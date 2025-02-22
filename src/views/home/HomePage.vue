@@ -372,8 +372,8 @@ export default {
   }
   ::v-deep {
     .el-drawer__wrapper {
-      height: 100%;
-      top: auto;
+      height: calc(100% - 57px);
+      top: 57px;
       bottom: auto;
     }
     .v-modal {
