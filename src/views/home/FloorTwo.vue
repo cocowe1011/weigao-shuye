@@ -41,6 +41,7 @@
     <el-drawer
       title="托盘缓存区"
       :visible.sync="palletStorageDrawerVisible"
+      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"
@@ -102,6 +103,7 @@
     <el-drawer
       title="空托盘缓存区"
       :visible.sync="emptyPalletStorageDrawerVisible"
+      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"
@@ -147,6 +149,7 @@
     <el-dialog
       title="添加托盘"
       :visible.sync="addPalletDialogVisible"
+      append-to-body
       width="400px"
       :close-on-click-modal="false"
     >
@@ -178,6 +181,7 @@
     <el-dialog
       title="测试面板"
       :visible.sync="testPanelVisible"
+      append-to-body
       width="360px"
       :close-on-click-modal="false"
       custom-class="test-panel-dialog"

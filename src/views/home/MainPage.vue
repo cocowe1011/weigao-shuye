@@ -111,9 +111,10 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
   z-index: 1;
   margin-top: -9px;
+  padding: 0 20px;
 }
 
 .title {
@@ -153,5 +154,7 @@ export default {
   font-size: 24px;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  min-width: 120px;
+  text-align: center;
 }
 </style>

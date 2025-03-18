@@ -76,6 +76,7 @@
     <el-drawer
       title="托盘缓存区"
       :visible.sync="palletStorageDrawerVisible"
+      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"
@@ -137,6 +138,7 @@
     <el-drawer
       title="空托盘缓存区"
       :visible.sync="emptyPalletStorageDrawerVisible"
+      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"
@@ -182,20 +184,21 @@
     <el-dialog
       title="选择目标机械臂"
       :visible.sync="selectArmDialogVisible"
+      append-to-body
       width="400px"
       :close-on-click-modal="false"
     >
-      <el-select v-model="selectedArm" placeholder="请选择机械臂" style="width: 100%">
+      <el-select v-model="selectedArmName" placeholder="请选择机械臂" style="width: 100%">
         <el-option
           v-for="arm in availableArms"
           :key="arm.name"
           :label="`机械臂 ${arm.name}`"
-          :value="arm">
+          :value="arm.name">
         </el-option>
       </el-select>
       <div slot="footer" class="dialog-footer">
         <el-button @click="selectArmDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="confirmMovePallet" :disabled="!selectedArm">确 定</el-button>
+        <el-button type="primary" @click="confirmMovePallet" :disabled="!selectedArmName">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -203,6 +206,7 @@
     <el-dialog
       title="添加托盘"
       :visible.sync="addPalletDialogVisible"
+      append-to-body
       width="400px"
       :close-on-click-modal="false"
     >
@@ -234,6 +238,7 @@
     <el-dialog
       title="测试面板"
       :visible.sync="testPanelVisible"
+      append-to-body
       width="360px"
       :close-on-click-modal="false"
       custom-class="test-panel-dialog"
@@ -329,7 +334,7 @@ export default {
       emptyPalletStorageDrawerVisible: false,
       selectArmDialogVisible: false,
       selectedPalletPosition: null,
-      selectedArm: null,
+      selectedArmName: '',
       addPalletDialogVisible: false,
       palletForm: {
         palletCode: ''
@@ -538,24 +543,28 @@ export default {
         return;
       }
       this.selectedPalletPosition = position;
-      this.selectedArm = null;
+      this.selectedArmName = '';
       this.selectArmDialogVisible = true;
     },
-    handleArmSelect(arm) {
-      this.selectedArm = arm;
-    },
     confirmMovePallet() {
-      if (!this.selectedArm || !this.selectedPalletPosition) {
+      if (!this.selectedArmName || !this.selectedPalletPosition) {
         this.$message.warning('请选择目标机械臂');
         return;
       }
       
+      // 根据名称找到对应的机械臂对象
+      const selectedArm = this.mechanicalArms.find(arm => arm.name === this.selectedArmName);
+      if (!selectedArm) {
+        this.$message.error('未找到选中的机械臂');
+        return;
+      }
+      
       // 更新机械臂状态
-      this.selectedArm.currentPallet = this.selectedPalletPosition.palletCode;
-      this.selectedArm.status = 1; // 设置为处理中状态
+      selectedArm.currentPallet = this.selectedPalletPosition.palletCode;
+      selectedArm.status = 1; // 设置为处理中状态
       
       // 添加日志
-      this.addLog('info', `托盘 ${this.selectedPalletPosition.palletCode} 从位置 ${this.selectedPalletPosition.name} 移动到机械臂 ${this.selectedArm.name}`);
+      this.addLog('info', `托盘 ${this.selectedPalletPosition.palletCode} 从位置 ${this.selectedPalletPosition.name} 移动到机械臂 ${selectedArm.name}`);
       
       // 清空原托盘位置
       this.selectedPalletPosition.palletCode = null;
@@ -563,7 +572,7 @@ export default {
       // 关闭弹窗并重置选择
       this.selectArmDialogVisible = false;
       this.selectedPalletPosition = null;
-      this.selectedArm = null;
+      this.selectedArmName = '';
       
       this.$message.success('托盘移动指令已发送');
     },
