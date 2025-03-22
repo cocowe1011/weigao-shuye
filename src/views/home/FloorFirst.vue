@@ -76,7 +76,6 @@
     <el-drawer
       title="托盘缓存区"
       :visible.sync="palletStorageDrawerVisible"
-      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"
@@ -138,7 +137,6 @@
     <el-drawer
       title="空托盘缓存区"
       :visible.sync="emptyPalletStorageDrawerVisible"
-      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"
@@ -357,23 +355,23 @@ export default {
       })),
       mechanicalArms: [
         { 
-          name: 'A1', 
-          x: 1305, 
-          y: 410, 
+          name: 'B1', 
+          x: 1255, 
+          y: 370, 
           status: 0, 
           currentPallet: null,
           position: 'top-left'
         },
         { 
-          name: 'B1', 
+          name: 'B2', 
           x: 1385, 
-          y: 410, 
+          y: 370, 
           status: 0, 
           currentPallet: null,
           position: 'top-right'
         },
         { 
-          name: 'C1', 
+          name: 'B3', 
           x: 1285, 
           y: 580, 
           status: 0, 
@@ -381,7 +379,7 @@ export default {
           position: 'left'
         },
         { 
-          name: 'D1', 
+          name: 'B4', 
           x: 1370, 
           y: 580, 
           status: 0, 
@@ -389,7 +387,15 @@ export default {
           position: 'right'
         },
         { 
-          name: 'A2', 
+          name: 'B5', 
+          x: 1370, 
+          y: 580, 
+          status: 0, 
+          currentPallet: null,
+          position: 'right'
+        },
+        { 
+          name: 'C1', 
           x: 1295, 
           y: 860, 
           status: 0, 
@@ -397,7 +403,7 @@ export default {
           position: 'left'
         },
         { 
-          name: 'B2', 
+          name: 'C2', 
           x: 1385, 
           y: 860, 
           status: 0, 
@@ -405,7 +411,7 @@ export default {
           position: 'right'
         },
         { 
-          name: 'C2', 
+          name: 'C3', 
           x: 1225, 
           y: 1010, 
           status: 0, 
@@ -413,7 +419,15 @@ export default {
           position: 'bottom-left'
         },
         { 
-          name: 'D2', 
+          name: 'C4', 
+          x: 1345, 
+          y: 1095, 
+          status: 0, 
+          currentPallet: null,
+          position: 'bottom-right'
+        },
+        { 
+          name: 'C5', 
           x: 1345, 
           y: 1095, 
           status: 0, 
