@@ -1,7 +1,7 @@
 <template>
   <div class="floor-image-container">
     <div class="image-wrapper">
-      <img src="@/assets/jinan-agv/floor2.png" alt="一楼平面图" class="floor-image" @load="updateMarkerPositions">
+      <img src="@/assets/jinan-agv/2500.png" alt="一楼平面图" class="floor-image" @load="updateMarkerPositions">
       <!-- 上货扫码区域提示 -->
       <div class="marker-with-panel" data-x="200" data-y="360">
         <div class="pulse"></div>
@@ -279,7 +279,7 @@ export default {
       },
       // 添加日志数据
       logs: [],
-      isLogExpanded: true,  // 添加日志面板展开状态
+      isLogExpanded: false,  // 添加日志面板展开状态
     };
   },
   mounted() {

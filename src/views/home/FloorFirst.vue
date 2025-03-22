@@ -1,11 +1,11 @@
 <template>
   <div class="floor-image-container">
     <div class="image-wrapper">
-      <img src="@/assets/jinan-agv/floor1.png" alt="一楼平面图" class="floor-image" @load="updateMarkerPositions">
+      <img src="@/assets/jinan-agv/2800-2F.png" alt="一楼平面图" class="floor-image" @load="updateMarkerPositions">
       <!-- 上货扫码区域提示 -->
-      <div class="marker-with-panel" data-x="90" data-y="100">
+      <div class="marker-with-panel" data-x="230" data-y="200">
         <div class="pulse"></div>
-        <div class="data-panel" :class="['position-left', { 'always-show': true }]">
+        <div class="data-panel" :class="['position-bottom', { 'always-show': true }]">
           <div class="data-panel-header">
             <span>上货扫码信息</span>
           </div>
@@ -26,12 +26,12 @@
         </div>
       </div>
       <!-- 添加带按钮的点位示例 -->
-      <div class="marker-with-button" data-x="600" data-y="550">
+      <div class="marker-with-button" data-x="1820" data-y="1050">
         <div class="pulse"></div>
         <button class="marker-button" @click="handlePalletStorageClick">托盘缓存区操作</button>
       </div>
       <!-- 添加带按钮的点位示例 -->
-      <div class="marker-with-button" data-x="860" data-y="75">
+      <div class="marker-with-button" data-x="2900" data-y="75">
         <div class="pulse"></div>
         <button class="marker-button" @click="handleEmptyPalletStorageClick">空托盘缓存区操作</button>
       </div>
@@ -358,64 +358,64 @@ export default {
       mechanicalArms: [
         { 
           name: 'A1', 
-          x: 405, 
-          y: 150, 
+          x: 1305, 
+          y: 410, 
           status: 0, 
           currentPallet: null,
           position: 'top-left'
         },
         { 
           name: 'B1', 
-          x: 445, 
-          y: 150, 
+          x: 1385, 
+          y: 410, 
           status: 0, 
           currentPallet: null,
           position: 'top-right'
         },
         { 
           name: 'C1', 
-          x: 405, 
-          y: 190, 
+          x: 1285, 
+          y: 580, 
           status: 0, 
           currentPallet: null,
           position: 'left'
         },
         { 
           name: 'D1', 
-          x: 445, 
-          y: 190, 
+          x: 1370, 
+          y: 580, 
           status: 0, 
           currentPallet: null,
           position: 'right'
         },
         { 
           name: 'A2', 
-          x: 405, 
-          y: 320, 
+          x: 1295, 
+          y: 860, 
           status: 0, 
           currentPallet: null,
           position: 'left'
         },
         { 
           name: 'B2', 
-          x: 445, 
-          y: 320, 
+          x: 1385, 
+          y: 860, 
           status: 0, 
           currentPallet: null,
           position: 'right'
         },
         { 
           name: 'C2', 
-          x: 405, 
-          y: 360, 
+          x: 1225, 
+          y: 1010, 
           status: 0, 
           currentPallet: null,
           position: 'bottom-left'
         },
         { 
           name: 'D2', 
-          x: 445, 
-          y: 360, 
+          x: 1345, 
+          y: 1095, 
           status: 0, 
           currentPallet: null,
           position: 'bottom-right'
@@ -439,7 +439,7 @@ export default {
       },
       // 添加日志数据
       logs: [],
-      isLogExpanded: true,  // 添加日志面板展开状态
+      isLogExpanded: false,  // 添加日志面板展开状态
     };
   },
   computed: {

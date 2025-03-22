@@ -10,13 +10,13 @@
             :class="['switch-btn', currentFloor === 1 ? 'active' : '']" 
             @click="switchFloor(1)"
           >
-            一号车间
+            2800车间
           </button>
           <button 
             :class="['switch-btn', currentFloor === 2 ? 'active' : '']" 
             @click="switchFloor(2)"
           >
-            二号车间
+            2500车间
           </button>
         </div>
         <div class="current-time">{{ currentTime }}</div>
@@ -74,7 +74,7 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: black;
+  background: #07293e;
   padding: 0;
   font-family: 'Roboto', sans-serif;
   overflow: hidden;
