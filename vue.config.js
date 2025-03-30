@@ -18,6 +18,9 @@ module.exports = defineConfig({
   pluginOptions: {
     electronBuilder: {
       nodeIntegration: true,
+      contextIsolation: false,
+      customFileProtocol: 'app://./',
+      preload: 'src/preload.js',
       builderOptions: {
         'productName': 'wcs-caina-agv-jinan',//生成exe的名字
         "appId": "com.wl.ccs",//包名  

@@ -41,7 +41,6 @@
     <el-drawer
       title="托盘缓存区"
       :visible.sync="palletStorageDrawerVisible"
-      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"
@@ -103,7 +102,6 @@
     <el-drawer
       title="空托盘缓存区"
       :visible.sync="emptyPalletStorageDrawerVisible"
-      append-to-body
       direction="rtl"
       size="400px"
       :modal="false"

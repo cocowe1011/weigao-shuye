@@ -21,10 +21,28 @@ var appTray = null;
 let closeStatus = false;
 var conn = new nodes7;
 var pollingST = null;
+// 定义__static变量，在Electron v20中需要手动定义
+const __static = path.join(__dirname, '../public').replace(/\\/g, '\\\\');
 // electron 开启热更新
 try {
-  require('electron-reloader')(module,{});
-} catch (_) {}
+  // 仅在开发环境下启用reloader，并确保module.filename存在
+  if (process.env.NODE_ENV === 'development' && module.filename) {
+    require('electron-reloader')(module, {});
+  }
+} catch (err) {
+  console.log('Electron reloader error:', err.message);
+}
+
+// 添加ipc通信处理
+// 处理获取global对象的请求
+ipcMain.on('get-global', (event, key) => {
+  event.returnValue = global.sharedObject[key]
+})
+
+// 处理设置global对象的请求
+ipcMain.on('set-global', (event, key, value) => {
+  global.sharedObject[key] = value
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -45,11 +63,13 @@ app.on('ready', () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
-      webSecurity: false
+      webSecurity: false,
+      sandbox: false,
+      preload: path.join(__dirname, process.env.NODE_ENV === 'production' ? 'preload.js' : '../src/preload.js')
     },
     icon: './build/icons/icon.ico'
   });
+
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL);

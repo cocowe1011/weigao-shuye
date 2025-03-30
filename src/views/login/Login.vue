@@ -52,7 +52,7 @@
 import { ipcRenderer } from 'electron'
 import HttpUtil from '@/utils/HttpUtil'
 import axios from 'axios';
-const remote = require('electron').remote
+import ipcBridge from '@/utils/ipcBridge'
 export default {
   name: "Login",
   components: {},
@@ -176,11 +176,11 @@ export default {
       //   this.$message.error(err)
       //   this.loadingStatus = false;
       // });
-      remote.getGlobal('sharedObject').userInfo = {
+      ipcBridge.setGlobal('userInfo', {
         userCode: this.userCode,
         userPassword: this.userPassword,
         userName: '测试'
-      };
+      });
       setTimeout(() => {
         this.loadingStatus = false;
         // 跳转主页

@@ -72,7 +72,7 @@
 import { ipcRenderer } from 'electron'
 import StatusMonitor from '@/components/StatusMonitoring.vue'
 import HttpUtil from '@/utils/HttpUtil'
-const remote = require('electron').remote
+import ipcBridge from '@/utils/ipcBridge'
 export default {
   name: "HomePage",
   components: {
@@ -170,7 +170,7 @@ export default {
             // 验证姓名是否正确
             const param = {
               userName: value,
-              userCode: remote.getGlobal('sharedObject').userInfo.userCode
+              userCode: ipcBridge.getGlobal('userInfo').userCode
             }
             HttpUtil.post('/userInfo/verifyName', param).then((res)=> {
               if(res.data) {
@@ -225,7 +225,7 @@ export default {
       }
       const param = {
         userPassword: this.updatePasswordForm.newPassword,
-        userCode: remote.getGlobal('sharedObject').userInfo.userCode
+        userCode: ipcBridge.getGlobal('userInfo').userCode
       }
       HttpUtil.post('/userInfo/updatePassword', param).then((res)=> {
         if(res.data > 0) {

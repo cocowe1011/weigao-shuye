@@ -38,10 +38,9 @@
       <!-- 机械臂 -->
       <div v-for="arm in mechanicalArms" 
             :key="arm.name" 
-            class="marker-with-panel mechanical-arm-marker" 
+            class="marker-with-panel-machine" 
             :data-x="arm.x" 
             :data-y="arm.y">
-        <div class="pulse"></div>
         <div class="data-panel data-panel-mechanical-arm" :class="[`position-${arm.position}`, { 'always-show': true }]">
           <div class="data-panel-header">
             <span>机械臂{{ arm.name }}</span>
@@ -356,83 +355,83 @@ export default {
       mechanicalArms: [
         { 
           name: 'B1', 
-          x: 1255, 
-          y: 370, 
+          x: 1340, 
+          y: 320, 
           status: 0, 
           currentPallet: null,
-          position: 'top-left'
+          position: 'top'
         },
         { 
           name: 'B2', 
-          x: 1385, 
-          y: 370, 
-          status: 0, 
-          currentPallet: null,
-          position: 'top-right'
-        },
-        { 
-          name: 'B3', 
-          x: 1285, 
-          y: 580, 
+          x: 1300, 
+          y: 390, 
           status: 0, 
           currentPallet: null,
           position: 'left'
         },
         { 
-          name: 'B4', 
-          x: 1370, 
-          y: 580, 
+          name: 'B3', 
+          x: 1375, 
+          y: 390, 
           status: 0, 
           currentPallet: null,
           position: 'right'
         },
         { 
+          name: 'B4', 
+          x: 1230, 
+          y: 630, 
+          status: 0, 
+          currentPallet: null,
+          position: 'left'
+        },
+        { 
           name: 'B5', 
-          x: 1370, 
-          y: 580, 
+          x: 1350, 
+          y: 630, 
           status: 0, 
           currentPallet: null,
           position: 'right'
         },
         { 
           name: 'C1', 
-          x: 1295, 
-          y: 860, 
+          x: 1235, 
+          y: 870, 
           status: 0, 
           currentPallet: null,
           position: 'left'
         },
         { 
           name: 'C2', 
-          x: 1385, 
-          y: 860, 
+          x: 1375, 
+          y: 870, 
           status: 0, 
           currentPallet: null,
           position: 'right'
         },
         { 
           name: 'C3', 
-          x: 1225, 
-          y: 1010, 
+          x: 1235, 
+          y: 1110, 
           status: 0, 
           currentPallet: null,
-          position: 'bottom-left'
+          position: 'left'
         },
         { 
           name: 'C4', 
-          x: 1345, 
-          y: 1095, 
+          x: 1330, 
+          y: 1110, 
           status: 0, 
           currentPallet: null,
-          position: 'bottom-right'
+          position: 'right'
         },
         { 
           name: 'C5', 
-          x: 1345, 
-          y: 1095, 
+          x: 1280, 
+          y: 1185, 
           status: 0, 
           currentPallet: null,
-          position: 'bottom-right'
+          position: 'bottom'
         }
       ],
       testPanelVisible: false,
@@ -505,7 +504,7 @@ export default {
         const imageWrapper = image.parentElement;
         if (!imageWrapper) return;
 
-        const markers = imageWrapper.querySelectorAll('.marker, .marker-with-panel, .marker-with-button');
+        const markers = imageWrapper.querySelectorAll('.marker, .marker-with-panel, .marker-with-panel-machine, .marker-with-button');
         const imageRect = image.getBoundingClientRect();
         const wrapperRect = imageWrapper.getBoundingClientRect();
         
@@ -828,7 +827,7 @@ export default {
   }
 }
 /* 带数据面板的标识点样式 */
-.marker-with-panel {
+.marker-with-panel, .marker-with-panel-machine {
   position: absolute;
   width: 16px;
   height: 16px;
@@ -1087,28 +1086,6 @@ export default {
 .data-panel-mechanical-arm .data-panel-label {
   color: rgba(0, 231, 255, 0.7);
 }
-
-.marker-with-panel.mechanical-arm-marker::before {
-  background: rgba(0, 231, 255, 0.8);
-  animation: glow-blue 2s infinite;
-}
-
-.marker-with-panel.mechanical-arm-marker .pulse {
-  background: rgba(0, 231, 255, 0.4);
-}
-
-@keyframes glow-blue {
-  0% {
-    box-shadow: 0 0 0 0 rgba(0, 231, 255, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(0, 231, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(0, 231, 255, 0);
-  }
-}
-
 /* 抽屉内容样式 */
 .storage-container {
   padding: 20px;
