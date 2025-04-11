@@ -2121,7 +2121,7 @@ export default {
         width: 100%;
         min-height: 0;
 
-        .floor-left, .floor-right > .floor-right-top, .floor-right-bottom {
+        .floor-left {
           .floor-image-container {
             flex: 1;
             background: rgba(0, 0, 0, 0.2);
@@ -2404,35 +2404,6 @@ export default {
                 height: auto;
                 object-fit: contain;
               }
-            }
-          }
-        }
-
-        .floor-right {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          min-height: 0;
-          height: 100%;
-          .floor-right-top,
-          .floor-right-bottom {
-            flex: 1;
-            background: rgba(30, 42, 56, 0.8);
-            padding: 10px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            color: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-            height: calc(50% - 5px);
-            overflow: hidden;
-            .floor-title {
-              font-size: 22px;
-              color: #0ac5a8;
-              font-weight: 900;
-              padding-bottom: 10px;
-              flex-shrink: 0;
             }
           }
         }
