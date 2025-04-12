@@ -469,55 +469,6 @@
               </div>
             </div>
           </div>
-          <!-- 添加队列托盘批量移动测试部分 -->
-          <div class="test-section">
-            <span class="test-label">队列托盘批量移动:</span>
-            <div class="queue-move-container">
-              <div class="queue-select-group">
-                <div class="queue-move-label">源队列:</div>
-                <el-select v-model="queueMoveForm.sourceQueueId" size="small" placeholder="请选择源队列">
-                  <el-option
-                    v-for="queue in queues"
-                    :key="queue.id"
-                    :label="queue.queueName"
-                    :value="queue.id"
-                  ></el-option>
-                </el-select>
-              </div>
-              <div class="queue-select-group">
-                <div class="queue-move-label">目标队列:</div>
-                <el-select v-model="queueMoveForm.targetQueueId" size="small" placeholder="请选择目标队列">
-                  <el-option
-                    v-for="queue in queues"
-                    :key="queue.id"
-                    :label="queue.queueName"
-                    :value="queue.id"
-                  ></el-option>
-                </el-select>
-              </div>
-              <div class="queue-move-actions">
-                <el-button 
-                  type="primary" 
-                  size="small" 
-                  @click="moveAllTrays"
-                  :disabled="!queueMoveForm.sourceQueueId || !queueMoveForm.targetQueueId || queueMoveForm.sourceQueueId === queueMoveForm.targetQueueId"
-                >移动全部托盘</el-button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 添加托盘到上货区测试部分 -->
-          <div class="test-section">
-            <span class="test-label">托盘上货区操作:</span>
-            <div class="upload-area-actions">
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="addCurrentTraysToQueue"
-                :disabled="!currentOrder || !currentOrder.qrCode"
-              >添加托盘到上货区</el-button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -722,10 +673,6 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalHistoryOrders: 0,
-      currentQrCode2A: '',  // 二楼A点位扫码信息
-      currentQrCode2B: '',  // 二楼B点位扫码信息
-      currentQrCode3A: '',  // 三楼A点位扫码信息
-      currentQrCode3B: '',  // 三楼B点位扫码信息
       currentQrCodeUpload: '',  // 上货扫码区域信息
       currentUploadQrCode: '',  // 上货点扫码信息
       addTrayDialogVisible: false,
@@ -765,6 +712,18 @@ export default {
       { id: 13, name: 'E', x: 2165, y: 340 },
       ],
       logId: 1000,  // 添加一个日志ID计数器
+      // 输送线当前运行状态-读取PLC
+      conveyorStatus: '',
+      // 允许进料反馈-读取PLC
+      allowFeedBack: {
+        bit0: '0', // 值为1时，全部接货口不允许进货
+        bit1: '0', // 值为1时，一楼接货口允许进货；值为0时，不允许
+        bit2: '0', // 值为1时，二楼1#接货口允许进货；值为0时，不允许
+        bit3: '0', // 值为1时，二楼2#接货口允许进货；值为0时，不允许
+        bit4: '0', // 值为1时，三楼1#接货口允许进货；值为0时，不允许
+        bit5: '0', // 值为1时，三楼2#接货口允许进货；值为0时，不允许
+      },
+      // A线电机运行信号-读取PLC
     };
   },
   computed: {
@@ -1233,10 +1192,6 @@ export default {
       return outputMap[output] || '--';
     },
     clearAllQrCodes() {
-      this.currentQrCode2A = '';
-      this.currentQrCode2B = '';
-      this.currentQrCode3A = '';
-      this.currentQrCode3B = '';
       this.currentQrCodeUpload = '';
       this.currentUploadQrCode = '';
     },
@@ -2740,114 +2695,6 @@ export default {
 
 
 /* 添加新的测试面板样式 */
-.test-panel {
-  position: absolute;
-  right: 50px;
-  top: 0;
-  width: 300px;
-  max-height: 80vh; /* 限制最大高度为视窗高度的80% */
-  background: rgba(30, 42, 56, 0.98);
-  border: 1px solid rgba(10, 197, 168, 0.3);
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
-  transform-origin: top right;
-  opacity: 1;
-  transform: scale(1);
-  display: flex;
-  flex-direction: column;
-}
-
-.test-panel.collapsed {
-  opacity: 0;
-  transform: scale(0);
-  pointer-events: none;
-}
-
-.test-panel-header {
-  padding: 15px;
-  background: rgba(10, 197, 168, 0.3);
-  border-radius: 15px 15px 0 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #0ac5a8;
-  font-weight: bold;
-  pointer-events: auto;
-  flex-shrink: 0;
-}
-
-/* 添加滚动条样式 */
-.test-panel-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.test-panel-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-}
-
-.test-panel-content::-webkit-scrollbar-thumb {
-  background: rgba(10, 197, 168, 0.3);
-  border-radius: 2px;
-}
-
-.test-panel-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(10, 197, 168, 0.5);
-}
-
-.test-panel-header i {
-  transition: transform 0.3s ease;
-  margin-left: 10px;
-}
-
-.test-panel-header i.rotated {
-  transform: rotate(180deg);
-}
-
-.test-section {
-  margin-bottom: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(10, 197, 168, 0.1);
-}
-
-.test-label {
-  display: block;
-  color: #0ac5a8;
-  margin-bottom: 10px;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.position-buttons {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  pointer-events: auto;
-}
-
-.position-btn {
-  padding: 6px 12px;
-  background: rgba(10, 197, 168, 0.3);
-  border: 1px solid rgba(10, 197, 168, 0.5);
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.3s ease;
-}
-
-.position-btn:hover {
-  background: rgba(10, 197, 168, 0.5);
-}
-
-.position-btn:active {
-  transform: scale(0.95);
-}
-
-/* 移除旧的测试面板样式，添加新的样式 */
 .test-panel-container {
   position: absolute; /* 修改位置，为测试按钮留出空间 */
   right: 80px;  /* 修改位置，为队列按钮留出空间 */
