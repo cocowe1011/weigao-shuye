@@ -219,7 +219,7 @@
                 <div 
                   v-for="log in currentLogs" 
                   :key="log.id"
-                  :class="['log-item', { 'alarm': log.type === 'alarm', 'unread': log.unread }]"
+                  :class="['log-item', { 'alarm': log.type === 'alarm', 'unread': log.unread }]" 
                   @click="markAsRead(log)"
                 >
                   <div class="log-time">{{ formatTime(log.timestamp) }}</div>
@@ -262,7 +262,7 @@
                 <!-- 修改小车元素 -->
                 <div 
                   v-for="cart in carts" 
-                  :key="cart.id"
+                  :key="cart.name"
                   class="cart-container" 
                   :data-x="cart.x" 
                   :data-y="cart.y" 
@@ -293,6 +293,356 @@
                     </div>
                   </div>
                 </div>
+                <!-- 光电集合，光电标签默认在下方，可以控制标签位置：label-top、label-left、label-right -->
+                <!-- 上货区输送线光电信号 -->
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit1 === '1' }" 
+                     data-x="1440" data-y="1347">
+                  <div class="marker-label">S-2#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height: 85px;"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit3 === '1' }" 
+                     data-x="2250" data-y="1395">
+                  <div class="marker-label">S-4#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height: 115px;"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit4 === '1' }" 
+                     data-x="2335" data-y="1425">
+                  <div class="marker-label">S-5#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height: 85px;"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit5 === '1' }" 
+                     data-x="2475" data-y="1395">
+                  <div class="marker-label">S-6#</div>
+                </div>
+                <div class="marker marker-show-label label-right"
+                style="height: 2px;width: 115px;"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit6 === '1' }" 
+                     data-x="2470" data-y="1192">
+                  <div class="marker-label">S-7#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit7 === '1' }" 
+                     data-x="2290" data-y="1230">
+                  <div class="marker-label">S-8#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit8 === '1' }" 
+                     data-x="2480" data-y="1230">
+                  <div class="marker-label">S-9#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height:35px"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit10 === '1' }" 
+                     data-x="1570" data-y="1225">
+                  <div class="marker-label">S-11#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height:35px"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit12 === '1' }" 
+                     data-x="890" data-y="1225">
+                  <div class="marker-label">S-13#</div>
+                </div>
+                <!-- 电机点位示例，可以控制标签位置：label-top、label-left、label-right -->
+                <!-- 上货区电机运行信号（扫码后入队） -->
+                <div class="motor-marker marker-show-label"
+                     :class="{ 'running': upLoadMotorRunning.bit0 === '1' }"
+                     data-x="1080" data-y="1390">
+                  <div class="marker-label">S1#</div>
+                </div>
+                <div class="motor-marker marker-show-label"
+                     :class="{ 'running': upLoadMotorRunning.bit1 === '1' }"
+                     data-x="1910" data-y="1390">
+                  <div class="marker-label">S2#</div>
+                </div>
+                <div class="motor-marker marker-show-label"
+                     :class="{ 'running': upLoadMotorRunning.bit2 === '1' }"
+                     data-x="2300" data-y="1390">
+                  <div class="marker-label">S3#</div>
+                </div>
+                <div class="motor-marker marker-show-label"
+                     :class="{ 'running': upLoadMotorRunning.bit3 === '1' }"
+                     data-x="2385" data-y="1390">
+                  <div class="marker-label">S4#</div>
+                </div>
+                <div class="motor-marker marker-show-label"
+                     :class="{ 'running': upLoadMotorRunning.bit4 === '1' }"
+                     data-x="2470" data-y="1390">
+                  <div class="marker-label">S5#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': upLoadMotorRunning.bit5 === '1' }"
+                     data-x="2330" data-y="1287">
+                  <div class="marker-label">S6#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-top"
+                     :class="{ 'running': upLoadMotorRunning.bit6 === '1' }"
+                     data-x="2385" data-y="1210">
+                  <div class="marker-label">S7#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': upLoadMotorRunning.bit7 === '1' }"
+                     data-x="2460" data-y="1230">
+                  <div class="marker-label">S8#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': upLoadMotorRunning.bit8 === '1' }"
+                     data-x="2260" data-y="1230">
+                  <div class="marker-label">S9#</div>
+                </div>
+                <div class="motor-marker marker-show-label"
+                     :class="{ 'running': upLoadMotorRunning.bit9 === '1' }"
+                     data-x="1910" data-y="1220">
+                  <div class="marker-label">S10#</div>
+                </div>
+                <div class="motor-marker marker-show-label"
+                     :class="{ 'running': upLoadMotorRunning.bit10 === '1' }"
+                     data-x="1130" data-y="1220">
+                  <div class="marker-label">S11#</div>
+                </div>
+                <!-- A线电机运行信号 -->
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': aLineMotorRunning.bit0 === '1' }"
+                     data-x="1180" data-y="1098">
+                  <div class="marker-label">A1-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': aLineMotorRunning.bit1 === '1' }"
+                     data-x="1180" data-y="1030">
+                  <div class="marker-label">A1-2#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': aLineMotorRunning.bit2 === '1' }"
+                     data-x="1820" data-y="1098">
+                  <div class="marker-label">A2-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': aLineMotorRunning.bit3 === '1' }"
+                     data-x="1820" data-y="1030">
+                  <div class="marker-label">A2-2#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': aLineMotorRunning.bit4 === '1' }"
+                     data-x="2320" data-y="1090">
+                  <div class="marker-label">A3-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': aLineMotorRunning.bit5 === '1' }"
+                     data-x="2320" data-y="1025">
+                  <div class="marker-label">A3-2#</div>
+                </div>
+                <!-- A线光电检测信号 -->
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit0 === '1' }" 
+                     style="height: 23px;"
+                     data-x="870" data-y="1090">
+                  <div class="marker-label">A1#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit1 === '1' }" 
+                     style="height: 23px;"
+                     data-x="870" data-y="1040">
+                  <div class="marker-label">A2#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit2 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1320" data-y="1090">
+                  <div class="marker-label">A3#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit3 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1320" data-y="1040">
+                  <div class="marker-label">A4#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit4 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1440" data-y="1090">
+                  <div class="marker-label">A5#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit5 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1440" data-y="1040">
+                  <div class="marker-label">A6#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit6 === '1' }" 
+                     style="height: 23px;"
+                     data-x="2020" data-y="1090">
+                  <div class="marker-label">A7#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit7 === '1' }" 
+                     style="height: 23px;"
+                     data-x="2020" data-y="1040">
+                  <div class="marker-label">A8#</div>
+                </div>
+                <!-- B线电机运行信号 -->
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': bLineMotorRunning.bit0 === '1' }"
+                     data-x="1180" data-y="880">
+                  <div class="marker-label">B1-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': bLineMotorRunning.bit1 === '1' }"
+                     data-x="1180" data-y="810">
+                  <div class="marker-label">B1-2#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': bLineMotorRunning.bit2 === '1' }"
+                     data-x="1820" data-y="880">
+                  <div class="marker-label">B2-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': bLineMotorRunning.bit3 === '1' }"
+                     data-x="1820" data-y="810">
+                  <div class="marker-label">B2-2#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': bLineMotorRunning.bit4 === '1' }"
+                     data-x="2320" data-y="880">
+                  <div class="marker-label">B3-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': bLineMotorRunning.bit5 === '1' }"
+                     data-x="2320" data-y="810">
+                  <div class="marker-label">B3-2#</div>
+                </div>
+                <!-- B线光电检测信号 -->
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit0 === '1' }" 
+                     style="height: 23px;"
+                     data-x="870" data-y="875">
+                  <div class="marker-label">B1#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit1 === '1' }" 
+                     style="height: 23px;"
+                     data-x="870" data-y="820">
+                  <div class="marker-label">B2#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit2 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1320" data-y="875">
+                  <div class="marker-label">B3#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit3 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1320" data-y="820">
+                  <div class="marker-label">B4#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit4 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1440" data-y="875">
+                  <div class="marker-label">B5#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit5 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1440" data-y="820">
+                  <div class="marker-label">B6#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit6 === '1' }" 
+                     style="height: 23px;"
+                     data-x="2020" data-y="875">
+                  <div class="marker-label">B7#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit7 === '1' }" 
+                     style="height: 23px;"
+                     data-x="2020" data-y="820">
+                  <div class="marker-label">B8#</div>
+                </div>
+                <!-- C线电机运行信号 -->
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': cLineMotorRunning.bit0 === '1' }"
+                     data-x="1180" data-y="678">
+                  <div class="marker-label">C1-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': cLineMotorRunning.bit1 === '1' }"
+                     data-x="1180" data-y="615">
+                  <div class="marker-label">C1-2#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': cLineMotorRunning.bit2 === '1' }"
+                     data-x="1820" data-y="678">
+                  <div class="marker-label">C2-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-left"
+                     :class="{ 'running': cLineMotorRunning.bit3 === '1' }"
+                     data-x="1820" data-y="615">
+                  <div class="marker-label">C2-2#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': cLineMotorRunning.bit4 === '1' }"
+                     data-x="2320" data-y="678">
+                  <div class="marker-label">C3-1#</div>
+                </div>
+                <div class="motor-marker marker-show-label label-right"
+                     :class="{ 'running': cLineMotorRunning.bit5 === '1' }"
+                     data-x="2320" data-y="615">
+                  <div class="marker-label">C3-2#</div>
+                </div>
+                <!-- C线光电检测信号 -->
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit0 === '1' }" 
+                     style="height: 23px;"
+                     data-x="870" data-y="675">
+                  <div class="marker-label">C1#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit1 === '1' }" 
+                     style="height: 23px;"
+                     data-x="870" data-y="620">
+                  <div class="marker-label">C2#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit2 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1320" data-y="675">
+                  <div class="marker-label">C3#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit3 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1320" data-y="620">
+                  <div class="marker-label">C4#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit4 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1440" data-y="675">
+                  <div class="marker-label">C5#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit5 === '1' }" 
+                     style="height: 23px;"
+                     data-x="1440" data-y="620">
+                  <div class="marker-label">C6#</div>
+                </div>
+                <div class="marker marker-show-label"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit6 === '1' }" 
+                     style="height: 23px;"
+                     data-x="2020" data-y="675">
+                  <div class="marker-label">C7#</div>
+                </div>
+                <div class="marker marker-show-label label-top"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit7 === '1' }" 
+                     style="height: 23px;"
+                     data-x="2020" data-y="620">
+                  <div class="marker-label">C8#</div>
+                </div>
               </div>
             </div>
           </div>
@@ -319,7 +669,7 @@
             <div class="queue-container-left">
               <div
                 v-for="(queue, index) in queues"
-                :key="queue.id"
+                :key="'queue-' + queue.id + '-' + index"
                 class="queue"
                 :class="{ active: selectedQueueIndex === index }"
                 @click="showTrays(index)"
@@ -351,8 +701,8 @@
               <div class="tray-list">
                 <template v-if="nowTrays && nowTrays.length > 0">
                   <div
-                    v-for="tray in nowTrays"
-                    :key="tray.id"
+                    v-for="(tray, index) in nowTrays"
+                    :key="'tray-' + tray.id + '-' + index"
                     class="tray-item"
                     :class="{ 'dragging': isDragging && draggedTray?.id === tray.id }"
                     draggable="true"
@@ -404,7 +754,7 @@
             <div class="position-buttons">
               <button 
                 v-for="pos in ['O1', 'A1', 'B1', 'C1']" 
-                :key="pos"
+                :key="'test-cart1-pos-' + pos"
                 @click="updateCartPosition(1, pos)"
                 class="position-btn"
               >
@@ -417,7 +767,7 @@
             <div class="position-buttons">
               <button 
                 v-for="pos in ['A2', 'B2', 'C2']" 
-                :key="pos"
+                :key="'test-cart2-pos-' + pos"
                 @click="updateCartPosition(2, pos)"
                 class="position-btn"
               >
@@ -430,7 +780,7 @@
             <div class="position-buttons">
               <button 
                 v-for="pos in ['A3', 'B3', 'C3']" 
-                :key="pos"
+                :key="'test-cart3-pos-' + pos"
                 @click="updateCartPosition(3, pos)"
                 class="position-btn"
               >
@@ -697,17 +1047,17 @@ export default {
       },
       // 添加队列位置标识数据
       queueMarkers: [
-      { id: 1, name: '上货区', x: 1365, y: 1350 },
-      { id: 2, name: '缓冲区', x: 1365, y: 1230 },
-      { id: 3, name: 'A1', x: 1100, y: 1065 },
-      { id: 4, name: 'B1', x: 1100, y: 845 },
-      { id: 5, name: 'C1', x: 1100, y: 645 },
-      { id: 6, name: 'A2', x: 1685, y: 1065 },
-      { id: 7, name: 'B2', x: 1685, y: 845 },
-      { id: 8, name: 'C2', x: 1685, y: 645 },
-      { id: 9, name: 'A3', x: 2255, y: 1065 },
-      { id: 10, name: 'B3', x: 2255, y: 845 },
-      { id: 11, name: 'C3', x: 2255, y: 645 },
+      { id: 1, name: '上货区', x: 1325, y: 1350 },
+      { id: 2, name: '缓冲区', x: 1325, y: 1230 },
+      { id: 3, name: 'A1', x: 1050, y: 1065 },
+      { id: 4, name: 'B1', x: 1050, y: 845 },
+      { id: 5, name: 'C1', x: 1050, y: 645 },
+      { id: 6, name: 'A2', x: 1610, y: 1065 },
+      { id: 7, name: 'B2', x: 1610, y: 845 },
+      { id: 8, name: 'C2', x: 1610, y: 645 },
+      { id: 9, name: 'A3', x: 2190, y: 1065 },
+      { id: 10, name: 'B3', x: 2190, y: 845 },
+      { id: 11, name: 'C3', x: 2190, y: 645 },
       { id: 12, name: 'D', x: 2165, y: 490 },
       { id: 13, name: 'E', x: 2165, y: 340 },
       ],
@@ -725,16 +1075,16 @@ export default {
       },
       // A线电机运行信号-读取PLC
       aLineMotorRunning: {
-        bit0: '0', // A1-1#电机运行信号
-        bit1: '0', // A1-2#电机运行信号
-        bit2: '0', // A2-1#电机运行信号
-        bit3: '0', // A2-2#电机运行信号
-        bit4: '0', // A3-1#电机运行信号
-        bit5: '0', // A3-2#电机运行信号
+        bit0: '1', // A1-1#电机运行信号
+        bit1: '1', // A1-2#电机运行信号
+        bit2: '1', // A2-1#电机运行信号
+        bit3: '1', // A2-2#电机运行信号
+        bit4: '1', // A3-1#电机运行信号
+        bit5: '1', // A3-2#电机运行信号
       },
       // A线光电检测信号-读取PLC
       aLinePhotoelectricSignal: {
-        bit0: '0', // A-1#光电
+        bit0: '1', // A-1#光电
         bit1: '0', // A-2#光电
         bit2: '0', // A-3#光电 
         bit3: '0', // A-4#光电
@@ -742,17 +1092,15 @@ export default {
         bit5: '0', // A-6#光电
         bit6: '0', // A-7#光电
         bit7: '0', // A-8#光电
-        bit8: '0', // A-9#光电
-        bit9: '0', // A-10#光电
       },
       // B线电机运行信号-读取PLC
       bLineMotorRunning: {
-        bit0: '0', // B1-1#电机运行信号
-        bit1: '0', // B1-2#电机运行信号
-        bit2: '0', // B2-1#电机运行信号
-        bit3: '0', // B2-2#电机运行信号
-        bit4: '0', // B3-1#电机运行信号
-        bit5: '0', // B3-2#电机运行信号
+        bit0: '1', // B1-1#电机运行信号
+        bit1: '1', // B1-2#电机运行信号
+        bit2: '1', // B2-1#电机运行信号
+        bit3: '1', // B2-2#电机运行信号
+        bit4: '1', // B3-1#电机运行信号
+        bit5: '1', // B3-2#电机运行信号
       },
       // B线光电检测信号-读取PLC
       bLinePhotoelectricSignal: {
@@ -769,12 +1117,12 @@ export default {
       },
       // C线电机运行信号-读取PLC
       cLineMotorRunning: {
-        bit0: '0', // C1-1#电机运行信号
-        bit1: '0', // C1-2#电机运行信号
-        bit2: '0', // C2-1#电机运行信号
-        bit3: '0', // C2-2#电机运行信号
-        bit4: '0', // C3-1#电机运行信号
-        bit5: '0', // C3-2#电机运行信号
+        bit0: '1', // C1-1#电机运行信号
+        bit1: '1', // C1-2#电机运行信号
+        bit2: '1', // C2-1#电机运行信号
+        bit3: '1', // C2-2#电机运行信号
+        bit4: '1', // C3-1#电机运行信号
+        bit5: '1', // C3-2#电机运行信号
       },
       // C线光电检测信号-读取PLC
       cLinePhotoelectricSignal: {
@@ -830,38 +1178,47 @@ export default {
       // D线数量和E线数量先不对接-读取PLC
       //上货区电机运行信号（扫码后入队）-读取PLC
       upLoadMotorRunning: {
-        bit0: '0', // S-1#电机运行信号
-        bit1: '0', // S-2#电机运行信号
-        bit2: '0', // S-3#电机运行信号
-        bit3: '0', // S-4#电机运行信号
-        bit4: '0', // S-5#电机运行信号
-        bit5: '0', // S-6#电机运行信号
-        bit6: '0', // S-7#电机运行信号
-        bit7: '0', // S-8#电机运行信号
+        bit0: '1', // S1#电机运行信号
+        bit1: '1', // S2#电机运行信号
+        bit2: '1', // S3#电机运行信号
+        bit3: '1', // S4#电机运行信号
+        bit4: '1', // S5#电机运行信号
+        bit5: '1', // S6#电机运行信号
+        bit6: '1', // S7#电机运行信号
+        bit7: '1', // S8#电机运行信号
+        bit8: '1', // S9#电机运行信号
+        bit9: '1', // S10#电机运行信号
+        bit10: '1', // S11#电机运行信号
+        bit11: '1', // S12#电机运行信号
       },
       // 上货区输送线光电信号-读取PLC
       upLoadPhotoelectricSignal: {
-        bit0: '0', // S-1#光电
-        bit1: '0', // S-2#光电
-        bit2: '0', // S-3#光电
-        bit3: '0', // S-4#光电
-        bit4: '0', // S-5#光电
-        bit5: '0', // S-6#光电
-        bit6: '0', // S-7#光电
-        bit7: '0', // S-8#光电
-        bit8: '0', // S-9#光电
+        bit0: '1', // S-1#光电
+        bit1: '1', // S-2#光电
+        bit2: '1', // S-3#光电
+        bit3: '1', // S-4#光电
+        bit4: '1', // S-5#光电
+        bit5: '1', // S-6#光电
+        bit6: '1', // S-7#光电
+        bit7: '1', // S-8#光电
+        bit8: '1', // S-9#光电
+        bit9: '1', // S-10#光电
+        bit10: '1', // S-11#光电
+        bit11: '1', // S-12#光电
+        bit12: '1', // S-13#光电
+        bit13: '1', // S-14#光电
       },
       // 扫码枪处光电信号-读取PLC
       scanPhotoelectricSignal: {
-        bit0: '0', // 一楼接货站台“有载信号”/光电占位
-        bit1: '0', // 一楼缓存区（扫码后入队或者去立库）处“有载信号”/光电占位
-        bit2: '0', // 二楼接货占位“有载信号”/光电占位
+        bit0: '0', // 一楼接货站台"有载信号"/光电占位
+        bit1: '0', // 一楼缓存区（扫码后入队或者去立库）处"有载信号"/光电占位
+        bit2: '0', // 二楼接货占位"有载信号"/光电占位
         bit3: '0', // 无解释
-        bit4: '0', // 三楼接货占位“有载信号”/光电占位
-        bit5: '0', // 四楼接货占位“有载信号”/光电占位
-        bit6: '0', // 进预热处“扫码枪处“有载信号”/光电占位
-        bit7: '0', // 一楼D灭菌“有载信号”/光电占位
-        bit8: '0', // 一楼E灭菌“有载信号”/光电占位
+        bit4: '0', // 三楼接货占位"有载信号"/光电占位
+        bit5: '0', // 四楼接货占位"有载信号"/光电占位
+        bit6: '0', // 进预热处"扫码枪处"有载信号"/光电占位
+        bit7: '0', // 一楼D灭菌"有载信号"/光电占位
+        bit8: '0', // 一楼E灭菌"有载信号"/光电占位
       },
     };
   },
@@ -966,7 +1323,7 @@ export default {
         const imageWrapper = image.parentElement;
         if (!imageWrapper) return;
 
-        const markers = imageWrapper.querySelectorAll('.marker, .marker-with-panel, .queue-marker');
+        const markers = imageWrapper.querySelectorAll('.marker, .marker-with-panel, .queue-marker, .motor-marker');
         const carts = imageWrapper.querySelectorAll('.cart-container');
         const imageRect = image.getBoundingClientRect();
         const wrapperRect = imageWrapper.getBoundingClientRect();
@@ -2243,32 +2600,25 @@ export default {
                 height: auto;
                 object-fit: contain;
               }
+              /* --- 光电点位样式 --- */
               .marker {
                 position: absolute;
-                width: 16px;
-                height: 16px;
+                width: 2px; // 修改这里
+                height: 42px; // 修改这里
                 transform: translate(-50%, -50%);
                 cursor: pointer;
                 z-index: 2;
                 pointer-events: auto;
-                .pulse {
-                  position: absolute;
-                  width: 100%;
-                  height: 100%;
-                  background: rgba(10, 197, 168, 0.4);
-                  border-radius: 50%;
-                  animation: pulse 2s infinite;
-                }
-
                 .marker-label {
                   position: absolute;
                   white-space: nowrap;
-                  background: rgba(0, 0, 0, 0.8);
+                  background: #0ac5a8;
                   color: #fff;
                   padding: 4px 8px;
                   border-radius: 4px;
                   font-size: 12px;
-                  bottom: 150%;
+                  /* 默认定位在下方 */
+                  top: calc(100% + 1px); 
                   left: 50%;
                   transform: translateX(-50%);
                   opacity: 0;
@@ -2280,39 +2630,110 @@ export default {
                 position: absolute;
                 width: 100%;
                 height: 100%;
-                background: rgba(10, 197, 168, 0.8);
-                border-radius: 50%;
-                animation: glow 2s infinite;
+                background: rgba(128, 128, 128, 0.8); /* 默认灰色核心 */
               }
+              /* 扫描状态 (红色) */
+              .marker.scanning::before {
+                  background: rgba(255, 0, 0, 0.8); /* 红色核心 */
+              }
+
               /* 默认隐藏标签，hover时显示 */
               .marker:hover .marker-label {
                 opacity: 1;
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); /* 灰色辉光 */
               }
               /* 始终显示标签的点位 */
               .marker-show-label .marker-label {
                 opacity: 1;
               }
-              @keyframes glow {
-                0% {
-                  box-shadow: 0 0 0 0 rgba(10, 197, 168, 0.4);
-                }
-                70% {
-                  box-shadow: 0 0 0 8px rgba(10, 197, 168, 0);
-                }
-                100% {
-                  box-shadow: 0 0 0 0 rgba(10, 197, 168, 0);
+              /* 控制标签位置的样式 */
+              .marker.label-top .marker-label {
+                top: auto; /* 重置默认 top */
+                bottom: calc(100% + 1px); /* 定位到上方 */
+                left: 50%;
+                transform: translateX(-50%);
+              }
+              .marker.label-left .marker-label {
+                top: 50%; /* 垂直居中 */
+                left: auto; /* 重置默认 left */
+                right: calc(100% + 1px); /* 定位到左方 */
+                transform: translateY(-50%); /* 垂直居中 */
+              }
+              .marker.label-right .marker-label {
+                top: 50%; /* 垂直居中 */
+                left: calc(100% + 1px); /* 定位到右方 */
+                transform: translateY(-50%); /* 垂直居中 */
+              }
+              /* --- 光电点位样式结束 --- */
+
+              /* --- 新增电机点位样式 --- */
+              .motor-marker {
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                transform: translate(-50%, -50%);
+                cursor: pointer;
+                z-index: 2;
+                pointer-events: auto;
+                .marker-label {
+                  position: absolute;
+                  white-space: nowrap;
+                  background: rgba(0, 0, 0, 0.8);
+                  color: #fff;
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                  font-size: 12px;
+                  /* 默认定位在下方 */
+                  top: calc(100% + 5px); 
+                  left: 50%;
+                  transform: translateX(-50%);
+                  opacity: 0; /* 默认隐藏 */
+                  transition: opacity 0.3s;
                 }
               }
-              @keyframes pulse {
-                0% {
-                  transform: scale(1);
-                  opacity: 1;
-                }
-                100% {
-                  transform: scale(2.8);
-                  opacity: 0;
-                }
+
+              .motor-marker::before {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                background: rgba(128, 128, 128, 0.8); /* 默认灰色方块 */
+                /* 无 border-radius，保持方形 */
               }
+
+              .motor-marker.running::before {
+                background: #00ff3f; /* 运行状态绿色方块 */
+              }
+
+              /* 始终显示电机标签 */
+              .motor-marker.marker-show-label .marker-label {
+                opacity: 1;
+              }
+              /* 悬停显示电机标签 */
+              .motor-marker:hover .marker-label {
+                opacity: 1;
+              }
+              
+              /* 控制电机标签位置的样式 (复制并适配) */
+              .motor-marker.label-top .marker-label {
+                top: auto;
+                bottom: calc(100% + 5px);
+                left: 50%;
+                transform: translateX(-50%);
+              }
+              .motor-marker.label-left .marker-label {
+                top: 50%;
+                left: auto;
+                right: calc(100% + 5px);
+                transform: translateY(-50%);
+              }
+              .motor-marker.label-right .marker-label {
+                top: 50%;
+                left: calc(100% + 5px);
+                transform: translateY(-50%);
+              }
+              /* --- 电机点位样式结束 --- */
+
               /* 带数据面板的标识点样式 */
               .marker-with-panel {
                 position: absolute;
