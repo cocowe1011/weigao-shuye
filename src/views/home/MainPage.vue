@@ -252,7 +252,7 @@
                   class="queue-marker"
                   :data-x="marker.x"
                   :data-y="marker.y"
-                  @click="handleQueueMarkerClick(marker.id)"
+                  @click="handleQueueMarkerClick(marker.queueId)"
                 >
                   <div class="queue-marker-content">
                     <span class="queue-marker-count">{{ queues.find(q => q.id === marker.queueId)?.trayInfo?.length || 0 }}</span>
@@ -267,8 +267,11 @@
                   :data-x="cart.x" 
                   :data-y="cart.y" 
                   :data-width="cart.width"
+                  @click="handleCartClick(cart.id)"
                 >
                   <img :src="cart.image" :alt="cart.name" class="cart-image">
+                  <!-- 直接显示数量 -->
+                  <span class="cart-tray-count-overlay">{{ queues.find(q => q.id === cart.queueId)?.trayInfo?.length || 0 }}</span>
                 </div>
                 <!-- 上货扫码区域提示 -->
                 <div class="marker-with-panel" data-x="500" data-y="1410">
@@ -855,15 +858,6 @@
             <span class="test-label">扫码信息测试:</span>
             <div class="qrcode-test-container">
               <div class="qrcode-input-group">
-                <div class="qrcode-label">上货点扫码:</div>
-                <el-input 
-                  v-model="currentQrCodeUpload" 
-                  size="small" 
-                  placeholder="输入扫码信息"
-                  class="qrcode-input"
-                ></el-input>
-              </div>
-              <div class="qrcode-input-group">
                 <div class="qrcode-label">上货扫码信息:</div>
                 <el-input 
                   v-model="currentUploadQrCode" 
@@ -1045,6 +1039,7 @@ export default {
           id: 1,
           name: '小车1',
           cartKey: 'cart1',  // 添加cartKey用于关联positions
+          queueId: 3,  // 关联到1#小车队列
           currentPosition: 'O1',
           x: 790,
           y: 1230,
@@ -1055,6 +1050,7 @@ export default {
           id: 2,
           name: '小车2',
           cartKey: 'cart2',
+          queueId: 4,  // 关联到2#小车队列
           currentPosition: 'A2',
           x: 1375,
           y: 647,
@@ -1065,6 +1061,7 @@ export default {
           id: 3,
           name: '小车3',
           cartKey: 'cart3',
+          queueId: 5,  // 关联到3#小车队列
           currentPosition: 'A3',
           x: 1945,
           y: 1066,
@@ -1072,7 +1069,6 @@ export default {
           image: require('@/assets/changzhou-img/cart3.png')
         }
       ],
-      queues: [],
       nowTrays: [],
       draggedTray: null,
       dragSourceQueue: null,
@@ -1085,7 +1081,6 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalHistoryOrders: 0,
-      currentQrCodeUpload: '',  // 上货扫码区域信息
       currentUploadQrCode: '',  // 上货点扫码信息
       addTrayDialogVisible: false,
       isSubmitting: false,
@@ -1107,21 +1102,104 @@ export default {
         sourceQueueId: '',
         targetQueueId: ''
       },
+      queues: [
+        {
+          id: 1,
+          queueName: '上货区',
+          trayInfo: []
+        },
+        {
+          id: 2,
+          queueName: '缓存区',
+          trayInfo: []
+        },
+        {
+          id: 3,
+          queueName: '1#小车',
+          trayInfo: []
+        },
+        {
+          id: 4,
+          queueName: '2#小车',
+          trayInfo: []
+        },
+        {
+          id: 5,
+          queueName: '3#小车',
+          trayInfo: []
+        },
+        {
+          id: 6,
+          queueName: 'A1',
+          trayInfo: []
+        },
+        {
+          id: 7,
+          queueName: 'B1',
+          trayInfo: []
+        },
+        {
+          id: 8,
+          queueName: 'C1',
+          trayInfo: []
+        },
+        {
+          id: 9,
+          queueName: 'A2',
+          trayInfo: []
+        },
+        {
+          id: 10,
+          queueName: 'B2',
+          trayInfo: []
+        },
+        {
+          id: 11,
+          queueName: 'C2',
+          trayInfo: []
+        },
+        {
+          id: 12,
+          queueName: 'A3',
+          trayInfo: []
+        },
+        {
+          id: 13,
+          queueName: 'B3',
+          trayInfo: []
+        },
+        {
+          id: 14,
+          queueName: 'C3',
+          trayInfo: []
+        },
+        {
+          id: 15,
+          queueName: 'D',
+          trayInfo: []
+        },
+        {
+          id: 16,
+          queueName: 'E',
+          trayInfo: []
+        }
+        
+      ],
       // 添加队列位置标识数据
       queueMarkers: [
-      { id: 1, name: '上货区', x: 1325, y: 1350 },
-      { id: 2, name: '缓冲区', x: 1325, y: 1230 },
-      { id: 3, name: 'A1', x: 1050, y: 1065 },
-      { id: 4, name: 'B1', x: 1050, y: 845 },
-      { id: 5, name: 'C1', x: 1050, y: 645 },
-      { id: 6, name: 'A2', x: 1610, y: 1065 },
-      { id: 7, name: 'B2', x: 1610, y: 845 },
-      { id: 8, name: 'C2', x: 1610, y: 645 },
-      { id: 9, name: 'A3', x: 2190, y: 1065 },
-      { id: 10, name: 'B3', x: 2190, y: 845 },
-      { id: 11, name: 'C3', x: 2190, y: 645 },
-      { id: 12, name: 'D', x: 2165, y: 490 },
-      { id: 13, name: 'E', x: 2165, y: 340 },
+      { id: 1, name: '上货区', queueId: 1, x: 1325, y: 1350 },
+      { id: 2, name: '缓冲区', queueId: 2, x: 1325, y: 1230 },
+      { id: 3, name: 'A1', queueId: 6, x: 1050, y: 1065 },
+      { id: 4, name: 'B1', queueId: 7, x: 1050, y: 845 },
+      { id: 5, name: 'C1', queueId: 8, x: 1050, y: 645 },
+      { id: 6, name: 'A2', queueId: 9, x: 1610, y: 1065 },
+      { id: 7, name: 'B2', queueId: 10, x: 1610, y: 845 },
+      { id: 8, name: 'C2', queueId: 11, x: 1610, y: 645 },
+      { id: 9, name: 'A3', queueId: 12, x: 2190, y: 1065 },
+      { id: 10, name: 'B3', queueId: 13, x: 2190, y: 845 },
+      { id: 11, name: 'C3', queueId: 14, x: 2190, y: 645 },
+      { id: 12, name: 'D', queueId: 15, x: 2165, y: 490 },
+      { id: 13, name: 'E', queueId: 16, x: 2165, y: 340 },
       ],
       logId: 1000,  // 添加一个日志ID计数器
       // 输送线当前运行状态-读取PLC
@@ -1309,29 +1387,11 @@ export default {
     this.updateTime();
     setInterval(this.updateTime, 1000);
     this.initializeMarkers();
-    this.refreshOrders()
-    this.queryQueueList();
+    this.refreshOrders();
   },
   methods: {
     changeQueueExpanded() {
       this.isQueueExpanded = !this.isQueueExpanded;
-      this.queryQueueList();
-    },
-    queryQueueList() {
-      HttpUtil.post('/queue_info/queryQueueList', {}).then((res)=> {
-        // 处理队列数据，解析trayInfo
-        const processedQueues = res.data.map(queue => ({
-          ...queue,
-          trayInfo: queue.trayInfo ? JSON.parse(queue.trayInfo) : []
-        }));
-        this.queues = processedQueues;
-        // 如果当前没有选中的队列，默认选中第一个
-        if (this.selectedQueueIndex === 0) {
-          this.showTrays(0);
-        }
-      }).catch((err)=> {
-        this.$message.error('查询队列失败，请重试' + err);
-      })
     },
     toggleButtonState(button) {
       this.buttonStates = {
@@ -1518,12 +1578,9 @@ export default {
         const [movedTray] = sourceQueue.trayInfo.splice(trayIndex, 1);
         targetQueue.trayInfo.push(movedTray);
 
-        await Promise.all([
-          this.updateQueueTrays(sourceQueue.id, sourceQueue.trayInfo),
-          this.updateQueueTrays(targetQueue.id, targetQueue.trayInfo)
-        ]);
-
-        await this.queryQueueList();
+        // 更新队列数据
+        this.updateQueueTrays(sourceQueue.id, sourceQueue.trayInfo);
+        this.updateQueueTrays(targetQueue.id, targetQueue.trayInfo);
 
         const currentQueueIndex = this.selectedQueueIndex;
         if (currentQueueIndex === targetQueueIndex || currentQueueIndex === this.dragSourceQueue) {
@@ -1544,7 +1601,6 @@ export default {
       } catch (error) {
         console.error('移动托盘时出错:', error);
         this.$message.error(error.message || '移动托盘失败，请重试');
-        await this.queryQueueList();
       } finally {
         this.draggedTray = null;
         this.dragSourceQueue = null;
@@ -1750,20 +1806,20 @@ export default {
       return outputMap[output] || '--';
     },
     clearAllQrCodes() {
-      this.currentQrCodeUpload = '';
       this.currentUploadQrCode = '';
     },
     // 添加更新队列托盘的方法
     updateQueueTrays(queueId, trayInfo) {
-      const param = {
-        id: queueId,
-        trayInfo: JSON.stringify(trayInfo)
-      };
-      HttpUtil.post('/queue_info/update', param).catch(err => {
-        this.$message.error('更新队列信息失败');
-        // 失败后刷新队列列表
-        this.queryQueueList();
-      });
+      // 查找对应ID的队列
+      const queueIndex = this.queues.findIndex(queue => queue.id === queueId);
+      if (queueIndex !== -1) {
+        // 直接更新前端队列数据
+        this.queues[queueIndex].trayInfo = trayInfo;
+        // 添加日志
+        this.addLog(`队列 ${this.queues[queueIndex].queueName} 数据已更新`);
+      } else {
+        this.$message.error('找不到队列ID: ' + queueId);
+      }
     },
     async deleteTray(tray) {
       if (!this.selectedQueue) return;
@@ -1781,8 +1837,8 @@ export default {
         if (trayIndex > -1) {
           this.selectedQueue.trayInfo.splice(trayIndex, 1);
 
-          // 更新后端数据
-          await this.updateQueueTrays(this.selectedQueue.id, this.selectedQueue.trayInfo);
+          // 更新队列数据
+          this.updateQueueTrays(this.selectedQueue.id, this.selectedQueue.trayInfo);
 
           // 刷新显示
           this.showTrays(this.selectedQueueIndex);
@@ -1828,8 +1884,8 @@ export default {
         // 添加新托盘
         this.selectedQueue.trayInfo.push(newTray);
 
-        // 更新后端数据
-        await this.updateQueueTrays(this.selectedQueue.id, this.selectedQueue.trayInfo);
+        // 更新队列数据
+        this.updateQueueTrays(this.selectedQueue.id, this.selectedQueue.trayInfo);
 
         // 刷新显示
         this.showTrays(this.selectedQueueIndex);
@@ -1880,8 +1936,8 @@ export default {
           }
         });
 
-        await this.updateQueueTrays(this.queues[0].id, this.queues[0].trayInfo);
-        await this.queryQueueList();
+        // 更新队列数据
+        this.updateQueueTrays(this.queues[0].id, this.queues[0].trayInfo);
         
         // 添加托盘添加日志
         this.addLog(`已添加 ${addedTrays.length} 个托盘到上货区队列，托盘编号：${addedTrays.join('、')}`);
@@ -1923,12 +1979,9 @@ export default {
         targetQueue.trayInfo = [...targetQueue.trayInfo, ...sourceQueue.trayInfo];
         sourceQueue.trayInfo = [];
 
-        await Promise.all([
-          this.updateQueueTrays(sourceQueue.id, sourceQueue.trayInfo),
-          this.updateQueueTrays(targetQueue.id, targetQueue.trayInfo)
-        ]);
-
-        await this.queryQueueList();
+        // 更新队列数据
+        this.updateQueueTrays(sourceQueue.id, sourceQueue.trayInfo);
+        this.updateQueueTrays(targetQueue.id, targetQueue.trayInfo);
 
         // 添加批量移动日志，包含托盘编号信息
         this.addLog(`已将 ${sourceQueue.queueName} 的 ${movedTraysCount} 个托盘(${movedTrayCodes})移动到 ${targetQueue.queueName}`);
@@ -1982,6 +2035,22 @@ export default {
     },
     toggleBitValue(obj, bit) {
       obj[bit] = obj[bit] === '1' ? '0' : '1';
+    },
+    handleCartClick(cartId) {
+      // 获取小车对象
+      const cart = this.carts.find(c => c.id === cartId);
+      if (!cart || !cart.queueId) return;
+      
+      // 展开队列面板
+      this.isQueueExpanded = true;
+      
+      // 找到队列在数组中的索引
+      const queueIndex = this.queues.findIndex(q => q.id === cart.queueId);
+      if (queueIndex !== -1) {
+        // 选中并显示对应队列
+        this.selectedQueueIndex = queueIndex;
+        this.showTrays(queueIndex);
+      }
     }
   }
 };
@@ -2977,12 +3046,32 @@ export default {
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                cursor: pointer;
               }
 
               .cart-image {
                 width: 100%;
                 height: auto;
                 object-fit: contain;
+              }
+              
+              .cart-tray-count-overlay {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%); /* 居中关键 */
+                background: rgba(0, 0, 0, 0.7);
+                color: #409eff;
+                font-size: 14px;
+                font-weight: bold;
+                min-width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+                border: 1px solid rgba(64, 158, 255, 0.5);
+                z-index: 4; /* 确保在图片之上 */
               }
             }
           }
