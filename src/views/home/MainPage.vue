@@ -1,13 +1,5 @@
 <template>
   <div class="smart-workshop">
-    <!-- 添加标题区域 -->
-    <div class="header" v-show="false">
-      <img src="@/assets//changzhou-img/header.png" alt="header" class="header-bg">
-      <div class="header-content">
-        <div class="title">智慧灭菌大屏监控</div>
-        <div class="current-time">{{ currentTime }}</div>
-      </div>
-    </div>
     <!-- 内容区包装器 -->
     <div class="content-wrapper">
       <!-- 左侧面板 -->
@@ -21,148 +13,28 @@
             <div class="status-overview">
               <div class="data-card">
                 <div class="data-card-border">
-                  <div class="data-card-border-borderTop granient-text">当前批次id</div>
-                  <div class="data-card-border-borderDown" style="font-size: 1.3vw;">{{ currentOrder ? currentOrder.orderId : '--' }}</div>
+                  <div class="data-card-border-borderTop granient-text">当前订单id</div>
+                  <div class="data-card-border-borderDown" style="font-size: 1.3vw;"></div>
                 </div>
               </div>
               <div class="data-card">
                 <div class="data-card-border">
                   <div class="data-card-border-borderTop">产品名称</div>
-                  <div class="data-card-border-borderDown">{{ currentOrder ? currentOrder.productName : '--' }}</div>
-                </div>
-              </div>
-              <div class="data-card">
-                <div class="data-card-border">
-                  <div class="data-card-border-borderTop">指定预热房</div>
-                  <div class="data-card-border-borderDown">{{ currentOrder ? currentOrder.isPrint1 : '--' }}</div>
-                </div>
-              </div>
-              <div class="data-card">
-                <div class="data-card-border">
-                  <div class="data-card-border-borderTop">指定灭菌柜</div>
-                  <div class="data-card-border-borderDown">{{ currentOrder ? currentOrder.isPrint2 : '--' }}</div>
+                  <div class="data-card-border-borderDown"></div>
                 </div>
               </div>
               <div class="data-card">
                 <div class="data-card-border">
                   <div class="data-card-border-borderTop">进货口</div>
-                  <div class="data-card-border-borderDown">{{ currentOrder ? getInputText(currentOrder.inPut) : '--' }}</div>
+                  <div class="data-card-border-borderDown"></div>
                 </div>
               </div>
               <div class="data-card">
                 <div class="data-card-border">
-                  <div class="data-card-border-borderTop">出货口</div>
-                  <div class="data-card-border-borderDown">{{ currentOrder ? getOutputText(currentOrder.isPrint3) : '--' }}</div>
+                  <div class="data-card-border-borderTop">是否消毒</div>
+                  <div class="data-card-border-borderDown"></div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 订单信息列表区域 -->
-        <div class="order-list-section">
-          <div class="section-header">
-            <div class="section-title">
-              订单信息列表
-              <div class="refresh-btn" @click="refreshOrders" :class="{ 'is-loading': isRefreshing }">
-                <i class="el-icon-refresh"></i>
-              </div>
-            </div>
-            <div class="order-actions">
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="showHistoryOrders"
-                icon="el-icon-time"
-              >
-                历史订单
-              </el-button>
-            </div>
-          </div>
-          <div class="scrollable-content">
-            <div class="order-list" v-if="ordersList.length > 0">
-              <div 
-                v-for="order in ordersList" 
-                :key="order.orderId"
-                class="order-item"
-                :class="order.orderStatus === '0' ? 'pending' : order.orderStatus === '1' ? 'running' : order.orderStatus === '2' ? 'paused' : 'complete'"
-              >
-                <div class="order-main">
-                  <div class="order-header">
-                    <span class="order-id">{{ order.orderId }}</span>
-                    <span class="order-status" :class="{ 'running': order.orderStatus === '1' }">
-                      <i v-if="order.orderStatus === '1'" class="el-icon-loading"></i>
-                      {{ getStatusText(order.orderStatus) }}
-                    </span>
-                    <el-button v-if="order.orderStatus === '1'" type="text" size="small" @click="cancelOrder(order)" :loading="order.isLoading" style="padding: 0px;">
-                      取消
-                    </el-button>
-                  </div>
-                  <div class="order-info">
-                    <div class="info-row">
-                      <div class="info-item">
-                        <span class="info-label">产品名称</span>
-                        <span class="info-value">{{ order.productName }}</span>
-                      </div>
-                    </div>
-                    <div class="info-row">
-                      <div class="info-item">
-                        <span class="info-label">订单时间</span>
-                        <span class="info-value">{{ order.insertTime }}</span>
-                      </div>
-                    </div>
-                    <div class="info-row">
-                      <div class="info-item">
-                        <span class="info-label">进货口</span>
-                        <span class="info-value">{{ order.inPut === '1' ? '一楼进货' : order.inPut === '2' ? '二楼进货' : '三楼进货' }}</span>
-                      </div>
-                      <div class="info-item">
-                        <span class="info-label">出货口</span>
-                        <span class="info-value">{{ order.isPrint3 === '0' ? '不解析' : order.isPrint3 === '1' ? '解析库' : '立体库' }}</span>
-                      </div>
-                    </div>
-                    <div class="info-row">
-                      <div class="info-item">
-                        <span class="info-label">灭菌柜</span>
-                        <span class="info-value">{{ order.isPrint2 }}</span>
-                      </div>
-                      <div class="info-item">
-                        <span class="info-label">预热房</span>
-                        <span class="info-value">{{ order.isPrint1 }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  v-if="order.orderStatus === '0'"
-                  class="switch-order-btn" 
-                  :class="{ 'loading': order.isLoading }"
-                  @click="switchOrder(order)"
-                  :disabled="order.isLoading"
-                >
-                  <i v-if="order.isLoading" class="el-icon-loading"></i>
-                  <span>执行订单</span>
-                </button>
-                <button 
-                  v-if="order.orderStatus === '1' && isLastQrCodeMatch"
-                  class="switch-order-btn complete-btn" 
-                  :class="{ 'loading': order.isLoading }"
-                  @click="finishOrder(order)"
-                  :disabled="order.isLoading"
-                >
-                  <i v-if="order.isLoading" class="el-icon-loading"></i>
-                  <span>上货完成</span>
-                </button>
-              </div>
-            </div>
-            <!-- 添加空状态显示 -->
-            <div v-else class="empty-state">
-              <i class="el-icon-document"></i>
-              <p>暂无订单信息</p>
-              <el-button type="text" @click="refreshOrders">
-                <i class="el-icon-refresh"></i>
-                点击刷新
-              </el-button>
             </div>
           </div>
         </div>
@@ -274,24 +146,18 @@
                   <span class="cart-tray-count-overlay">{{ queues.find(q => q.id === cart.queueId)?.trayInfo?.length || 0 }}</span>
                 </div>
                 <!-- 上货扫码区域提示 -->
-                <div class="marker-with-panel" data-x="500" data-y="1410">
+                <div class="marker-with-panel" data-x="400" data-y="1130">
                   <div class="pulse"></div>
-                  <div class="data-panel" :class="['position-bottom', { 'always-show': true }]">
+                  <div class="data-panel" :class="['position-top', { 'always-show': true }]">
                     <div class="data-panel-header">上货扫码信息</div>
                     <div class="data-panel-content">
                       <div class="data-panel-row">
-                        <span class="data-panel-label">当前批次：</span>
-                        <span>{{ currentOrder ? currentOrder.orderId : '--' }}</span>
+                        <span class="data-panel-label">当前进货口：</span>
+                        <span></span>
                       </div>
                       <div class="data-panel-row">
                         <span class="data-panel-label">当前上货扫码信息：</span>
-                        <span>{{ currentUploadQrCode || '--' }}</span>
-                      </div>
-                      <div class="data-panel-row" v-if="currentOrder && currentOrder.qrCode && currentUploadQrCode && isLastQrCodeMatch">
-                        <span>
-                          <i class="el-icon-success" style="color: #67c23a;"></i>
-                          <span class="data-panel-label" style="color: #67c23a; font-weight: bold;">当前批次上货完成，允许执行下一订单</span>
-                        </span>
+                        <span></span>
                       </div>
                     </div>
                   </div>
@@ -310,13 +176,6 @@
                      data-x="2250" data-y="1395"
                      @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit3')">
                   <div class="marker-label">S-4#</div>
-                </div>
-                <div class="marker marker-show-label"
-                style="height: 115px;"
-                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit4 === '1' }" 
-                     data-x="2335" data-y="1425"
-                     @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit4')">
-                  <div class="marker-label">S-5#</div>
                 </div>
                 <div class="marker marker-show-label"
                 style="height: 85px;"
@@ -708,6 +567,42 @@
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit7')">
                   <div class="marker-label">C8#</div>
                 </div>
+                <!-- 扫码枪处光电信号 -->
+                <div class="marker marker-show-label"
+                style="height: 50px;"
+                     :class="{ 'scanning': scanPhotoelectricSignal.bit0 === '1' }" 
+                     data-x="350" data-y="1400"
+                     @click="toggleBitValue(scanPhotoelectricSignal, 'bit0')">
+                  <div class="marker-label">1-1#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height: 115px;"
+                     :class="{ 'scanning': scanPhotoelectricSignal.bit1 === '1' }" 
+                     data-x="2335" data-y="1425"
+                     @click="toggleBitValue(scanPhotoelectricSignal, 'bit1')">
+                  <div class="marker-label">1-2#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height: 125px;"
+                     :class="{ 'scanning': scanPhotoelectricSignal.bit2 === '1' }" 
+                     data-x="560" data-y="1410"
+                     @click="toggleBitValue(scanPhotoelectricSignal, 'bit2')">
+                  <div class="marker-label">2-1#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height: 105px;"
+                     :class="{ 'scanning': scanPhotoelectricSignal.bit4 === '1' }" 
+                     data-x="480" data-y="1345"
+                     @click="toggleBitValue(scanPhotoelectricSignal, 'bit4')">
+                  <div class="marker-label">3-1#</div>
+                </div>
+                <div class="marker marker-show-label"
+                style="height: 170px;"
+                     :class="{ 'scanning': scanPhotoelectricSignal.bit5 === '1' }" 
+                     data-x="400" data-y="1365"
+                     @click="toggleBitValue(scanPhotoelectricSignal, 'bit5')">
+                  <div class="marker-label">4-1#</div>
+                </div>
               </div>
             </div>
           </div>
@@ -860,7 +755,6 @@
               <div class="qrcode-input-group">
                 <div class="qrcode-label">上货扫码信息:</div>
                 <el-input 
-                  v-model="currentUploadQrCode" 
                   size="small" 
                   placeholder="输入扫码信息"
                   class="qrcode-input"
@@ -878,96 +772,6 @@
         </div>
       </div>
     </div>
-    <!-- 历史订单对话框 -->
-    <el-dialog
-      title="历史订单"
-      :visible.sync="historyDialogVisible"
-      width="70%"
-      append-to-body
-      :before-close="handleHistoryDialogClose"
-    >
-      <div>
-        <el-table
-          :data="historyOrders"
-          style="width: 100%"
-          border
-          stripe
-        >
-          <el-table-column
-            prop="orderId"
-            label="订单编号"
-            width="180"
-          />
-          <el-table-column
-            prop="batchId"
-            label="订单批号"
-            width="180"
-          />
-          <el-table-column
-            prop="insertTime"
-            label="订单时间"
-            width="180"
-          />
-          <el-table-column
-            prop="productName"
-            label="产品名称"
-            width="180"
-          />
-          <el-table-column
-            prop="isPrint1"
-            label="指定预热房"
-            width="100"
-          />
-          <el-table-column
-            prop="isPrint2"
-            label="指定灭菌柜"
-            width="100"
-          />
-          <el-table-column
-            prop="isPrint3"
-            label="指定输出"
-            width="100"
-          >
-            <template slot-scope="scope">
-              {{ getOutputText(scope.row.isPrint3) }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="inPut"
-            label="进货口信息"
-            width="100"
-          >
-            <template slot-scope="scope">
-              {{ getInputText(scope.row.inPut) }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="qrCode"
-            label="托盘信息"
-            min-width="200"
-            show-overflow-tooltip
-          >
-            <template slot-scope="scope">
-              <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                {{ scope.row.qrCode }}
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="pagination-container" style="margin-top: 20px; text-align: right;">
-          <el-pagination
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="currentPage"
-            :page-sizes="[10, 20, 50, 100]"
-            :page-size="pageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="totalHistoryOrders"
-          >
-          </el-pagination>
-        </div>
-      </div>
-    </el-dialog>
 
     <!-- 添加托盘对话框 -->
     <el-dialog
@@ -1011,11 +815,9 @@ export default {
         clear: false
       },
       activeLogType: 'running',
-      activeOrderTab: 'current',
       ordersList: [],
       runningLogs: [],  // 修改为空数组
       alarmLogs: [],    // 修改为空数组
-      currentTime: '',
       positions: {
         cart1: {
           O1: { x: 790, y: 1230 },  // 最下面
@@ -1076,12 +878,6 @@ export default {
       selectedQueueIndex: 0,
       isDragging: false,
       isRefreshing: false,
-      historyDialogVisible: false,
-      historyOrders: [],
-      currentPage: 1,
-      pageSize: 10,
-      totalHistoryOrders: 0,
-      currentUploadQrCode: '',  // 上货点扫码信息
       addTrayDialogVisible: false,
       isSubmitting: false,
       newTrayForm: {
@@ -1097,10 +893,6 @@ export default {
           { required: true, message: '请输入批次号', trigger: 'blur' },
           { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
         ]
-      },
-      queueMoveForm: {
-        sourceQueueId: '',
-        targetQueueId: ''
       },
       queues: [
         {
@@ -1360,6 +1152,16 @@ export default {
         bit7: '0', // 一楼D灭菌"有载信号"/光电占位
         bit8: '0', // 一楼E灭菌"有载信号"/光电占位
       },
+      // 提升机一楼接货站台扫码数据（托盘号）
+      elevatorOneFloorScanCode: '',
+      // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
+      oneFloorElevatorScanCode: '',
+      // 提升机二楼接货站台扫码数据（托盘号）
+      elevatorTwoFloorScanCode: '',
+      // 提升机三楼接货站台扫码数据（托盘号）
+      elevatorThreeFloorScanCode: '',
+      // 提升机四楼接货站台扫码数据（托盘号）
+      elevatorFourFloorScanCode: '',
     };
   },
   computed: {
@@ -1371,23 +1173,10 @@ export default {
     },
     selectedQueue() {
       return this.queues[this.selectedQueueIndex];
-    },
-    currentOrder() {
-      return this.ordersList.find(order => order.orderStatus === '1') || null;
-    },
-    isLastQrCodeMatch() {
-      if (!this.currentOrder || !this.currentOrder.qrCode || !this.currentUploadQrCode) {
-        return false;
-      }
-      const qrCodes = this.currentOrder.qrCode.split(',');
-      return this.currentUploadQrCode === qrCodes[qrCodes.length - 1];
     }
   },
   mounted() {
-    this.updateTime();
-    setInterval(this.updateTime, 1000);
     this.initializeMarkers();
-    this.refreshOrders();
   },
   methods: {
     changeQueueExpanded() {
@@ -1415,23 +1204,6 @@ export default {
       if (log.type === 'alarm') {
         log.unread = false;
       }
-    },
-    getStatusText(status) {
-      const statusMap = {
-        '0': '待执行',
-        '1': '正在执行',
-        '2': '已暂停',
-        '3': '已完成'
-      };
-      return statusMap[status] || status;
-    },
-    updateTime() {
-      this.currentTime = new Date().toLocaleString('zh-CN', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
     },
     initializeMarkers() {
       this.$nextTick(() => {
@@ -1498,10 +1270,6 @@ export default {
           this.updateMarkerPositions();
         });
       }
-    },
-    getCartPosition(cartId) {
-      const cart = this.carts.find(c => c.id === cartId);
-      return cart ? cart.currentPosition : null;
     },
     showTrays(index) {
       if (index < 0 || index >= this.queues.length) {
@@ -1607,66 +1375,6 @@ export default {
         this.isDragging = false;
       }
     },
-    handleOrderStatusChange(order, newStatus) {
-      // 更新订单状态
-      const index = this.ordersList.findIndex(o => o.id === order.id);
-      if (index !== -1) {
-        this.$set(this.ordersList[index], 'orderStatus', newStatus);
-      }
-      // 根据状态显示不同的消息
-      if (newStatus === '1') {
-        this.$message.success(`订单 ${order.id} 已开始执行`);
-      } else if (newStatus === '3') {
-        this.$message.success(`订单 ${order.id} 已完成`);
-      }
-      // 刷新订单列表
-      this.refreshOrders();
-    },
-    async switchOrder(order) {
-      try {
-        const runningOrder = this.ordersList.find(order => order.orderStatus === '1');
-        // 如果有正在运行的订单
-        if (runningOrder) {
-          if (this.isLastQrCodeMatch) {
-            this.$message.warning('当前批次已完成上货，请先点击"上货完成"按钮完成当前订单');
-            return;
-          } else {
-            this.$message.warning('当前批次上货未完成，请完成上货后再切换下一个订单');
-            return;
-          }
-        }
-
-        await this.$confirm('确认要执行该订单吗？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        });
-
-        // 设置加载状态
-        order.isLoading = true;
-        const param = {
-          id: order.id,
-          orderStatus: '1'
-        }
-        await HttpUtil.post('/order_info/update', param).then((res)=> {
-          if(res.code === '200') {
-            this.handleOrderStatusChange(order, '1');
-            // 根据订单信息调整小车位置
-            this.adjustCartsPosition(order);
-            // 添加开始订单日志
-            this.addLog(`订单 ${order.orderId} 开始执行，产品：${order.productName}，进货口：${this.getInputText(order.inPut)}`);
-          } else {
-            this.$message.error('启动订单失败，请重试');
-          }
-        }).catch((err)=> {
-          this.$message.error('启动订单失败，请重试');
-        }).finally(() => {
-          order.isLoading = false;
-        });
-      } catch (err) {
-        // 用户取消操作，不做处理
-      }
-    },
     // 根据订单信息调整小车位置
     adjustCartsPosition(order) {
       // 小车1对应预热房
@@ -1680,133 +1388,7 @@ export default {
           this.updateCartPosition(3, order.isPrint2);
       }
     },
-    async finishOrder(order) {
-      try {
-        await this.$confirm('确认完成该订单吗？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        });
-
-        // 设置加载状态
-        order.isLoading = true;
-        const param = {
-          id: order.id,
-          orderStatus: '3'
-        }
-        await HttpUtil.post('/order_info/update', param).then((res)=> {
-          if(res.code === '200') {
-            this.handleOrderStatusChange(order, '3');
-            // 添加完成订单日志
-            this.addLog(`订单 ${order.orderId} 已完成，产品：${order.productName}`);
-          } else {
-            this.$message.error('完成订单失败，请重试');
-          }
-        }).catch((err)=> {
-          this.$message.error('完成订单失败，请重试');
-        }).finally(() => {
-          order.isLoading = false;
-        });
-      } catch (err) {
-        // 用户取消操作，不做处理
-      }
-    },
-    async cancelOrder(order) {
-      try {
-        await this.$confirm('确认要取消该订单的完成状态吗？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        });
-        
-        // 设置加载状态
-        order.isLoading = true;
-        const param = {
-          id: order.id,
-          orderStatus: '0'  // 改为0，表示待执行状态
-        }
-        await HttpUtil.post('/order_info/update', param).then((res)=> {
-          if(res.code === '200') {
-            this.handleOrderStatusChange(order, '0');  // 更新为待执行状态
-            this.$message.success('订单状态已更新为待执行');
-          } else {
-            this.$message.error('取消订单失败，请重试');
-          }
-        }).catch((err)=> {
-          this.$message.error('取消订单失败，请重试');
-        }).finally(() => {
-          order.isLoading = false;
-        });
-      } catch (err) {
-        // 用户取消操作，不做处理
-      }
-    },
-    async refreshOrders() {
-      if (this.isRefreshing) return;
-      this.isRefreshing = true;
-      // 刷新订单 列表
-      await HttpUtil.post('/order_info/queryOrderList', {}).then((res)=> {
-        this.ordersList = res.data;
-      }).catch((err)=> {
-        this.$message.error('刷新订单列表失败，请重试');
-      }).finally(()=> {
-        this.isRefreshing = false;
-      });
-    },
-    async showHistoryOrders() {
-      this.historyDialogVisible = true;
-      await this.loadHistoryOrders();
-    },
-    handleHistoryDialogClose(done) {
-      this.historyOrders = [];
-      this.currentPage = 1;
-      done();
-    },
-    async loadHistoryOrders() {
-      const params = {
-        pageNum: this.currentPage,
-        pageSize: this.pageSize,
-      };
-      
-      try {
-        const res = await HttpUtil.post('/order_info/queryHistoryOrderList', params);
-        if (res.code === '200') {
-          this.historyOrders = res.data.list;
-          this.totalHistoryOrders = res.data.total;
-        } else {
-          this.$message.error('获取历史订单失败');
-        }
-      } catch (error) {
-        this.$message.error('获取历史订单失败');
-      }
-    },
-    handleSizeChange(val) {
-      this.pageSize = val;
-      this.loadHistoryOrders();
-    },
-    handleCurrentChange(val) {
-      this.currentPage = val;
-      this.loadHistoryOrders();
-    },
-    getInputText(input) {
-      const inputMap = {
-        '1': '一楼进货',
-        '2': '二楼进货',
-        '3': '三楼进货',
-        '4': '不解析出口'
-      };
-      return inputMap[input] || '--';
-    },
-    getOutputText(output) {
-      const outputMap = {
-        '0': '不解析',
-        '1': '解析库',
-        '2': '立体库'
-      };
-      return outputMap[output] || '--';
-    },
     clearAllQrCodes() {
-      this.currentUploadQrCode = '';
     },
     // 添加更新队列托盘的方法
     updateQueueTrays(queueId, trayInfo) {
@@ -1901,100 +1483,6 @@ export default {
         }
       } finally {
         this.isSubmitting = false;
-      }
-    },
-    // 添加托盘到上货区队列的方法
-    async addCurrentTraysToQueue() {
-      if (!this.currentOrder || !this.currentOrder.qrCode) {
-        this.$message.warning('当前没有运行中的订单或托盘信息为空');
-        return;
-      }
-      
-      try {
-        const trays = this.currentOrder.qrCode.split(',');
-        const currentTime = moment().format('YYYY-MM-DD HH:mm:ss');
-        
-        if (!this.queues[0]) {
-          this.$message.error('上货区队列不存在');
-          return;
-        }
-        
-        if (!Array.isArray(this.queues[0].trayInfo)) {
-          this.queues[0].trayInfo = [];
-        }
-        
-        const addedTrays = [];
-        trays.forEach(tray => {
-          if (tray && tray.trim()) {
-            const newTray = {
-              trayCode: tray.trim(),
-              trayTime: currentTime,
-              batchId: this.currentOrder.orderId
-            };
-            this.queues[0].trayInfo.push(newTray);
-            addedTrays.push(newTray.trayCode);
-          }
-        });
-
-        // 更新队列数据
-        this.updateQueueTrays(this.queues[0].id, this.queues[0].trayInfo);
-        
-        // 添加托盘添加日志
-        this.addLog(`已添加 ${addedTrays.length} 个托盘到上货区队列，托盘编号：${addedTrays.join('、')}`);
-        
-        this.$message.success(`成功添加 ${trays.length} 个托盘到上货区队列`);
-      } catch (error) {
-        console.error('添加托盘失败:', error);
-        this.$message.error('添加托盘失败，请重试');
-      }
-    },
-    // 批量移动托盘的方法
-    async moveAllTrays() {
-      try {
-        const sourceQueue = this.queues.find(q => q.id === this.queueMoveForm.sourceQueueId);
-        const targetQueue = this.queues.find(q => q.id === this.queueMoveForm.targetQueueId);
-        
-        if (!sourceQueue || !targetQueue) {
-          this.$message.error('队列不存在');
-          return;
-        }
-
-        sourceQueue.trayInfo = Array.isArray(sourceQueue.trayInfo) ? sourceQueue.trayInfo : [];
-        targetQueue.trayInfo = Array.isArray(targetQueue.trayInfo) ? targetQueue.trayInfo : [];
-
-        if (sourceQueue.trayInfo.length === 0) {
-          this.$message.warning('源队列没有托盘可移动');
-          return;
-        }
-
-        await this.$confirm(`确认要将 ${sourceQueue.queueName} 的所有托盘(${sourceQueue.trayInfo.length}个)移动到 ${targetQueue.queueName} 吗？`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        });
-
-        const movedTraysCount = sourceQueue.trayInfo.length;
-        const movedTrayCodes = sourceQueue.trayInfo.map(t => t.trayCode).join('、');
-        
-        targetQueue.trayInfo = [...targetQueue.trayInfo, ...sourceQueue.trayInfo];
-        sourceQueue.trayInfo = [];
-
-        // 更新队列数据
-        this.updateQueueTrays(sourceQueue.id, sourceQueue.trayInfo);
-        this.updateQueueTrays(targetQueue.id, targetQueue.trayInfo);
-
-        // 添加批量移动日志，包含托盘编号信息
-        this.addLog(`已将 ${sourceQueue.queueName} 的 ${movedTraysCount} 个托盘(${movedTrayCodes})移动到 ${targetQueue.queueName}`);
-
-        this.$message.success('托盘批量移动成功');
-        
-        this.queueMoveForm.sourceQueueId = '';
-        this.queueMoveForm.targetQueueId = '';
-      } catch (error) {
-        if (error !== 'cancel') {
-          console.error('移动托盘失败:', error);
-          this.$message.error('移动托盘失败，请重试');
-        }
       }
     },
     // 点击队列标识
@@ -2119,8 +1607,7 @@ export default {
       flex-shrink: 0;
       overflow: hidden;
       .plc-info-section,
-      .operation-panel,
-      .order-list-section {
+      .operation-panel{
         background: rgba(30, 42, 56, 0.8);
         padding: 10px;
         border-radius: 15px;
@@ -2194,311 +1681,6 @@ export default {
           }
         }
       }
-      .order-list-section {
-        height: 300px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        .section-header {
-          .section-title {
-            .refresh-btn {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 28px;
-              height: 28px;
-              border-radius: 4px;
-              cursor: pointer;
-              transition: all 0.3s ease;
-              margin-left: 0; /* 移除左边距 */
-              margin-right: 0; /* 移除右边距 */
-              background: rgba(10, 197, 168, 0.2);
-              border: 1px solid rgba(10, 197, 168, 0.3);
-              i {
-                font-size: 16px;
-                color: #0ac5a8;
-                transition: all 0.3s ease;
-              }
-            }
-
-            .refresh-btn:hover {
-              background: rgba(10, 197, 168, 0.3);
-              border-color: rgba(10, 197, 168, 0.5);
-              i {
-                color: #fff;
-              }
-            }
-
-            .refresh-btn.is-loading i {
-              animation: rotate 1s linear infinite;
-            }
-          }
-          .order-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            .el-button {
-              background: rgba(10, 197, 168, 0.2);
-              border: 1px solid rgba(10, 197, 168, 0.3);
-              color: #0ac5a8;
-              font-size: 12px;
-              height: 28px;
-              padding: 0 12px;
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              transition: all 0.3s ease;
-              i {
-                font-size: 14px;
-              }
-            }
-            .el-button:hover {
-              background: rgba(10, 197, 168, 0.3);
-              border-color: rgba(10, 197, 168, 0.5);
-              color: #fff;
-            }
-          }
-        }
-        .scrollable-content {
-          flex: 1;
-          overflow-y: auto;
-          overflow-x: hidden;
-          padding-right: 10px;
-          margin-right: -10px;
-          .order-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 8px 0;
-            width: 100%;
-            box-sizing: border-box;
-            .order-item {
-              width: 100%;
-              box-sizing: border-box;
-              background: linear-gradient(90deg, 
-                rgba(30, 42, 56, 0.95) 0%, 
-                rgba(48, 65, 86, 0.85) 50%,
-                rgba(48, 65, 86, 0.75) 100%
-              );
-              border-radius: 6px;
-              padding: 12px 15px;
-              transition: all 0.3s ease;
-              position: relative;
-              height: 120px;  /* 增加高度以适应新增的信息 */
-              display: flex;
-              align-items: center;
-              gap: 15px;
-              overflow: hidden;
-              cursor: pointer;
-              box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-              .order-main {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                min-width: 0;
-                padding-right: 100px;
-                .order-header {
-                  display: flex;
-                  align-items: center;
-                  gap: 12px;
-                  margin: 0;
-                  padding: 0;
-                  border: none;
-                  .order-id {
-                    font-weight: 600;
-                    color: #fff;
-                    font-size: 14px;
-                    letter-spacing: 0.5px;
-                    white-space: nowrap;
-                  }
-
-                  .order-status {
-                    font-size: 11px;
-                    padding: 2px 8px;
-                    border-radius: 4px;
-                    background: rgba(255, 255, 255, 0.1);
-                    color: #fff;
-                    white-space: nowrap;
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    i {
-                      font-size: 12px;
-                    }
-                  }
-                  .order-status.running {
-                    background: rgba(64, 158, 255, 0.15);
-                    color: #409eff;
-                    i {
-                      animation: rotate 1s linear infinite;
-                    }
-                  }
-                }
-                .order-info {
-                  display: flex;
-                  flex-direction: column;
-                  gap: 4px;
-                  padding: 0;
-                  .info-row {
-                    display: flex;
-                    align-items: center;
-                    gap: 20px; /* 增加间距 */
-                  }
-                  .info-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    flex: 1;
-                    min-width: 0;
-                    .info-label {
-                      color: rgba(255, 255, 255, 0.45);
-                      font-size: 12px;
-                      white-space: nowrap;
-                      width: 50px;  /* 调整标签宽度 */
-                      flex-shrink: 0;
-                    }
-
-                    .info-value {
-                      color: rgba(255, 255, 255, 0.85);
-                      font-size: 12px;
-                      font-weight: 500;
-                      white-space: nowrap;
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                      flex: 1;
-                      min-width: 0;
-                    }
-                  }
-                }
-              }
-              /* 基础按钮样式 */
-              .switch-order-btn {
-                position: absolute;
-                right: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-                background: rgba(255, 255, 255, 0.06);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                color: rgba(255, 255, 255, 0.85);
-                padding: 0 15px;
-                border-radius: 4px;
-                font-size: 12px;
-                height: 28px;
-                min-width: 85px;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 4px;
-                cursor: pointer;
-              }
-
-              /* 普通按钮hover效果 */
-              .switch-order-btn:not(.complete-btn):hover {
-                background: rgba(255, 255, 255, 0.1);
-                border-color: rgba(255, 255, 255, 0.2);
-              }
-
-              /* 完成订单按钮样式 */
-              .switch-order-btn.complete-btn {
-                background: linear-gradient(45deg, #67c23a 0%, #85ce61 100%);
-                border: 1px solid rgba(103, 194, 58, 0.2);
-                color: #fff;
-                font-weight: 500;
-              }
-
-              /* 完成订单按钮hover效果，提高优先级 */
-              .switch-order-btn.complete-btn:hover {
-                border-color: rgba(103, 194, 58, 0.4);
-              }
-
-              /* 禁用和加载状态 */
-              .switch-order-btn:disabled,
-              .switch-order-btn.loading {
-                cursor: not-allowed;
-                opacity: 0.8;
-              }
-            }
-
-            .order-item:hover {
-              background: linear-gradient(90deg, 
-                rgba(30, 42, 56, 0.98) 0%, 
-                rgba(48, 65, 86, 0.9) 50%,
-                rgba(48, 65, 86, 0.85) 100%
-              );
-              transform: translateX(4px);
-              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            }
-
-            .order-item::before {
-              content: '';
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 3px;
-              height: 100%;
-              background: transparent;
-              transition: all 0.3s ease;
-            }
-
-            .order-item.pending::before {
-              background: #e6a23c;
-            }
-
-            .order-item.running::before {
-              background: #409eff;
-            }
-
-            .order-item.completed::before {
-              background: #67c23a;
-            }
-          }
-          /* 添加空状态样式 */
-          .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 0;
-            color: rgba(255, 255, 255, 0.6);
-            i {
-              font-size: 48px;
-              margin-bottom: 16px;
-              color: rgba(255, 255, 255, 0.3);
-            }
-            p {
-              font-size: 14px;
-              margin: 0 0 16px 0;
-            }
-            .el-button {
-              color: #0ac5a8;
-              font-size: 14px;
-              i {
-                font-size: 14px;
-                margin-right: 4px;
-                color: inherit;
-              }
-            }
-            .el-button:hover {
-              color: #0db196;
-            }
-          }
-        }
-        .scrollable-content::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollable-content::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollable-content::-webkit-scrollbar-thumb {
-          background: rgba(10, 197, 168, 0.2);
-          border-radius: 2px;
-        }
-        .scrollable-content::-webkit-scrollbar-thumb:hover {
-          background: rgba(10, 197, 168, 0.4);
-        }
-      }
       .log-section {
         background: rgba(30, 42, 56, 0.8);
         padding: 10px;
@@ -2507,6 +1689,7 @@ export default {
         height: 257px;
         display: flex;
         flex-direction: column;
+        flex: 1;
         .section-header {
           display: flex;
           justify-content: space-between;
