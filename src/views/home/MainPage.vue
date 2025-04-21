@@ -14,25 +14,25 @@
               <div class="data-card">
                 <div class="data-card-border">
                   <div class="data-card-border-borderTop granient-text">当前订单id</div>
-                  <div class="data-card-border-borderDown" style="font-size: 1.3vw;"></div>
+                  <div class="data-card-border-borderDown" style="font-size: 1.3vw;">{{ nowScanTrayInfo.orderId || '--' }}</div>
                 </div>
               </div>
               <div class="data-card">
                 <div class="data-card-border">
                   <div class="data-card-border-borderTop">产品名称</div>
-                  <div class="data-card-border-borderDown"></div>
+                  <div class="data-card-border-borderDown">{{ nowScanTrayInfo.productName || '--' }}</div>
                 </div>
               </div>
               <div class="data-card">
                 <div class="data-card-border">
                   <div class="data-card-border-borderTop">进货口</div>
-                  <div class="data-card-border-borderDown"></div>
+                  <div class="data-card-border-borderDown">{{ nowScanTrayInfo.inPut || '--' }}</div>
                 </div>
               </div>
               <div class="data-card">
                 <div class="data-card-border">
                   <div class="data-card-border-borderTop">是否消毒</div>
-                  <div class="data-card-border-borderDown"></div>
+                  <div class="data-card-border-borderDown">{{ nowScanTrayInfo.isTerile || '--' }}</div>
                 </div>
               </div>
             </div>
@@ -142,80 +142,129 @@
                   @click="handleCartClick(cart.id)"
                 >
                   <img :src="cart.image" :alt="cart.name" class="cart-image">
-                  <!-- 直接显示数量 -->
-                  <span class="cart-tray-count-overlay">{{ queues.find(q => q.id === cart.queueId)?.trayInfo?.length || 0 }}</span>
                 </div>
                 <!-- 上货扫码区域提示 -->
-                <div class="marker-with-panel" data-x="400" data-y="1130">
-                  <div class="pulse"></div>
+                <div class="marker-with-panel" data-x="300" data-y="1590">
                   <div class="data-panel" :class="['position-top', { 'always-show': true }]">
-                    <div class="data-panel-header">上货扫码信息</div>
                     <div class="data-panel-content">
                       <div class="data-panel-row">
-                        <span class="data-panel-label">当前进货口：</span>
-                        <span></span>
+                        <span class="data-panel-label">一楼扫码信息：</span>
+                        <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
                       </div>
+                      <div class="data-panel-row checkbox-group">
+                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="marker-with-panel" data-x="490" data-y="920">
+                  <div class="data-panel" :class="['position-top', { 'always-show': true }]">
+                    <div class="data-panel-content">
                       <div class="data-panel-row">
-                        <span class="data-panel-label">当前上货扫码信息：</span>
-                        <span></span>
+                        <span class="data-panel-label">二楼扫码信息：</span>
+                        <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
+                      </div>
+                      <div class="data-panel-row checkbox-group">
+                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="marker-with-panel" data-x="490" data-y="535">
+                  <div class="data-panel" :class="['position-top', { 'always-show': true }]">
+                    <div class="data-panel-content">
+                      <div class="data-panel-row">
+                        <span class="data-panel-label">三楼扫码信息：</span>
+                        <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
+                      </div>
+                      <div class="data-panel-row checkbox-group">
+                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="marker-with-panel" data-x="640" data-y="320">
+                  <div class="data-panel" :class="['position-top', { 'always-show': true }]">
+                    <div class="data-panel-content">
+                      <div class="data-panel-row">
+                        <span class="data-panel-label">四楼扫码信息：</span>
+                        <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
+                      </div>
+                      <div class="data-panel-row checkbox-group">
+                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="marker-with-panel" data-x="2200" data-y="1620">
+                  <div class="data-panel" :class="['position-top', { 'always-show': true }]">
+                    <div class="data-panel-content">
+                      <div class="data-panel-row">
+                        <span class="data-panel-label">缓冲区扫码信息：</span>
+                        <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <!-- 光电集合，光电标签默认在下方，可以控制标签位置：label-top、label-left、label-right -->
                 <!-- 上货区输送线光电信号 -->
-                <div class="marker marker-show-label"
-                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit1 === '1' }" 
-                     data-x="1440" data-y="1347"
-                     @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit1')">
+                <div class="marker"
+                    :class="{ 'scanning': upLoadPhotoelectricSignal.bit0 === '1' }" 
+                    data-x="640" data-y="1380" 
+                    @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit0')">
+                  <div class="marker-label">S-1#</div>
+                </div>
+                <div class="marker"
+                    :class="{ 'scanning': upLoadPhotoelectricSignal.bit1 === '1' }" 
+                    data-x="1440" data-y="1380" 
+                    @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit1')">
                   <div class="marker-label">S-2#</div>
                 </div>
-                <div class="marker marker-show-label"
-                style="height: 85px;"
+                <div class="marker label-left"
                      :class="{ 'scanning': upLoadPhotoelectricSignal.bit3 === '1' }" 
-                     data-x="2250" data-y="1395"
+                     data-x="2190" data-y="1380"
                      @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit3')">
                   <div class="marker-label">S-4#</div>
                 </div>
-                <div class="marker marker-show-label"
-                style="height: 85px;"
+                <div class="marker label-right"
                      :class="{ 'scanning': upLoadPhotoelectricSignal.bit5 === '1' }" 
-                     data-x="2475" data-y="1395"
+                     data-x="2475" data-y="1340"
                      @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit5')">
                   <div class="marker-label">S-6#</div>
                 </div>
-                <div class="marker marker-show-label label-right"
-                style="height: 2px;width: 115px;"
+                <div class="marker label-top"
                      :class="{ 'scanning': upLoadPhotoelectricSignal.bit6 === '1' }" 
-                     data-x="2470" data-y="1192"
+                     data-x="2440" data-y="1180"
                      @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit6')">
                   <div class="marker-label">S-7#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-top"
                      :class="{ 'scanning': upLoadPhotoelectricSignal.bit7 === '1' }" 
-                     data-x="2290" data-y="1230"
+                     data-x="2290" data-y="1180"
                      @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit7')">
                   <div class="marker-label">S-8#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': upLoadPhotoelectricSignal.bit8 === '1' }" 
-                     data-x="2480" data-y="1230"
+                     data-x="2480" data-y="1180"
                      @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit8')">
                   <div class="marker-label">S-9#</div>
                 </div>
-                <div class="marker marker-show-label"
-                style="height:35px"
+                <div class="marker"
                      :class="{ 'scanning': upLoadPhotoelectricSignal.bit10 === '1' }" 
-                     data-x="1570" data-y="1225"
+                     data-x="1570" data-y="1266"
+                     @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit9')">
+                  <div class="marker-label">S-10#</div>
+                </div>
+                <div class="marker"
+                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit12 === '1' }" 
+                     data-x="860" data-y="1266"
                      @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit10')">
                   <div class="marker-label">S-11#</div>
-                </div>
-                <div class="marker marker-show-label"
-                style="height:35px"
-                     :class="{ 'scanning': upLoadPhotoelectricSignal.bit12 === '1' }" 
-                     data-x="890" data-y="1225"
-                     @click="toggleBitValue(upLoadPhotoelectricSignal, 'bit12')">
-                  <div class="marker-label">S-13#</div>
                 </div>
                 <!-- 电机点位示例，可以控制标签位置：label-top、label-left、label-right -->
                 <!-- 上货区电机运行信号（扫码后入队） -->
@@ -323,61 +372,65 @@
                   <div class="marker-label">A3-2#</div>
                 </div>
                 <!-- A线光电检测信号 -->
-                <div class="marker marker-show-label"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit0 === '1' }" 
-                     style="height: 23px;"
-                     data-x="870" data-y="1090"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit0 === '1' }"
+                     data-x="840" data-y="1120"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit0')">
-                  <div class="marker-label">A1#</div>
+                  <div class="marker-label">A-1#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit1 === '1' }" 
-                     style="height: 23px;"
-                     data-x="870" data-y="1040"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit1 === '1' }"
+                     data-x="840" data-y="1010"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit1')">
-                  <div class="marker-label">A2#</div>
+                  <div class="marker-label">A-2#</div>
                 </div>
-                <div class="marker marker-show-label"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit2 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1320" data-y="1090"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit2 === '1' }"
+                     data-x="1320" data-y="1120"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit2')">
-                  <div class="marker-label">A3#</div>
+                  <div class="marker-label">A-3#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit3 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1320" data-y="1040"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit3 === '1' }"
+                     data-x="1320" data-y="1010"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit3')">
-                  <div class="marker-label">A4#</div>
+                  <div class="marker-label">A-4#</div>
                 </div>
-                <div class="marker marker-show-label"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit4 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1440" data-y="1090"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit4 === '1' }"
+                     data-x="1435" data-y="1120"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit4')">
-                  <div class="marker-label">A5#</div>
+                  <div class="marker-label">A-5#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit5 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1440" data-y="1040"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit5 === '1' }"
+                     data-x="1435" data-y="1010"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit5')">
-                  <div class="marker-label">A6#</div>
+                  <div class="marker-label">A-6#</div>
                 </div>
-                <div class="marker marker-show-label"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit6 === '1' }" 
-                     style="height: 23px;"
-                     data-x="2020" data-y="1090"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit6 === '1' }"
+                     data-x="2020" data-y="1120"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit6')">
-                  <div class="marker-label">A7#</div>
+                  <div class="marker-label">A-7#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
-                     :class="{ 'scanning': aLinePhotoelectricSignal.bit7 === '1' }" 
-                     style="height: 23px;"
-                     data-x="2020" data-y="1040"
+                <div class="marker label-right"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit7 === '1' }"
+                     data-x="2020" data-y="1010"
                      @click="toggleBitValue(aLinePhotoelectricSignal, 'bit7')">
-                  <div class="marker-label">A8#</div>
+                  <div class="marker-label">A-8#</div>
+                </div>
+                <div class="marker label-bottom"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit8 === '1' }"
+                     data-x="2470" data-y="1120"
+                     @click="toggleBitValue(aLinePhotoelectricSignal, 'bit8')">
+                  <div class="marker-label">A-9#</div>
+                </div>
+                <div class="marker label-top"
+                     :class="{ 'scanning': aLinePhotoelectricSignal.bit9 === '1' }"
+                     data-x="2470" data-y="1010"
+                     @click="toggleBitValue(aLinePhotoelectricSignal, 'bit9')">
+                  <div class="marker-label">A-10#</div>
                 </div>
                 <!-- B线电机运行信号 -->
                 <div class="motor-marker marker-show-label label-right"
@@ -417,62 +470,67 @@
                   <div class="marker-label">B3-2#</div>
                 </div>
                 <!-- B线光电检测信号 -->
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit0 === '1' }" 
-                     style="height: 23px;"
-                     data-x="870" data-y="875"
+                     data-x="840" data-y="900"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit0')">
-                  <div class="marker-label">B1#</div>
+                  <div class="marker-label">B-1#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit1 === '1' }" 
-                     style="height: 23px;"
-                     data-x="870" data-y="830"
+                     data-x="840" data-y="790"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit1')">
-                  <div class="marker-label">B2#</div>
+                  <div class="marker-label">B-2#</div>
                 </div>
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit2 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1320" data-y="875"
+                     data-x="1320" data-y="900"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit2')">
-                  <div class="marker-label">B3#</div>
+                  <div class="marker-label">B-3#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit3 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1320" data-y="830"
+                     data-x="1320" data-y="790"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit3')">
-                  <div class="marker-label">B4#</div>
+                  <div class="marker-label">B-4#</div>
                 </div>
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit4 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1440" data-y="875"
+                     data-x="1435" data-y="900"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit4')">
-                  <div class="marker-label">B5#</div>
+                  <div class="marker-label">B-5#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit5 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1440" data-y="830"
+                     data-x="1435" data-y="790"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit5')">
-                  <div class="marker-label">B6#</div>
+                  <div class="marker-label">B-6#</div>
                 </div>
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit6 === '1' }" 
-                     style="height: 23px;"
-                     data-x="2020" data-y="875"
+                     data-x="2020" data-y="900"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit6')">
-                  <div class="marker-label">B7#</div>
+                  <div class="marker-label">B-7#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': bLinePhotoelectricSignal.bit7 === '1' }" 
-                     style="height: 23px;"
-                     data-x="2020" data-y="830"
+                     data-x="2020" data-y="790"
                      @click="toggleBitValue(bLinePhotoelectricSignal, 'bit7')">
-                  <div class="marker-label">B8#</div>
+                  <div class="marker-label">B-8#</div>
                 </div>
+                <div class="marker label-right"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit8 === '1' }" 
+                     data-x="2470" data-y="900"
+                     @click="toggleBitValue(bLinePhotoelectricSignal, 'bit8')">
+                  <div class="marker-label">B-9#</div>
+                </div>
+                <div class="marker label-right"
+                     :class="{ 'scanning': bLinePhotoelectricSignal.bit9 === '1' }" 
+                     data-x="2470" data-y="790"
+                     @click="toggleBitValue(bLinePhotoelectricSignal, 'bit9')">
+                  <div class="marker-label">B-10#</div>
+                </div>
+                
                 <!-- C线电机运行信号 -->
                 <div class="motor-marker marker-show-label label-right"
                      :class="{ 'running': cLineMotorRunning.bit0 === '1' }"
@@ -511,95 +569,95 @@
                   <div class="marker-label">C3-2#</div>
                 </div>
                 <!-- C线光电检测信号 -->
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit0 === '1' }" 
-                     style="height: 23px;"
-                     data-x="870" data-y="665"
+                     data-x="840" data-y="690"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit0')">
-                  <div class="marker-label">C1#</div>
+                  <div class="marker-label">C-1#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit1 === '1' }" 
-                     style="height: 23px;"
-                     data-x="870" data-y="620"
+                     data-x="840" data-y="590"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit1')">
-                  <div class="marker-label">C2#</div>
+                  <div class="marker-label">C-2#</div>
                 </div>
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit2 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1320" data-y="665"
+                     data-x="1320" data-y="690"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit2')">
-                  <div class="marker-label">C3#</div>
+                  <div class="marker-label">C-3#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit3 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1320" data-y="620"
+                     data-x="1320" data-y="590"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit3')">
-                  <div class="marker-label">C4#</div>
+                  <div class="marker-label">C-4#</div>
                 </div>
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit4 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1440" data-y="665"
+                     data-x="1435" data-y="690"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit4')">
-                  <div class="marker-label">C5#</div>
+                  <div class="marker-label">C-5#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit5 === '1' }" 
-                     style="height: 23px;"
-                     data-x="1440" data-y="620"
+                     data-x="1435" data-y="590"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit5')">
-                  <div class="marker-label">C6#</div>
+                  <div class="marker-label">C-6#</div>
                 </div>
-                <div class="marker marker-show-label"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit6 === '1' }" 
-                     style="height: 23px;"
-                     data-x="2020" data-y="665"
+                     data-x="2020" data-y="690"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit6')">
-                  <div class="marker-label">C7#</div>
+                  <div class="marker-label">C-7#</div>
                 </div>
-                <div class="marker marker-show-label label-top"
+                <div class="marker label-right"
                      :class="{ 'scanning': cLinePhotoelectricSignal.bit7 === '1' }" 
-                     style="height: 23px;"
-                     data-x="2020" data-y="620"
+                     data-x="2020" data-y="590"
                      @click="toggleBitValue(cLinePhotoelectricSignal, 'bit7')">
-                  <div class="marker-label">C8#</div>
+                  <div class="marker-label">C-8#</div>
                 </div>
+                <div class="marker label-right"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit8 === '1' }" 
+                     data-x="2470" data-y="690"
+                     @click="toggleBitValue(cLinePhotoelectricSignal, 'bit8')">
+                  <div class="marker-label">C-9#</div>
+                </div>
+                <div class="marker label-right"
+                     :class="{ 'scanning': cLinePhotoelectricSignal.bit9 === '1' }" 
+                     data-x="2470" data-y="590"
+                     @click="toggleBitValue(cLinePhotoelectricSignal, 'bit9')">
+                  <div class="marker-label">C-10#</div>
+                </div>
+                
                 <!-- 扫码枪处光电信号 -->
-                <div class="marker marker-show-label"
-                style="height: 50px;"
+                <div class="marker marker-show-label label-left"
                      :class="{ 'scanning': scanPhotoelectricSignal.bit0 === '1' }" 
-                     data-x="350" data-y="1400"
+                     data-x="335" data-y="1360"
                      @click="toggleBitValue(scanPhotoelectricSignal, 'bit0')">
                   <div class="marker-label">1-1#</div>
                 </div>
-                <div class="marker marker-show-label"
-                style="height: 115px;"
+                <div class="marker marker-show-label label-left"
                      :class="{ 'scanning': scanPhotoelectricSignal.bit1 === '1' }" 
-                     data-x="2335" data-y="1425"
+                     data-x="2335" data-y="1340"
                      @click="toggleBitValue(scanPhotoelectricSignal, 'bit1')">
                   <div class="marker-label">1-2#</div>
                 </div>
-                <div class="marker marker-show-label"
-                style="height: 125px;"
+                <div class="marker marker-show-label label-right"
                      :class="{ 'scanning': scanPhotoelectricSignal.bit2 === '1' }" 
-                     data-x="560" data-y="1410"
+                     data-x="585" data-y="915"
                      @click="toggleBitValue(scanPhotoelectricSignal, 'bit2')">
                   <div class="marker-label">2-1#</div>
                 </div>
-                <div class="marker marker-show-label"
-                style="height: 105px;"
+                <div class="marker marker-show-label label-right"
                      :class="{ 'scanning': scanPhotoelectricSignal.bit4 === '1' }" 
-                     data-x="480" data-y="1345"
+                     data-x="515" data-y="525"
                      @click="toggleBitValue(scanPhotoelectricSignal, 'bit4')">
                   <div class="marker-label">3-1#</div>
                 </div>
-                <div class="marker marker-show-label"
-                style="height: 170px;"
+                <div class="marker marker-show-label label-top"
                      :class="{ 'scanning': scanPhotoelectricSignal.bit5 === '1' }" 
-                     data-x="400" data-y="1365"
+                     data-x="400" data-y="145"
                      @click="toggleBitValue(scanPhotoelectricSignal, 'bit5')">
                   <div class="marker-label">4-1#</div>
                 </div>
@@ -672,7 +730,7 @@
                     <div class="tray-info">
                       <div class="tray-info-row">
                         <span class="tray-name">{{ tray.name }}</span>
-                        <span class="tray-batch">批次号: {{ tray.batchId }}</span>
+                        <span class="tray-batch">是否消毒: {{ tray.isTerile === '1' ? '消毒' : '不消毒' }}</span>
                       </div>
                       <span class="tray-time">{{ tray.time }}</span>
                     </div>
@@ -748,13 +806,63 @@
               </button>
             </div>
           </div>
+          <div class="test-section">
+            <span class="test-label">小车4测试:</span>
+            <div class="position-buttons">
+              <button 
+                v-for="pos in ['A', 'B', 'C', 'D', 'E', 'P']" 
+                :key="'test-cart4-pos-' + pos"
+                @click="updateCartPosition(4, pos)"
+                class="position-btn"
+              >
+                {{pos}}
+              </button>
+            </div>
+          </div>
           <!-- 添加扫码测试部分 -->
           <div class="test-section">
             <span class="test-label">扫码信息测试:</span>
             <div class="qrcode-test-container">
               <div class="qrcode-input-group">
-                <div class="qrcode-label">上货扫码信息:</div>
+                <div class="qrcode-label">一楼扫码:</div>
                 <el-input 
+                  v-model="elevatorOneFloorScanCode"
+                  size="small" 
+                  placeholder="输入扫码信息"
+                  class="qrcode-input"
+                ></el-input>
+              </div>
+              <div class="qrcode-input-group">
+                <div class="qrcode-label">二楼扫码:</div>
+                <el-input 
+                  v-model="elevatorTwoFloorScanCode"
+                  size="small" 
+                  placeholder="输入扫码信息"
+                  class="qrcode-input"
+                ></el-input>
+              </div>
+              <div class="qrcode-input-group">
+                <div class="qrcode-label">三楼扫码:</div>
+                <el-input 
+                  v-model="elevatorThreeFloorScanCode"
+                  size="small" 
+                  placeholder="输入扫码信息"
+                  class="qrcode-input"
+                ></el-input>
+              </div>
+              <div class="qrcode-input-group">
+                <div class="qrcode-label">四楼扫码:</div>
+                <el-input 
+                  v-model="elevatorFourFloorScanCode"
+                  size="small" 
+                  placeholder="输入扫码信息"
+                  class="qrcode-input"
+                ></el-input>
+              </div>
+              <div class="qrcode-input-group">
+                <div class="qrcode-label">一楼缓冲区区扫码:</div>
+                <el-input 
+                  v-model="oneFloorElevatorScanCode"
                   size="small" 
                   placeholder="输入扫码信息"
                   class="qrcode-input"
@@ -806,6 +914,7 @@ export default {
   name: 'MonitorScreen',
   data() {
     return {
+      nowScanTrayInfo: {},
       showTestPanel: false,
       buttonStates: {
         start: false,
@@ -834,6 +943,14 @@ export default {
           A3: { x: 1945, y: 1066 },
           B3: { x: 1945, y: 848 },
           C3: { x: 1945, y: 647 }
+        },
+        cart4: {
+          A: { x: 2510, y: 1066 },
+          B: { x: 2510, y: 848 },
+          C: { x: 2510, y: 647 },
+          D: { x: 2510, y: 490 },
+          E: { x: 2510, y: 340 },
+          P: { x: 2510, y: 425 }
         }
       },
       carts: [
@@ -841,7 +958,6 @@ export default {
           id: 1,
           name: '小车1',
           cartKey: 'cart1',  // 添加cartKey用于关联positions
-          queueId: 3,  // 关联到1#小车队列
           currentPosition: 'O1',
           x: 790,
           y: 1230,
@@ -852,7 +968,6 @@ export default {
           id: 2,
           name: '小车2',
           cartKey: 'cart2',
-          queueId: 4,  // 关联到2#小车队列
           currentPosition: 'A2',
           x: 1375,
           y: 647,
@@ -863,12 +978,21 @@ export default {
           id: 3,
           name: '小车3',
           cartKey: 'cart3',
-          queueId: 5,  // 关联到3#小车队列
           currentPosition: 'A3',
           x: 1945,
           y: 1066,
           width: 72,
           image: require('@/assets/changzhou-img/cart3.png')
+        },
+        {
+          id: 4,
+          name: '小车4',
+          cartKey: 'cart4',
+          currentPosition: 'A',
+          x: 2510,
+          y: 1066,
+          width: 72,
+          image: require('@/assets/changzhou-img/cart4.png')
         }
       ],
       nowTrays: [],
@@ -902,96 +1026,86 @@ export default {
         },
         {
           id: 2,
-          queueName: '缓存区',
+          queueName: '分发区',
           trayInfo: []
         },
         {
           id: 3,
-          queueName: '1#小车',
+          queueName: '缓存区',
           trayInfo: []
         },
         {
           id: 4,
-          queueName: '2#小车',
-          trayInfo: []
-        },
-        {
-          id: 5,
-          queueName: '3#小车',
-          trayInfo: []
-        },
-        {
-          id: 6,
           queueName: 'A1',
           trayInfo: []
         },
         {
-          id: 7,
+          id: 5,
           queueName: 'B1',
           trayInfo: []
         },
         {
-          id: 8,
+          id: 6,
           queueName: 'C1',
           trayInfo: []
         },
         {
-          id: 9,
+          id: 7,
           queueName: 'A2',
           trayInfo: []
         },
         {
-          id: 10,
+          id: 8,
           queueName: 'B2',
           trayInfo: []
         },
         {
-          id: 11,
+          id: 9,
           queueName: 'C2',
           trayInfo: []
         },
         {
-          id: 12,
+          id: 10,
           queueName: 'A3',
           trayInfo: []
         },
         {
-          id: 13,
+          id: 11,
           queueName: 'B3',
           trayInfo: []
         },
         {
-          id: 14,
+          id: 12,
           queueName: 'C3',
           trayInfo: []
         },
         {
-          id: 15,
+          id: 13,
           queueName: 'D',
           trayInfo: []
         },
         {
-          id: 16,
+          id: 14,
           queueName: 'E',
           trayInfo: []
         }
-        
       ],
       // 添加队列位置标识数据
       queueMarkers: [
       { id: 1, name: '上货区', queueId: 1, x: 1325, y: 1350 },
-      { id: 2, name: '缓冲区', queueId: 2, x: 1325, y: 1230 },
-      { id: 3, name: 'A1', queueId: 6, x: 1050, y: 1065 },
-      { id: 4, name: 'B1', queueId: 7, x: 1050, y: 845 },
-      { id: 5, name: 'C1', queueId: 8, x: 1050, y: 645 },
-      { id: 6, name: 'A2', queueId: 9, x: 1610, y: 1065 },
-      { id: 7, name: 'B2', queueId: 10, x: 1610, y: 845 },
-      { id: 8, name: 'C2', queueId: 11, x: 1610, y: 645 },
-      { id: 9, name: 'A3', queueId: 12, x: 2190, y: 1065 },
-      { id: 10, name: 'B3', queueId: 13, x: 2190, y: 845 },
-      { id: 11, name: 'C3', queueId: 14, x: 2190, y: 645 },
-      { id: 12, name: 'D', queueId: 15, x: 2165, y: 490 },
-      { id: 13, name: 'E', queueId: 16, x: 2165, y: 340 },
+      { id: 2, name: '分发区', queueId: 14, x: 1325, y: 1230 },
+      { id: 3, name: '缓冲区', queueId: 2, x: 2500, y: 1530 },
+      { id: 4, name: 'A1', queueId: 3, x: 1050, y: 1065 },
+      { id: 5, name: 'B1', queueId: 4, x: 1050, y: 845 },
+      { id: 6, name: 'C1', queueId: 5, x: 1050, y: 645 },
+      { id: 7, name: 'A2', queueId: 6, x: 1610, y: 1065 },
+      { id: 8, name: 'B2', queueId: 7, x: 1610, y: 845 },
+      { id: 9, name: 'C2', queueId: 8, x: 1610, y: 645 },
+      { id: 10, name: 'A3', queueId: 9, x: 2190, y: 1065 },
+      { id: 11, name: 'B3', queueId: 10, x: 2190, y: 845 },
+      { id: 12, name: 'C3', queueId: 11, x: 2190, y: 645 },
+      { id: 13, name: 'D', queueId: 12, x: 2165, y: 490 },
+      { id: 14, name: 'E', queueId: 13, x: 2165, y: 340 },
       ],
       logId: 1000,  // 添加一个日志ID计数器
       // 输送线当前运行状态-读取PLC
@@ -1107,6 +1221,8 @@ export default {
         c2: '0',
         c3: '0',
       },
+      // 缓冲区数量
+      bufferQuantity: '0',
       // D线数量和E线数量先不对接-读取PLC
       //上货区电机运行信号（扫码后入队）-读取PLC
       upLoadMotorRunning: {
@@ -1162,6 +1278,9 @@ export default {
       elevatorThreeFloorScanCode: '',
       // 提升机四楼接货站台扫码数据（托盘号）
       elevatorFourFloorScanCode: '',
+      // 添加复选框状态
+      allowUpload: false,
+      nonSterile: false,
     };
   },
   computed: {
@@ -1178,7 +1297,154 @@ export default {
   mounted() {
     this.initializeMarkers();
   },
+  watch: { // 添加 watch 属性
+    'scanPhotoelectricSignal.bit0'(newVal) {
+      if (newVal === '0') {
+        this.elevatorOneFloorScanCode = '';
+        this.addLog('一楼接货站台光电信号无货，已清空一楼接货站台扫码数据');
+      }
+      if (newVal === '1' && this.elevatorOneFloorScanCode !== '') {
+        this.addLog(`一楼接货站台扫码数据：${this.elevatorOneFloorScanCode}`);
+        this.addToUpLoadQueue(this.elevatorOneFloorScanCode, '一楼接货站台');
+      }
+    },
+    elevatorOneFloorScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit0 === '1') {
+          this.addLog(`一楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '一楼接货站台');
+        }
+      },
+    },
+    'scanPhotoelectricSignal.bit1'(newVal) {
+      if (newVal === '0') {
+        this.oneFloorElevatorScanCode = '';
+        this.addLog('一楼缓存区光电信号无货，已清空一楼缓存区扫码数据');
+      }
+      if (newVal === '1' && this.oneFloorElevatorScanCode !== '') {
+        this.addLog(`一楼缓存区扫码数据：${this.oneFloorElevatorScanCode}`);
+        // 判断是否消毒，如果消毒则此托盘进入下一队列，如果不消毒直接发走
+        this.addToCartLoadQueue(this.oneFloorElevatorScanCode);
+      }
+    },
+    oneFloorElevatorScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit1 === '1') {
+          this.addLog(`一楼缓存区扫码数据：${newVal}`);
+          this.addToCartLoadQueue(newVal);
+        }
+      },
+    },
+    'scanPhotoelectricSignal.bit2'(newVal) {
+      if (newVal === '0') {
+        this.elevatorTwoFloorScanCode = '';
+        this.addLog('二楼接货站台光电信号无货，已清空二楼接货站台扫码数据');
+      }
+      if (newVal === '1' && this.elevatorTwoFloorScanCode !== '') {
+        this.addLog(`二楼接货站台扫码数据：${this.elevatorTwoFloorScanCode}`);
+        this.addToUpLoadQueue(this.elevatorTwoFloorScanCode, '二楼接货站台');
+      }
+    },
+    elevatorTwoFloorScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit2 === '1') {
+          this.addLog(`二楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '二楼接货站台');
+        }
+      },
+    },
+    'scanPhotoelectricSignal.bit4'(newVal) {
+      if (newVal === '0') {
+        this.elevatorThreeFloorScanCode = '';
+        this.addLog('三楼接货站台光电信号无货，已清空三楼接货站台扫码数据');
+      }
+      if (newVal === '1' && this.elevatorThreeFloorScanCode !== '') {
+        this.addLog(`三楼接货站台扫码数据：${this.elevatorThreeFloorScanCode}`);
+        this.addToUpLoadQueue(this.elevatorThreeFloorScanCode, '三楼接货站台');
+      }
+    },
+    elevatorThreeFloorScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit4 === '1') {
+          this.addLog(`三楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '三楼接货站台');
+        }
+      },
+    },
+    'scanPhotoelectricSignal.bit5'(newVal) {
+      if (newVal === '0') {
+        this.elevatorFourFloorScanCode = '';
+        this.addLog('四楼接货站台光电信号无货，已清空四楼接货站台扫码数据');
+      }
+      if (newVal === '1' && this.elevatorFourFloorScanCode !== '') {
+        this.addLog(`四楼接货站台扫码数据：${this.elevatorFourFloorScanCode}`);
+        this.addToUpLoadQueue(this.elevatorFourFloorScanCode, '四楼接货站台');
+      }
+    },
+    elevatorFourFloorScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit5 === '1') {
+          this.addLog(`四楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '四楼接货站台');
+        }
+      },
+    },
+  },
   methods: {
+    // 判断是否消毒，如果消毒则此托盘进入分发区队列，如果不消毒直接发走
+    addToCartLoadQueue(trayCode) {
+      // 通过trayCode 查询this.queues[0].trayInfo的托盘信息
+      const trayInfo = this.queues[0].trayInfo.find(tray => tray.trayCode === trayCode);
+      // 判断是否消毒
+      if (trayInfo.isTerile === '1') {
+        // 托盘信息进入下一队列，并且把托盘信息从this.queues[0].trayInfo中删除
+        this.queues[1].trayInfo.push(trayInfo);
+        this.queues[0].trayInfo = this.queues[0].trayInfo.filter(tray => tray.trayCode !== trayCode);
+        this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
+      } else {
+        this.addLog(`托盘信息：${trayInfo.trayCode} 直接发走去立库了`);
+      }
+    },
+    // 添加货物到上货区队列
+    addToUpLoadQueue(trayCode, trayFrom) {
+      // 通过trayCode 查询erp数据
+      const params = {
+        trayCode: trayCode,
+        invalidFlag: '0',
+        orderStatus: '0'
+      }
+      HttpUtil.post('/order_info/selectList', params).then((res)=> {
+        // this.queues[0]： 上货区
+        if (res.data && res.data.length > 0) {
+          const trayInfo = { 
+            trayCode: res.data[0].trayCode,
+            trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+            orderId: res.data[0].orderId,
+            productCode: res.data[0].productCode,
+            productName: res.data[0].productName,
+            isTerile: res.data[0].isTerile,
+            state: '0',
+          };
+          this.queues[0].trayInfo.push(trayInfo);
+          this.addLog(trayFrom + `上货区队列添加货物：${trayCode}`);
+          this.nowScanTrayInfo = {
+            trayCode: trayCode,
+            orderId: res.data[0].orderId,
+            productName: res.data[0].productName,
+            isTerile: res.data[0].isTerile === '1' ? '消毒' : '不消毒',
+            inPut: trayFrom,
+          };
+        } else {
+          this.addLog(trayFrom + `上货区队列添加货物失败：${trayCode}`);
+          this.nowScanTrayInfo = {};
+        }
+      }).catch((err)=> {
+        this.$message.error('查询队列失败，请重试' + err);
+        // 没查询到货物信息，直接报警
+        this.addLog(trayFrom + `上货区队列添加货物失败：${trayCode}`);
+        this.nowScanTrayInfo = {};
+      })
+    },
     changeQueueExpanded() {
       this.isQueueExpanded = !this.isQueueExpanded;
     },
@@ -1293,7 +1559,7 @@ export default {
           id: tray.trayCode || '',
           name: tray.trayCode ? `托盘 ${tray.trayCode}` : '未知托盘',
           time: tray.trayTime || '',
-          batchId: tray.batchId || '--'
+          isTerile: tray.isTerile
         })).filter(tray => tray.id); // 过滤掉没有 id 的托盘
       } catch (error) {
         console.error('处理托盘信息时出错:', error);
@@ -1375,20 +1641,12 @@ export default {
         this.isDragging = false;
       }
     },
-    // 根据订单信息调整小车位置
-    adjustCartsPosition(order) {
-      // 小车1对应预热房
-      if (order.isPrint1) {
-        this.updateCartPosition(1, order.isPrint1);
-      }
-
-      // 小车2和小车3对应灭菌区
-      if (order.isPrint2) {
-          this.updateCartPosition(2, order.isPrint2);
-          this.updateCartPosition(3, order.isPrint2);
-      }
-    },
     clearAllQrCodes() {
+      this.elevatorOneFloorScanCode = '';
+      this.elevatorTwoFloorScanCode = '';
+      this.elevatorThreeFloorScanCode = '';
+      this.elevatorFourFloorScanCode = '';
+      this.oneFloorElevatorScanCode = '';
     },
     // 添加更新队列托盘的方法
     updateQueueTrays(queueId, trayInfo) {
@@ -1920,8 +2178,8 @@ export default {
               /* --- 光电点位样式 --- */
               .marker {
                 position: absolute;
-                width: 2px; // 修改这里
-                height: 42px; // 修改这里
+                width: 12px;
+                height: 12px;
                 transform: translate(-50%, -50%);
                 cursor: pointer;
                 z-index: 2;
@@ -1935,11 +2193,12 @@ export default {
                   border-radius: 4px;
                   font-size: 12px;
                   /* 默认定位在下方 */
-                  top: calc(100% + 1px); 
+                  top: calc(100% + 5px); 
                   left: 50%;
                   transform: translateX(-50%);
                   opacity: 0;
                   transition: opacity 0.3s;
+                  pointer-events: none; /* 添加此行 */
                 }
               }
               .marker::before {
@@ -1947,6 +2206,7 @@ export default {
                 position: absolute;
                 width: 100%;
                 height: 100%;
+                border-radius: 50%;
                 background: rgba(128, 128, 128, 0.8); /* 默认灰色核心 */
               }
               /* 扫描状态 (红色) */
@@ -1966,19 +2226,19 @@ export default {
               /* 控制标签位置的样式 */
               .marker.label-top .marker-label {
                 top: auto; /* 重置默认 top */
-                bottom: calc(100% + 1px); /* 定位到上方 */
+                bottom: calc(100% + 5px); /* 定位到上方 */
                 left: 50%;
                 transform: translateX(-50%);
               }
               .marker.label-left .marker-label {
                 top: 50%; /* 垂直居中 */
                 left: auto; /* 重置默认 left */
-                right: calc(100% + 1px); /* 定位到左方 */
+                right: calc(100% + 5px); /* 定位到左方 */
                 transform: translateY(-50%); /* 垂直居中 */
               }
               .marker.label-right .marker-label {
                 top: 50%; /* 垂直居中 */
-                left: calc(100% + 1px); /* 定位到右方 */
+                left: calc(100% + 5px); /* 定位到右方 */
                 transform: translateY(-50%); /* 垂直居中 */
               }
               /* --- 光电点位样式结束 --- */
@@ -2059,38 +2319,54 @@ export default {
                 transform: translate(-50%, -50%);
                 cursor: pointer;
                 z-index: 2; 
-                .pulse {
-                  background: rgba(64, 158, 255, 0.4);
-                }
                 .data-panel {
                   position: absolute;
                   background: rgba(30, 42, 56, 0.95);
                   border: 1px solid rgba(64, 158, 255, 0.3);
                   border-radius: 8px;
                   padding: 12px;
-                  width: 200px;
+                  width: 170px;
                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                   opacity: 0;
                   transition: all 0.3s ease;
                   pointer-events: none;
-                  .data-panel-header {
-                    font-size: 14px;
-                    color: #409eff;
-                    margin-bottom: 8px;
-                    padding-bottom: 8px;
-                    border-bottom: 1px solid rgba(64, 158, 255, 0.2);
-                  }
                   .data-panel-content {
                     font-size: 12px;
                     .data-panel-row {
                       display: flex;
                       justify-content: space-between;
-                      margin-bottom: 6px;
                       color: rgba(255, 255, 255, 0.9);
                       .data-panel-label {
                         color: rgba(255, 255, 255, 0.6);
                         font-size: 12px;
                       }
+                    }
+                    /* 新增：复选框组样式 */
+                    .checkbox-group {
+                      display: flex;
+                      justify-content: space-between; /* 或 space-between */
+                      align-items: center;
+                      padding-top: 5px; /* 增加一点顶部间距 */
+                    }
+
+                    .checkbox-group .el-checkbox {
+                      margin-right: 10px; /* 增加复选框之间的间距 */
+                    }
+
+                    /* 调整复选框标签颜色 */
+                    .checkbox-group :deep(.el-checkbox__label) {
+                      color: rgba(255, 255, 255, 0.8); /* 调整标签颜色 */
+                      font-size: 12px; /* 调整标签字体大小 */
+                    }
+
+                    /* 调整选中状态下的颜色 */
+                    .checkbox-group :deep(.el-checkbox__input.is-checked+.el-checkbox__label) {
+                      color: #0ac5a8; /* 选中时标签颜色 */
+                    }
+
+                    .checkbox-group :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+                      background-color: #0ac5a8; /* 选中时背景色 */
+                      border-color: #0ac5a8; /* 选中时边框色 */
                     }
                   }
                 }
@@ -2118,6 +2394,7 @@ export default {
                 /* 始终显示的面板 */
                 .data-panel.always-show {
                   opacity: 1;
+                  pointer-events: auto; /* 重新启用指针事件 */
                 }
                 /* 竖向布局样式 */
                 .data-panel.vertical-layout {
@@ -2135,30 +2412,9 @@ export default {
                   }
                 }
               }
-
-              .marker-with-panel::before {
-                content: '';
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                background: rgba(64, 158, 255, 0.8);
-                border-radius: 50%;
-                animation: glow-blue 2s infinite;
-              }
               /* 悬停时显示面板 */
               .marker-with-panel:hover .data-panel:not(.always-show) {
                 opacity: 1;
-              }
-              @keyframes glow-blue {
-                0% {
-                  box-shadow: 0 0 0 0 rgba(64, 158, 255, 0.4);
-                }
-                70% {
-                  box-shadow: 0 0 0 8px rgba(64, 158, 255, 0);
-                }
-                100% {
-                  box-shadow: 0 0 0 0 rgba(64, 158, 255, 0);
-                }
               }
             }
           }
@@ -2236,25 +2492,6 @@ export default {
                 width: 100%;
                 height: auto;
                 object-fit: contain;
-              }
-              
-              .cart-tray-count-overlay {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%); /* 居中关键 */
-                background: rgba(0, 0, 0, 0.7);
-                color: #409eff;
-                font-size: 14px;
-                font-weight: bold;
-                min-width: 20px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-                border: 1px solid rgba(64, 158, 255, 0.5);
-                z-index: 4; /* 确保在图片之上 */
               }
             }
           }

@@ -122,7 +122,7 @@ export default {
   height: 85px;
   border-radius: 50%;
   position: absolute;
-  right: 70px;
+  right: 170px;
   top: 60px;
   z-index: 4000;
   cursor: pointer;

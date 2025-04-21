@@ -138,7 +138,7 @@ app.on('ready', () => {
       title: '提醒！',
       message:'确认关闭程序吗？',
       buttons: ['关闭程序', '放入托盘','取消'],   //选择按钮，点击确认则下面的idx为0，取消为1
-      cancelId: 2, //这个的值是如果直接把提示框×掉返回的值，这里设置成和“取消”按钮一样的值，下面的idx也会是1
+      cancelId: 2, //这个的值是如果直接把提示框×掉返回的值，这里设置成和"取消"按钮一样的值，下面的idx也会是1
     }).then(idx => {
       if (idx.response == 2) {
         e.preventDefault();
@@ -228,34 +228,94 @@ function conPLC() {
       }
       conn.setTranslationCB(function(tag) { return variables[tag]; }); // This sets the "translation" to allow us to work with object names
       logger.info('连接PLC成功')
-      // PLC看门狗心跳
-      conn.addItems('DBW60')
-      // 输送线自动运行 DBW62
-      conn.addItems('DBW62')
-      // 故障信息
-      conn.addItems('DBW66')
-      // 输送线不允许加速器写
-      conn.addItems('DBW64')
-      // 束下实时反馈速度
-      conn.addItems('DBW68')
-      // 关键点光电信号
+      // 输送线看门狗心跳
+      conn.addItems('DBW0')
+      // 输送线当前运行状态
+      conn.addItems('DBW2')
+      // 允许进料反馈
+      conn.addItems('DBW4')
+      // A线电机运行信号
+      conn.addItems('DBW6')
+      // A线光电检测信号
+      conn.addItems('DBW8')
+      // B线电机运行信号
+      conn.addItems('DBW10');
+      // B线光电检测信号
+      conn.addItems('DBW12');
+      // C线电机运行信号
+      conn.addItems('DBW14');
+      // C线光电检测信号
+      conn.addItems('DBW16');
+      // D线电机运行信号
+      conn.addItems('DBW18');
+      // D线光电检测信号
+      conn.addItems('DBW20');
+      // E线电机运行信号
+      conn.addItems('DBW22');
+      // E线光电检测信号
+      conn.addItems('DBW24');
+      // 输送线故障反馈
+      conn.addItems('DBW26');
+      // 缓存区数量
+      conn.addItems('DBW28');
+      // 请求上位机下发任务(判断去灭菌还是非灭菌）
+      conn.addItems('DBW30');
+      // A1数量
+      conn.addItems('DBW34');
+      // A2数量
+      conn.addItems('DBW36');
+      // A3数量
+      conn.addItems('DBW38');
+      // B1数量
+      conn.addItems('DBW40');
+      // B2数量
+      conn.addItems('DBW42');
+      // B3数量
+      conn.addItems('DBW44');
+      // C1数量
+      conn.addItems('DBW46');
+      // C2数量
+      conn.addItems('DBW48');
+      // C3数量
+      conn.addItems('DBW50');
+      // D数量
+      conn.addItems('DBW52');
+      // E数量
+      conn.addItems('DBW58');
+      // 上货区电机运行信号（扫码后入队）
+      conn.addItems('DBW64');
+      // 上货区输送线光电信号
+      conn.addItems('DBW66');
+      // 预热前小车电机运行信号1#车
+      conn.addItems('DBW68');
+      // 预热前小车检测信号1#车
       conn.addItems('DBW70');
-      // 电机运行信号
+      // 灭菌前小车电机运行信号2#车
       conn.addItems('DBW72');
-      // 束下前输送速度比
+      // 灭菌前小车检测信号2#车
+      conn.addItems('DBW74');
+      // 解析前小车电机运行信号3#车
       conn.addItems('DBW76');
-      // 上料固定扫码
-      conn.addItems('DBB100');
-      // 迷宫出口固定扫码
-      conn.addItems('DBB130');
-      // J区速度
+      // 解析前小车检测信号3#车
+      conn.addItems('DBW78');
+      // 解析后小车电机运行信号4#车
       conn.addItems('DBW80');
-      // K区速度
+      // 解析后小车检测信号4#车
       conn.addItems('DBW82');
-      // L区速度
+      // 扫码枪处光电信号
       conn.addItems('DBW84');
-      
-      // 读DBW6和DBW62
+      // 请求上位机下发任务(预热小车前）
+      conn.addItems('DBW86');
+      // 提升机一楼接货站台扫码数据（托盘号）
+      conn.addItems('DBB160');
+      // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
+      conn.addItems('DBB190');
+      // 提升机二楼接货站台扫码数据（托盘号）
+      conn.addItems('DBB220');
+      // 提升机三楼接货站台扫码数据（托盘号）
+      conn.addItems('DBB250');
+      // 提升机四楼接货站台扫码数据（托盘号）
+      conn.addItems('DBB280');
       setInterval(() => {
         conn.readAllItems(valuesReady);
       }, 50);
@@ -339,109 +399,90 @@ function createFile(fileNameVal) {
 
 var variables = {
   DBW0: 'DB101,INT0', // 心跳
-  DBW2: 'DB101,INT2', // 加速器设定输送线速度
-  DBW4: 'DB101,INT4', // 加速器允许货物进入辐照区
-  DBW6: 'DB101,INT6', // 暂停按钮
-  DBW8: 'DB101,INT8', // 启动输送线
-  DBW10: 'DB101,INT10', // 停止输送线
-  DBW12: 'DB101,INT12', // 翻转模式
-  DBW14: 'DB101,INT14', // 回流模式
-  DBW16: 'DB101,INT16', // 下货
-  DBW18: 'DB101,INT18', // 剔除指令
-  DBW20: 'DB101,INT20', // 单独启动105
-  DBW22: 'DB101,INT22', // 纸箱宽度
-  DBW24: 'DB101,INT24', // 纸箱长度
-  DBW26: 'DB101,INT26', // 不允许上货
-  DBW34: 'DB101,INT34', // 扫码信息不一致报警
-  DBW36: 'DB101,INT36', // 允许上货
-  DBW38: 'DB101,INT38', // 下货报警
-  DBW40: 'DB101,INT40', // 调节自动居中
-  DBW42: 'DB101,INT42', // 故障复位
-  DBW44: 'DB101,INT44', // 下货完成
-  DBW46: 'DB101,INT46', // 托盘模式
-  DBW60: 'DB101,INT60', // 看门狗心跳
-  DBW62: 'DB101,INT62', // 输送系统自动运行
-  DBW64: 'DB101,INT64',
-  DBW66: 'DB101,INT66', // 故障信息
-  DBW68: 'DB101,INT68',
-  DBW70: 'DB101,INT70',
-  DBW72: 'DB101,INT72',
-  DBW76: 'DB101,INT76', // 束下前输送速度比
-  DBW80: 'DB101,INT80', // J区速度
-  DBW82: 'DB101,INT82', // K区速度
-  DBW84: 'DB101,INT84', // L区速度
-  DBB100: 'DB101,C100.30',
-  DBB130: 'DB101,C130.30'
+  DBW2: 'DB101,INT2', // 输送线当前运行状态
+  DBW4: 'DB101,INT4', // 允许进料反馈
+  DBW6: 'DB101,INT6', // A线电机运行信号
+  DBW8: 'DB101,INT8', // A线光电检测信号
+  DBW10: 'DB101,INT10', // B线电机运行信号
+  DBW12: 'DB101,INT12', // B线光电检测信号
+  DBW14: 'DB101,INT14', // C线电机运行信号
+  DBW16: 'DB101,INT16', // C线光电检测信号
+  DBW18: 'DB101,INT18', // D线电机运行信号
+  DBW20: 'DB101,INT20', // D线光电检测信号
+  DBW22: 'DB101,INT22', // E线电机运行信号
+  DBW24: 'DB101,INT24', // E线光电检测信号
+  DBW26: 'DB101,INT26', // 输送线故障反馈
+  DBW28: 'DB101,INT28', // 缓存区数量
+  DBW30: 'DB101,INT30', // 请求上位机下发任务(判断去灭菌还是非灭菌）
+  DBW34: 'DB101,INT34', // A1数量
+  DBW36: 'DB101,INT36', // A2数量
+  DBW38: 'DB101,INT38', // A3数量
+  DBW40: 'DB101,INT40', // B1数量
+  DBW42: 'DB101,INT42', // B2数量
+  DBW44: 'DB101,INT44', // B3数量
+  DBW46: 'DB101,INT46', // C1数量
+  DBW48: 'DB101,INT48', // C2数量
+  DBW50: 'DB101,INT50', // C3数量
+  DBW52: 'DB101,INT52', // D数量
+  DBW58: 'DB101,INT58', // E数量
+  DBW64: 'DB101,INT64', // 上货区电机运行信号（扫码后入队）
+  DBW66: 'DB101,INT66', // 上货区输送线光电信号
+  DBW68: 'DB101,INT68', // 预热前小车电机运行信号1#车
+  DBW70: 'DB101,INT70', // 预热前小车检测信号1#车
+  DBW72: 'DB101,INT72', // 灭菌前小车电机运行信号2#车
+  DBW74: 'DB101,INT74', // 灭菌前小车检测信号2#车
+  DBW76: 'DB101,INT76', // 解析前小车电机运行信号3#车
+  DBW78: 'DB101,INT78', // 解析前小车检测信号3#车
+  DBW80: 'DB101,INT80', // 解析后小车电机运行信号4#车
+  DBW82: 'DB101,INT82', // 解析后小车检测信号4#车
+  DBW84: 'DB101,INT84', // 扫码枪处光电信号
+  DBW86: 'DB101,INT86', // 请求上位机下发任务(预热小车前）
+  DBB160: 'DB101,C160.30', // 提升机一楼接货站台扫码数据（托盘号）
+  DBB190: 'DB101,C190.30', // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
+  DBB220: 'DB101,C220.30', // 提升机二楼接货站台扫码数据（托盘号）
+  DBB250: 'DB101,C250.30', // 提升机三楼接货站台扫码数据（托盘号）
+  DBB280: 'DB101,C280.30', // 提升机四楼接货站台扫码数据（托盘号）
+  DBW500: 'DB101,INT500', // WCS看门狗心跳
+  DBW502: 'DB101,INT502', // WCS-全线启动
+  DBW504: 'DB101,INT504', // WCS-全线停止
+  DBW506: 'DB101,INT506', // WCS看门狗心跳
+  DBW508: 'DB101,INT508', // WCS-故障复位
+  DBW510: 'DB101,INT510', // 接货口全部禁用→写1禁用；写0不禁用
+  DBW512: 'DB101,INT512', // 一楼接货口启用→写1启用；写0不启用
+  DBW514: 'DB101,INT514', // 二楼接货口启用→写1启用；写0不启用
+  DBW516: 'DB101,INT516', // 三楼接货口启用→写1启用；写0不启用
+  DBW518: 'DB101,INT518', // 四楼接货口启用→写1启用；写0不启用
+  DBW520: 'DB101,INT520', // 一楼D灭菌接货口启用→写1启用；写0不启用
+  DBW522: 'DB101,INT522', // 一楼E灭菌接货口启用→写1启用；写0不启用
+  DBW524: 'DB101,INT524', // WCS执行进货预热房编号预热房
+  DBW526: 'DB101,INT526', // WCS执行出货预热房编号
+  DBW528: 'DB101,INT528', // WCS执行进货灭菌柜编号
+  DBW530: 'DB101,INT530', // WCS执行出货灭菌柜编号
+  DBW532: 'DB101,INT532', // WCS执行进货解析柜编号
+  DBW534: 'DB101,INT534', // WCS执行出货解析柜编号
+  DBW536: 'DB101,INT536', // WCS执行出货DE灭菌柜编号
+  DBW540: 'DB101,INT540', // WCS下发任务完成
+  DBW542: 'DB101,INT542', // WCS下发顶升移栽目的地
+  DBW544: 'DB101,INT544', // WCS-接货口进货错误
+  DBW546: 'DB101,INT546', // WCS-预热柜当前需要进货数量
+  DBW548: 'DB101,INT548', // WCS-灭菌柜当前需要进货数量
+  DBW550: 'DB101,INT550', // WCS-解析柜当前需要进货数量
+  DBW552: 'DB101,INT552', // WCS-D灭菌柜当前需要进货数量
+  DBW554: 'DB101,INT554', // WCS-E灭菌柜当前需要进货数量
+  
+  
 };
 
-var writeStrArr = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-var writeAddArr = ['DBW0', 'DBW2', 'DBW4', 'DBW6', 'DBW8', 'DBW10', 'DBW12', 'DBW14', 'DBW16', 'DBW18', 'DBW22', 'DBW24', 'DBW26', 'DBW34', 'DBW36', 'DBW38', 'DBW40', 'DBW42', 'DBW44', 'DBW46'];
+var writeStrArr = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var writeAddArr = ['DBW500', 'DBW502', 'DBW504', 'DBW506', 'DBW508', 'DBW510', 'DBW512', 'DBW514', 'DBW516', 'DBW518', 'DBW520', 'DBW522', 'DBW524', 'DBW526', 'DBW528', 'DBW530', 'DBW532', 'DBW534', 'DBW536', 'DBW540', 'DBW542', 'DBW544', 'DBW546', 'DBW548', 'DBW550', 'DBW552', 'DBW554'];
 
 // 给PLC写值
 function writeValuesToPLC(add, values) {
-  switch (add) {
-    case 'DBW0':
-      writeStrArr[0] = values;
-      break;
-    case 'DBW2':
-      writeStrArr[1] = values;
-      break;
-    case 'DBW4':
-      writeStrArr[2] = values;
-      break;
-    case 'DBW6':
-      writeStrArr[3] = values;
-      break;
-    case 'DBW8':
-      writeStrArr[4] = values;
-      break;
-    case 'DBW10':
-      writeStrArr[5] = values;
-      break;
-    case 'DBW12':
-      writeStrArr[6] = values;
-      break;
-    case 'DBW14':
-      writeStrArr[7] = values;
-      break;
-    case 'DBW16':
-      writeStrArr[8] = values;
-      break;
-    case 'DBW18':
-      writeStrArr[9] = values;
-      break;
-    case 'DBW22':
-      writeStrArr[10] = values;
-      break;
-    case 'DBW24':
-      writeStrArr[11] = values;
-      break;
-    case 'DBW26':
-      writeStrArr[12] = values;
-      break;
-    case 'DBW34':
-      writeStrArr[13] = values;
-      break;
-    case 'DBW36':
-      writeStrArr[14] = values;
-      break;
-    case 'DBW38':
-      writeStrArr[15] = values;
-      break;
-    case 'DBW40':
-      writeStrArr[16] = values;
-      break;
-    case 'DBW42':
-      writeStrArr[17] = values;
-      break;
-    case 'DBW44':
-      writeStrArr[18] = values;
-      break;
-    case 'DBW46':
-      writeStrArr[19] = values;
-      break;
-    default:
-      break;
+  const index = writeAddArr.indexOf(add);
+  if (index !== -1) {
+    writeStrArr[index] = values;
+  } else {
+    console.warn(`Address ${add} not found in writeAddArr.`);
   }
 }
 
@@ -466,7 +507,6 @@ const setAppTray = () => {
       }
   ]
 
-  console.log()
   // 系统托盘图标目录
   appTray = new Tray(path.join(__static, './icon.ico'))
 
@@ -474,7 +514,7 @@ const setAppTray = () => {
   const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
 
   // 设置此托盘图标的悬停提示内容
-  appTray.setToolTip('全自动束下输送系统(ccs)')
+  appTray.setToolTip('WCS系统')
 
   // 设置此图标的上下文菜单
   appTray.setContextMenu(contextMenu)
