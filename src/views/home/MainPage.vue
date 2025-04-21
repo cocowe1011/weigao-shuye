@@ -152,8 +152,8 @@
                         <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
-                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                        <el-checkbox v-model="allowUploadOne">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterileOne">非灭菌</el-checkbox>
                       </div>
                     </div>
                   </div>
@@ -166,8 +166,8 @@
                         <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
-                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                        <el-checkbox v-model="allowUploadTwo">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterileTwo">非灭菌</el-checkbox>
                       </div>
                     </div>
                   </div>
@@ -180,8 +180,8 @@
                         <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
-                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                        <el-checkbox v-model="allowUploadThree">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterileThree">非灭菌</el-checkbox>
                       </div>
                     </div>
                   </div>
@@ -194,8 +194,8 @@
                         <span>{{ nowScanTrayInfo.trayCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUpload">允许上货</el-checkbox>
-                        <el-checkbox v-model="nonSterile">非灭菌</el-checkbox>
+                        <el-checkbox v-model="allowUploadFour">允许上货</el-checkbox>
+                        <el-checkbox v-model="nonSterileFour">非灭菌</el-checkbox>
                       </div>
                     </div>
                   </div>
@@ -877,6 +877,118 @@
               </div>
             </div>
           </div>
+          <!-- 添加数量控制测试部分 -->
+          <div class="test-section">
+            <span class="test-label">数量控制测试:</span>
+            <div class="quantity-test-container">
+              <!-- A线数量控制 -->
+              <div class="quantity-group">
+                <div class="quantity-title">A线数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-label">A1:</span>
+                    <span class="quantity-value">{{aLineQuantity.a1}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('aLineQuantity', 'a1', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('aLineQuantity', 'a1', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                  <div class="quantity-item">
+                    <span class="quantity-label">A2:</span>
+                    <span class="quantity-value">{{aLineQuantity.a2}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('aLineQuantity', 'a2', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('aLineQuantity', 'a2', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                  <div class="quantity-item">
+                    <span class="quantity-label">A3:</span>
+                    <span class="quantity-value">{{aLineQuantity.a3}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('aLineQuantity', 'a3', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('aLineQuantity', 'a3', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- B线数量控制 -->
+              <div class="quantity-group">
+                <div class="quantity-title">B线数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-label">B1:</span>
+                    <span class="quantity-value">{{bLineQuantity.b1}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('bLineQuantity', 'b1', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('bLineQuantity', 'b1', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                  <div class="quantity-item">
+                    <span class="quantity-label">B2:</span>
+                    <span class="quantity-value">{{bLineQuantity.b2}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('bLineQuantity', 'b2', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('bLineQuantity', 'b2', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                  <div class="quantity-item">
+                    <span class="quantity-label">B3:</span>
+                    <span class="quantity-value">{{bLineQuantity.b3}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('bLineQuantity', 'b3', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('bLineQuantity', 'b3', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- C线数量控制 -->
+              <div class="quantity-group">
+                <div class="quantity-title">C线数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-label">C1:</span>
+                    <span class="quantity-value">{{cLineQuantity.c1}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('cLineQuantity', 'c1', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('cLineQuantity', 'c1', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                  <div class="quantity-item">
+                    <span class="quantity-label">C2:</span>
+                    <span class="quantity-value">{{cLineQuantity.c2}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('cLineQuantity', 'c2', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('cLineQuantity', 'c2', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                  <div class="quantity-item">
+                    <span class="quantity-label">C3:</span>
+                    <span class="quantity-value">{{cLineQuantity.c3}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateQuantity('cLineQuantity', 'c3', 1)" class="quantity-btn plus">+</button>
+                      <button @click="updateQuantity('cLineQuantity', 'c3', -1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 缓冲区数量控制 -->
+              <div class="quantity-group">
+                <div class="quantity-title">缓冲区数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-value">{{bufferQuantity}}</span>
+                    <div class="quantity-buttons">
+                      <button @click="updateBufferQuantity(1)" class="quantity-btn plus">+</button>
+                      <button @click="updateBufferQuantity(-1)" class="quantity-btn minus">-</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1093,19 +1205,19 @@ export default {
       // 添加队列位置标识数据
       queueMarkers: [
       { id: 1, name: '上货区', queueId: 1, x: 1325, y: 1350 },
-      { id: 2, name: '分发区', queueId: 14, x: 1325, y: 1230 },
-      { id: 3, name: '缓冲区', queueId: 2, x: 2500, y: 1530 },
-      { id: 4, name: 'A1', queueId: 3, x: 1050, y: 1065 },
-      { id: 5, name: 'B1', queueId: 4, x: 1050, y: 845 },
-      { id: 6, name: 'C1', queueId: 5, x: 1050, y: 645 },
-      { id: 7, name: 'A2', queueId: 6, x: 1610, y: 1065 },
-      { id: 8, name: 'B2', queueId: 7, x: 1610, y: 845 },
-      { id: 9, name: 'C2', queueId: 8, x: 1610, y: 645 },
-      { id: 10, name: 'A3', queueId: 9, x: 2190, y: 1065 },
-      { id: 11, name: 'B3', queueId: 10, x: 2190, y: 845 },
-      { id: 12, name: 'C3', queueId: 11, x: 2190, y: 645 },
-      { id: 13, name: 'D', queueId: 12, x: 2165, y: 490 },
-      { id: 14, name: 'E', queueId: 13, x: 2165, y: 340 },
+      { id: 2, name: '分发区', queueId: 2, x: 2500, y: 1530 },
+      { id: 3, name: '缓冲区', queueId: 3, x: 1325, y: 1230 },
+      { id: 4, name: 'A1', queueId: 4, x: 1050, y: 1065 },
+      { id: 5, name: 'B1', queueId: 5, x: 1050, y: 845 },
+      { id: 6, name: 'C1', queueId: 6, x: 1050, y: 645 },
+      { id: 7, name: 'A2', queueId: 7, x: 1610, y: 1065 },
+      { id: 8, name: 'B2', queueId: 8, x: 1610, y: 845 },
+      { id: 9, name: 'C2', queueId: 9, x: 1610, y: 645 },
+      { id: 10, name: 'A3', queueId: 10, x: 2190, y: 1065 },
+      { id: 11, name: 'B3', queueId: 11, x: 2190, y: 845 },
+      { id: 12, name: 'C3', queueId: 12, x: 2190, y: 645 },
+      { id: 13, name: 'D', queueId: 13, x: 2165, y: 490 },
+      { id: 14, name: 'E', queueId: 14, x: 2165, y: 340 },
       ],
       logId: 1000,  // 添加一个日志ID计数器
       // 输送线当前运行状态-读取PLC
@@ -1278,9 +1390,24 @@ export default {
       elevatorThreeFloorScanCode: '',
       // 提升机四楼接货站台扫码数据（托盘号）
       elevatorFourFloorScanCode: '',
-      // 添加复选框状态
-      allowUpload: false,
-      nonSterile: false,
+      // 请求上位机下发任务(判断去灭菌还是非灭菌）
+      requestUploadTask: '0',
+      // 添加复选框状态-一楼允许上货
+      allowUploadOne: false,
+      // 添加复选框状态-一楼是否非灭菌（默认灭菌）
+      nonSterileOne: false,
+      // 添加复选框状态-二楼允许上货
+      allowUploadTwo: false,
+      // 添加复选框状态-二楼是否非灭菌（默认灭菌）
+      nonSterileTwo: false,
+      // 添加复选框状态-三楼允许上货
+      allowUploadThree: false,
+      // 添加复选框状态-三楼是否非灭菌（默认灭菌）
+      nonSterileThree: false,
+      // 添加复选框状态-四楼允许上货
+      allowUploadFour: false,
+      // 添加复选框状态-四楼是否非灭菌（默认灭菌）
+      nonSterileFour: false,
     };
   },
   computed: {
@@ -1297,7 +1424,8 @@ export default {
   mounted() {
     this.initializeMarkers();
   },
-  watch: { // 添加 watch 属性
+  watch: {
+    // 一楼接货站台光电信号
     'scanPhotoelectricSignal.bit0'(newVal) {
       if (newVal === '0') {
         this.elevatorOneFloorScanCode = '';
@@ -1305,17 +1433,19 @@ export default {
       }
       if (newVal === '1' && this.elevatorOneFloorScanCode !== '') {
         this.addLog(`一楼接货站台扫码数据：${this.elevatorOneFloorScanCode}`);
-        this.addToUpLoadQueue(this.elevatorOneFloorScanCode, '一楼接货站台');
+        this.addToUpLoadQueue(this.elevatorOneFloorScanCode, '一楼接货站台', this.nonSterileOne);
       }
     },
+    // 一楼接货站台扫码数据
     elevatorOneFloorScanCode: {
       async handler(newVal) {
         if (newVal !== '' && this.scanPhotoelectricSignal.bit0 === '1') {
           this.addLog(`一楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '一楼接货站台');
+          this.addToUpLoadQueue(newVal, '一楼接货站台', this.nonSterileOne);
         }
       },
     },
+    // 一楼缓存区光电信号
     'scanPhotoelectricSignal.bit1'(newVal) {
       if (newVal === '0') {
         this.oneFloorElevatorScanCode = '';
@@ -1327,6 +1457,7 @@ export default {
         this.addToCartLoadQueue(this.oneFloorElevatorScanCode);
       }
     },
+    // 一楼缓存区扫码数据
     oneFloorElevatorScanCode: {
       async handler(newVal) {
         if (newVal !== '' && this.scanPhotoelectricSignal.bit1 === '1') {
@@ -1335,6 +1466,7 @@ export default {
         }
       },
     },
+    // 二楼接货站台光电信号
     'scanPhotoelectricSignal.bit2'(newVal) {
       if (newVal === '0') {
         this.elevatorTwoFloorScanCode = '';
@@ -1342,17 +1474,19 @@ export default {
       }
       if (newVal === '1' && this.elevatorTwoFloorScanCode !== '') {
         this.addLog(`二楼接货站台扫码数据：${this.elevatorTwoFloorScanCode}`);
-        this.addToUpLoadQueue(this.elevatorTwoFloorScanCode, '二楼接货站台');
+        this.addToUpLoadQueue(this.elevatorTwoFloorScanCode, '二楼接货站台', this.nonSterileTwo);
       }
     },
+    // 二楼接货站台扫码数据
     elevatorTwoFloorScanCode: {
       async handler(newVal) {
         if (newVal !== '' && this.scanPhotoelectricSignal.bit2 === '1') {
           this.addLog(`二楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '二楼接货站台');
+          this.addToUpLoadQueue(newVal, '二楼接货站台', this.nonSterileTwo);
         }
       },
     },
+    // 三楼接货站台光电信号
     'scanPhotoelectricSignal.bit4'(newVal) {
       if (newVal === '0') {
         this.elevatorThreeFloorScanCode = '';
@@ -1360,17 +1494,19 @@ export default {
       }
       if (newVal === '1' && this.elevatorThreeFloorScanCode !== '') {
         this.addLog(`三楼接货站台扫码数据：${this.elevatorThreeFloorScanCode}`);
-        this.addToUpLoadQueue(this.elevatorThreeFloorScanCode, '三楼接货站台');
+        this.addToUpLoadQueue(this.elevatorThreeFloorScanCode, '三楼接货站台', this.allowUploadThree, this.nonSterileThree);
       }
     },
+    // 三楼接货站台扫码数据
     elevatorThreeFloorScanCode: {
       async handler(newVal) {
         if (newVal !== '' && this.scanPhotoelectricSignal.bit4 === '1') {
           this.addLog(`三楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '三楼接货站台');
+          this.addToUpLoadQueue(newVal, '三楼接货站台', this.allowUploadThree, this.nonSterileThree);
         }
       },
     },
+    // 四楼接货站台光电信号
     'scanPhotoelectricSignal.bit5'(newVal) {
       if (newVal === '0') {
         this.elevatorFourFloorScanCode = '';
@@ -1378,14 +1514,36 @@ export default {
       }
       if (newVal === '1' && this.elevatorFourFloorScanCode !== '') {
         this.addLog(`四楼接货站台扫码数据：${this.elevatorFourFloorScanCode}`);
-        this.addToUpLoadQueue(this.elevatorFourFloorScanCode, '四楼接货站台');
+        this.addToUpLoadQueue(this.elevatorFourFloorScanCode, '四楼接货站台', this.nonSterileFour);
       }
     },
+    // 四楼接货站台扫码数据
     elevatorFourFloorScanCode: {
       async handler(newVal) {
         if (newVal !== '' && this.scanPhotoelectricSignal.bit5 === '1') {
           this.addLog(`四楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '四楼接货站台');
+          this.addToUpLoadQueue(newVal, '四楼接货站台', this.nonSterileFour);
+        }
+      },
+    },
+    // 请求上位机下发任务(判断去灭菌还是非灭菌）
+    requestUploadTask: {
+      async handler(newVal) {
+        if (newVal === '1') {
+          this.addLog('请求上位机下发任务(判断去灭菌还是非灭菌）');
+          // 这地方需要判断托盘数据有没有处理过，每次只处理没处理过的托盘数据
+        }
+      },
+    },
+    // 监听缓冲区数量变化
+    bufferQuantity: {
+      async handler(newVal, oldVal) {
+        // 判断与老数据相比是增加1还是减少1，如果增加1则把分发区的第一个托盘信息加入到缓冲区，同时把原队列的第一个托盘信息删除
+        if (newVal > oldVal) {
+          this.addLog('缓冲区数量加1了，把分发区的第一个托盘信息加入到缓冲区，同时把原队列的第一个托盘信息删除');
+          // 把分发区的托盘信息加入到缓冲区
+          this.queues[2].trayInfo.push(this.queues[1].trayInfo[0]);
+          this.queues[1].trayInfo.shift();
         }
       },
     },
@@ -1395,18 +1553,13 @@ export default {
     addToCartLoadQueue(trayCode) {
       // 通过trayCode 查询this.queues[0].trayInfo的托盘信息
       const trayInfo = this.queues[0].trayInfo.find(tray => tray.trayCode === trayCode);
-      // 判断是否消毒
-      if (trayInfo.isTerile === '1') {
-        // 托盘信息进入下一队列，并且把托盘信息从this.queues[0].trayInfo中删除
-        this.queues[1].trayInfo.push(trayInfo);
-        this.queues[0].trayInfo = this.queues[0].trayInfo.filter(tray => tray.trayCode !== trayCode);
-        this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
-      } else {
-        this.addLog(`托盘信息：${trayInfo.trayCode} 直接发走去立库了`);
-      }
+      // 托盘信息进入下一队列，并且把托盘信息从this.queues[0].trayInfo中删除
+      this.queues[1].trayInfo.push(trayInfo);
+      this.queues[0].trayInfo = this.queues[0].trayInfo.filter(tray => tray.trayCode !== trayCode);
+      this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
     },
     // 添加货物到上货区队列
-    addToUpLoadQueue(trayCode, trayFrom) {
+    addToUpLoadQueue(trayCode, trayFrom, nonSterile) {
       // 通过trayCode 查询erp数据
       const params = {
         trayCode: trayCode,
@@ -1422,16 +1575,16 @@ export default {
             orderId: res.data[0].orderId,
             productCode: res.data[0].productCode,
             productName: res.data[0].productName,
-            isTerile: res.data[0].isTerile,
+            isTerile: nonSterile ? '0' : res.data[0].isTerile,
             state: '0',
           };
           this.queues[0].trayInfo.push(trayInfo);
           this.addLog(trayFrom + `上货区队列添加货物：${trayCode}`);
           this.nowScanTrayInfo = {
-            trayCode: trayCode,
-            orderId: res.data[0].orderId,
-            productName: res.data[0].productName,
-            isTerile: res.data[0].isTerile === '1' ? '消毒' : '不消毒',
+            trayCode: trayInfo.trayCode,
+            orderId: trayInfo.orderId,
+            productName: trayInfo.productName,
+            isTerile: trayInfo.isTerile === '1' ? '消毒' : '不消毒',
             inPut: trayFrom,
           };
         } else {
@@ -1797,7 +1950,13 @@ export default {
         this.selectedQueueIndex = queueIndex;
         this.showTrays(queueIndex);
       }
-    }
+    },
+    updateQuantity(quantityObj, key, change) {
+      this[quantityObj][key] = Math.max(0, parseInt(this[quantityObj][key]) + change).toString();
+    },
+    updateBufferQuantity(change) {
+      this.bufferQuantity = Math.max(0, parseInt(this.bufferQuantity) + change).toString();
+    },
   }
 };
 </script>
@@ -3103,5 +3262,99 @@ export default {
   border-color: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.4);
   cursor: not-allowed;
+}
+
+.quantity-test-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.quantity-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quantity-title {
+  font-size: 14px;
+  color: #0ac5a8;
+  font-weight: bold;
+}
+
+.quantity-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.quantity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(30, 42, 56, 0.8);
+  border-radius: 4px;
+  padding: 8px;
+  border: 1px solid rgba(10, 197, 168, 0.1);
+  margin-bottom: 5px;
+  
+  .quantity-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    min-width: 30px;
+  }
+  
+  .quantity-value {
+    font-size: 14px;
+    color: #0ac5a8;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+  }
+  
+  .quantity-buttons {
+    display: flex;
+    gap: 5px;
+    
+    .quantity-btn {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: rgba(10, 197, 168, 0.3);
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
+      
+      &.plus {
+        background: rgba(10, 197, 168, 0.5);
+        &:hover {
+          background: rgba(10, 197, 168, 0.7);
+        }
+      }
+      
+      &.minus {
+        background: rgba(245, 108, 108, 0.3);
+        &:hover {
+          background: rgba(245, 108, 108, 0.5);
+        }
+      }
+    }
+  }
 }
 </style>
