@@ -7,13 +7,13 @@
         <!-- PLC状态与订单信息区域 -->
         <div class="plc-info-section">
           <div class="section-header">
-            当前执行订单信息
+            当前扫码托盘信息
           </div>
           <div class="scrollable-content" style="margin-top: 5px;">
             <div class="status-overview">
               <div class="data-card">
                 <div class="data-card-border">
-                  <div class="data-card-border-borderTop granient-text">当前订单id</div>
+                  <div class="data-card-border-borderTop granient-text">订单id</div>
                   <div class="data-card-border-borderDown" style="font-size: 1.3vw;">{{ nowScanTrayInfo.orderId || '--' }}</div>
                 </div>
               </div>
@@ -1540,7 +1540,7 @@ export default {
       async handler(newVal, oldVal) {
         // 判断与老数据相比是增加1还是减少1，如果增加1则把分发区的第一个托盘信息加入到缓冲区，同时把原队列的第一个托盘信息删除
         if (newVal > oldVal) {
-          this.addLog('缓冲区数量加1了，把分发区的第一个托盘信息加入到缓冲区，同时把原队列的第一个托盘信息删除');
+          this.addLog(this.queues[1].trayInfo[0].trayCode + '进入缓冲区。');
           // 把分发区的托盘信息加入到缓冲区
           this.queues[2].trayInfo.push(this.queues[1].trayInfo[0]);
           this.queues[1].trayInfo.shift();
