@@ -131,6 +131,72 @@
                     <span class="queue-marker-name">{{ marker.name }}</span>
                   </div>
                 </div>
+                <div 
+                  class="preheating-room-marker"
+                  data-x="610"
+                  data-y="1155"
+                >
+                  <div class="preheating-room-content">
+                    <div class="preheating-room-header">预热房选择</div>
+                    <div class="preheating-room-body">
+                      <el-select v-model="preheatingRoomSelected" placeholder="选择" size="mini">
+                        <el-option label="A" value="A"></el-option>
+                        <el-option label="B" value="B"></el-option>
+                        <el-option label="C" value="C"></el-option>
+                      </el-select>
+                      <el-button type="primary" size="mini" @click="sendToPreheatingRoom">执行</el-button>
+                    </div>
+                  </div>
+                </div>
+                <div 
+                  class="preheating-room-marker"
+                  data-x="1200"
+                  data-y="355"
+                >
+                  <div class="preheating-room-content">
+                    <div class="preheating-room-header">灭菌房选择</div>
+                    <div class="preheating-room-body">
+                      <el-select v-model="disinfectionRoomSelectedFrom" placeholder="选择" size="mini">
+                        <el-option label="A" value="A"></el-option>
+                        <el-option label="B" value="B"></el-option>
+                        <el-option label="C" value="C"></el-option>
+                      </el-select>
+                      <span style="font-size: 12px; color: #fff;">发送到：</span>
+                      <el-select v-model="disinfectionRoomSelectedTo" placeholder="选择" size="mini">
+                        <el-option label="A" value="A"></el-option>
+                        <el-option label="B" value="B"></el-option>
+                        <el-option label="C" value="C"></el-option>
+                      </el-select>
+                      <el-button type="primary" size="mini" @click="sendToDisinfectionRoom">执行</el-button>
+                    </div>
+                  </div>
+                </div>
+                <div 
+                  class="preheating-room-marker"
+                  data-x="1600"
+                  data-y="400"
+                >
+                  <div class="preheating-room-content">
+                    <div class="preheating-room-header">立库选择</div>
+                    <div class="preheating-room-body">
+                      <el-select v-model="warehouseSelectedFrom" placeholder="选择" size="mini">
+                        <el-option label="A" value="A"></el-option>
+                        <el-option label="B" value="B"></el-option>
+                        <el-option label="C" value="C"></el-option>
+                      </el-select>
+                      <span style="font-size: 12px; color: #fff;">发送到：</span>
+                      <el-select v-model="warehouseSelectedTo" placeholder="选择" size="mini">
+                        <el-option label="A" value="A"></el-option>
+                        <el-option label="B" value="B"></el-option>
+                        <el-option label="C" value="C"></el-option>
+                      </el-select>
+                      <el-button type="primary" size="mini" @click="sendToWarehouse">执行</el-button>
+                    </div>
+                  </div>
+                </div>
+                <div class="marker-with-button" data-x="1470" data-y="1228">
+                  <el-button type="primary" class="warehouse-btn">入库</el-button>
+                </div>
                 <!-- 修改小车元素 -->
                 <div 
                   v-for="cart in carts" 
@@ -1408,6 +1474,13 @@ export default {
       allowUploadFour: false,
       // 添加复选框状态-四楼是否非灭菌（默认灭菌）
       nonSterileFour: false,
+      // 显示小车1设置去哪个预热房的按钮
+      showCar1SetPreheatingRoom: false,
+      preheatingRoomSelected: '',
+      disinfectionRoomSelectedFrom: '',
+      disinfectionRoomSelectedTo: '',
+      warehouseSelectedFrom: '',
+      warehouseSelectedTo: '',
     };
   },
   computed: {
@@ -1544,6 +1617,10 @@ export default {
           // 把分发区的托盘信息加入到缓冲区
           this.queues[2].trayInfo.push(this.queues[1].trayInfo[0]);
           this.queues[1].trayInfo.shift();
+          // 如果bufferQuantity达到16个，则显示小车1设置去哪个预热房的按钮
+          if (newVal === 16) {
+            this.showCar1SetPreheatingRoom = true;
+          }
         }
       },
     },
@@ -1636,7 +1713,7 @@ export default {
         const imageWrapper = image.parentElement;
         if (!imageWrapper) return;
 
-        const markers = imageWrapper.querySelectorAll('.marker, .marker-with-panel, .queue-marker, .motor-marker');
+        const markers = imageWrapper.querySelectorAll('.marker, .marker-with-panel, .marker-with-button, .queue-marker, .motor-marker, .preheating-room-marker');
         const carts = imageWrapper.querySelectorAll('.cart-container');
         const imageRect = image.getBoundingClientRect();
         const wrapperRect = imageWrapper.getBoundingClientRect();
@@ -1957,6 +2034,33 @@ export default {
     updateBufferQuantity(change) {
       this.bufferQuantity = Math.max(0, parseInt(this.bufferQuantity) + change).toString();
     },
+    // 发送到预热房的方法
+    sendToPreheatingRoom() {
+      if (!this.preheatingRoomSelected) {
+        this.$message.warning('请先选择预热房');
+        return;
+      }
+      this.addLog(`执行发送到${this.preheatingRoomSelected}预热房操作`);
+      this.$message.success(`已发送到${this.preheatingRoomSelected}预热房`);
+    },
+    // 发送到灭菌房的方法
+    sendToDisinfectionRoom() {
+      if (!this.disinfectionRoomSelectedFrom || !this.disinfectionRoomSelectedTo) {
+        this.$message.warning('请先选择完整');
+        return;
+      }
+      this.addLog(`执行发送从${this.disinfectionRoomSelectedFrom}预热房到${this.disinfectionRoomSelectedTo}灭菌房操作`);
+      this.$message.success(`已发送从${this.disinfectionRoomSelectedFrom}预热房到${this.disinfectionRoomSelectedTo}灭菌房`);
+    },
+    // 发送到立库的方法
+    sendToWarehouse() {
+      if (!this.warehouseSelectedFrom || !this.warehouseSelectedTo) {
+        this.$message.warning('请先选择完整');
+        return;
+      }
+      this.addLog(`执行发送从${this.warehouseSelectedFrom}灭菌房到${this.warehouseSelectedTo}立库操作`);
+      this.$message.success(`已发送从${this.warehouseSelectedFrom}灭菌房到${this.warehouseSelectedTo}立库`);
+    }
   }
 };
 </script>
@@ -2480,12 +2584,12 @@ export default {
                 z-index: 2; 
                 .data-panel {
                   position: absolute;
-                  background: rgba(30, 42, 56, 0.95);
+                  background: linear-gradient(135deg, #0e1a27, #3c4c63);
                   border: 1px solid rgba(64, 158, 255, 0.3);
                   border-radius: 8px;
                   padding: 12px;
                   width: 170px;
-                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                   opacity: 0;
                   transition: all 0.3s ease;
                   pointer-events: none;
@@ -2574,6 +2678,82 @@ export default {
               /* 悬停时显示面板 */
               .marker-with-panel:hover .data-panel:not(.always-show) {
                 opacity: 1;
+              }
+              
+              /* 带按钮的标识点样式 */
+              .marker-with-button {
+                position: absolute;
+                transform: translate(-50%, -50%);
+                z-index: 5;
+                cursor: pointer;
+              }
+              .marker-with-button .warehouse-btn {
+                background: linear-gradient(135deg, #0e1a27, #3c4c63);
+                color: white;
+                font-weight: bold;
+                border: none;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+                border-radius: 4px;
+                padding: 10px 15px;
+                transition: all 0.3s ease;
+              }
+              .marker-with-button .warehouse-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+              }
+              
+              /* 预热房选择样式 */
+              .preheating-room-marker {
+                position: absolute;
+                transform: translate(-50%, -50%);
+                z-index: 10;
+                background: linear-gradient(135deg, #005aff 0%, #000000 100%);
+                border-radius: 5px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+                width: 80px;
+                .preheating-room-content {
+                  display: flex;
+                  flex-direction: column;
+                  width: 100%;
+                  .preheating-room-header {
+                    width: 100%;
+                    text-align: center;
+                    padding: 4px 0;
+                    font-size: 11px;
+                    color: white;
+                    background-color: rgba(0, 0, 0, 0.2);
+                    font-weight: bold;
+                  }
+                  .preheating-room-body {
+                    padding: 6px 8px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 6px;
+                  }
+                }
+              }
+              .preheating-room-marker :deep(.el-select) {
+                width: 100%;
+              }
+              .preheating-room-marker :deep(.el-input__inner) {
+                background-color: rgba(255, 255, 255, 0.15);
+                border-color: rgba(255, 255, 255, 0.2);
+                color: #fff;
+                height: 24px;
+                line-height: 24px;
+                font-size: 11px;
+                border-radius: 3px;
+                padding: 0 8px;
+              }
+              .preheating-room-marker :deep(.el-button) {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.3);
+                font-size: 11px;
+                height: 24px;
+                width: 100%;
+                padding: 4px 8px;
               }
             }
           }
