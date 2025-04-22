@@ -135,6 +135,7 @@
                   class="preheating-room-marker"
                   data-x="610"
                   data-y="1155"
+                  v-show="showCar1SetPreheatingRoom"
                 >
                   <div class="preheating-room-content">
                     <div class="preheating-room-header">预热房选择</div>
@@ -177,7 +178,7 @@
                   data-y="400"
                 >
                   <div class="preheating-room-content">
-                    <div class="preheating-room-header">立库选择</div>
+                    <div class="preheating-room-header">解析库选择</div>
                     <div class="preheating-room-body">
                       <el-select v-model="warehouseSelectedFrom" placeholder="选择" size="mini">
                         <el-option label="A" value="A"></el-option>
@@ -194,8 +195,27 @@
                     </div>
                   </div>
                 </div>
+                <div 
+                  class="preheating-room-marker"
+                  data-x="2500"
+                  data-y="150"
+                >
+                  <div class="preheating-room-content">
+                    <div class="preheating-room-header">出库选择</div>
+                    <div class="preheating-room-body">
+                      <el-select v-model="outWarehouseSelected" placeholder="选择" size="mini">
+                        <el-option label="A" value="A"></el-option>
+                        <el-option label="B" value="B"></el-option>
+                        <el-option label="C" value="C"></el-option>
+                        <el-option label="D" value="D"></el-option>
+                        <el-option label="E" value="E"></el-option>
+                      </el-select>
+                      <el-button type="primary" size="mini" @click="sendToWarehouse">执行</el-button>
+                    </div>
+                  </div>
+                </div>
                 <div class="marker-with-button" data-x="1470" data-y="1228">
-                  <el-button type="primary" class="warehouse-btn">入库</el-button>
+                  <el-button type="primary" class="warehouse-btn" @click="showCarSelect">入库</el-button>
                 </div>
                 <!-- 修改小车元素 -->
                 <div 
@@ -705,7 +725,7 @@
                 </div>
                 <div class="marker marker-show-label label-left"
                      :class="{ 'scanning': scanPhotoelectricSignal.bit1 === '1' }" 
-                     data-x="2335" data-y="1340"
+                     data-x="2335" data-y="1343"
                      @click="toggleBitValue(scanPhotoelectricSignal, 'bit1')">
                   <div class="marker-label">1-2#</div>
                 </div>
@@ -1383,24 +1403,24 @@ export default {
       },
       // A线数量-读取PLC
       aLineQuantity: {
-        a1: '0',
-        a2: '0',
-        a3: '0',
+        a1: 0,
+        a2: 0,
+        a3: 0,
       },
       // B线数量-读取PLC
       bLineQuantity: {
-        b1: '0',
-        b2: '0',
-        b3: '0',
+        b1: 0,
+        b2: 0,
+        b3: 0,
       },
       // C线数量-读取PLC
       cLineQuantity: {
-        c1: '0',
-        c2: '0',
-        c3: '0',
+        c1: 0,
+        c2: 0,
+        c3: 0,
       },
       // 缓冲区数量
-      bufferQuantity: '0',
+      bufferQuantity: 0,
       // D线数量和E线数量先不对接-读取PLC
       //上货区电机运行信号（扫码后入队）-读取PLC
       upLoadMotorRunning: {
@@ -1476,11 +1496,18 @@ export default {
       nonSterileFour: false,
       // 显示小车1设置去哪个预热房的按钮
       showCar1SetPreheatingRoom: false,
+      // 显示小车设置去哪个预热房的按钮
       preheatingRoomSelected: '',
+      // 灭菌出发地
       disinfectionRoomSelectedFrom: '',
+      // 灭菌目的地
       disinfectionRoomSelectedTo: '',
+      // 立库出发地
       warehouseSelectedFrom: '',
+      // 立库目的地
       warehouseSelectedTo: '',
+      // 出库选择
+      outWarehouseSelected: '',
     };
   },
   computed: {
@@ -1613,13 +1640,15 @@ export default {
       async handler(newVal, oldVal) {
         // 判断与老数据相比是增加1还是减少1，如果增加1则把分发区的第一个托盘信息加入到缓冲区，同时把原队列的第一个托盘信息删除
         if (newVal > oldVal) {
-          this.addLog(this.queues[1].trayInfo[0].trayCode + '进入缓冲区。');
-          // 把分发区的托盘信息加入到缓冲区
-          this.queues[2].trayInfo.push(this.queues[1].trayInfo[0]);
-          this.queues[1].trayInfo.shift();
-          // 如果bufferQuantity达到16个，则显示小车1设置去哪个预热房的按钮
-          if (newVal === 16) {
-            this.showCar1SetPreheatingRoom = true;
+          if (this.queues[1].trayInfo.length > 0) {
+            this.addLog(this.queues[1].trayInfo[0].trayCode + '进入缓冲区。');
+            // 把分发区的托盘信息加入到缓冲区
+            this.queues[2].trayInfo.push(this.queues[1].trayInfo[0]);
+            this.queues[1].trayInfo.shift();
+            // 如果bufferQuantity达到16个，则显示小车1设置去哪个预热房的按钮
+            if (newVal === 16) {
+              this.showCar1SetPreheatingRoom = true;
+            }
           }
         }
       },
@@ -2032,7 +2061,7 @@ export default {
       this[quantityObj][key] = Math.max(0, parseInt(this[quantityObj][key]) + change).toString();
     },
     updateBufferQuantity(change) {
-      this.bufferQuantity = Math.max(0, parseInt(this.bufferQuantity) + change).toString();
+      this.bufferQuantity = Math.max(0, parseInt(this.bufferQuantity) + change);
     },
     // 发送到预热房的方法
     sendToPreheatingRoom() {
@@ -2040,6 +2069,7 @@ export default {
         this.$message.warning('请先选择预热房');
         return;
       }
+      // 根据当前选择的预热房信息给PLC发送消息
       this.addLog(`执行发送到${this.preheatingRoomSelected}预热房操作`);
       this.$message.success(`已发送到${this.preheatingRoomSelected}预热房`);
     },
@@ -2060,6 +2090,15 @@ export default {
       }
       this.addLog(`执行发送从${this.warehouseSelectedFrom}灭菌房到${this.warehouseSelectedTo}立库操作`);
       this.$message.success(`已发送从${this.warehouseSelectedFrom}灭菌房到${this.warehouseSelectedTo}立库`);
+    },
+    // 显示小车选择按钮
+    showCarSelect() {
+      // 判断缓冲区队列有没有托盘信息，没有托盘信息直接返回
+      if (this.queues[this.selectedQueueIndex].trayInfo.length === 0) {
+        this.$message.warning('缓冲区队列没有托盘信息，无法入库');
+        return;
+      }
+      this.showCar1SetPreheatingRoom = true;
     }
   }
 };
