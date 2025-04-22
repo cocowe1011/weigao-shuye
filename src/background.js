@@ -1,25 +1,35 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, Menu, dialog, Tray, screen } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  globalShortcut,
+  ipcMain,
+  Menu,
+  dialog,
+  Tray,
+  screen
+} from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import nodes7 from 'nodes7';
-import HttpUtil from '@/utils/HttpUtil'
-import logger from 'electron-log'
+import HttpUtil from '@/utils/HttpUtil';
+import logger from 'electron-log';
 // 设置日志文件的保存路径
-logger.transports.file.file = app.getPath("userData") + "/app.log";
+logger.transports.file.file = app.getPath('userData') + '/app.log';
 
 // 初始化日志记录器
-logger.transports.file.level = "info";
-logger.transports.console.level = "info";
+logger.transports.file.level = 'info';
+logger.transports.console.level = 'info';
 // 日期样式
-logger.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}'
-console.log(app.getPath("userData"))
-logger.transports.file.file = app.getPath("userData") + "/app.log";
+logger.transports.file.format =
+  '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}';
+console.log(app.getPath('userData'));
+logger.transports.file.file = app.getPath('userData') + '/app.log';
 
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 var appTray = null;
 let closeStatus = false;
-var conn = new nodes7;
+var conn = new nodes7();
 var pollingST = null;
 // 定义__static变量，在Electron v20中需要手动定义
 const __static = path.join(__dirname, '../public').replace(/\\/g, '\\\\');
@@ -36,13 +46,13 @@ try {
 // 添加ipc通信处理
 // 处理获取global对象的请求
 ipcMain.on('get-global', (event, key) => {
-  event.returnValue = global.sharedObject[key]
-})
+  event.returnValue = global.sharedObject[key];
+});
 
 // 处理设置global对象的请求
 ipcMain.on('set-global', (event, key, value) => {
-  global.sharedObject[key] = value
-})
+  global.sharedObject[key] = value;
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -52,7 +62,7 @@ app.on('window-all-closed', () => {
 
 global.sharedObject = {
   userInfo: {}
-}
+};
 let mainWindow = null;
 app.on('ready', () => {
   // Create the browser window.
@@ -65,7 +75,12 @@ app.on('ready', () => {
       contextIsolation: false,
       webSecurity: false,
       sandbox: false,
-      preload: path.join(__dirname, process.env.NODE_ENV === 'production' ? 'preload.js' : '../src/preload.js')
+      preload: path.join(
+        __dirname,
+        process.env.NODE_ENV === 'production'
+          ? 'preload.js'
+          : '../src/preload.js'
+      )
     },
     icon: './build/icons/icon.ico'
   });
@@ -81,39 +96,49 @@ app.on('ready', () => {
     // mainWindow.webContents.openDevTools();
   }
   ipcMain.on('logStatus', (event, arg) => {
-    console.log(arg)
-    if(arg === 'login') {
-      mainWindow.setResizable(true)
-      mainWindow.setBounds({ x: 0, y: 0, width: screen.getPrimaryDisplay().workAreaSize.width, height: screen.getPrimaryDisplay().workAreaSize.height });
+    console.log(arg);
+    if (arg === 'login') {
+      mainWindow.setResizable(true);
+      mainWindow.setBounds({
+        x: 0,
+        y: 0,
+        width: screen.getPrimaryDisplay().workAreaSize.width,
+        height: screen.getPrimaryDisplay().workAreaSize.height
+      });
     } else {
       // 太几把坑了，windows系统setSize center方法失效 必须先mainWindow.unmaximize()
-      mainWindow.unmaximize()
+      mainWindow.unmaximize();
       mainWindow.setSize(1100, 600);
       mainWindow.center();
-      global.sharedObject.userInfo = {}
+      global.sharedObject.userInfo = {};
       // mainWindow.setResizable(false)
     }
-  })
+  });
   // 定义自定义事件
-  ipcMain.on('close-window', function() {
+  ipcMain.on('close-window', function () {
     mainWindow.close();
-  })
+  });
   // 定义自定义事件
   ipcMain.on('min-window', (event, arg) => {
     mainWindow.minimize();
-  })
+  });
   // writeValuesToPLC
   ipcMain.on('writeValuesToPLC', (event, arg1, arg2) => {
     writeValuesToPLC(arg1, arg2);
-  })
+  });
   // 定义自定义事件
   ipcMain.on('max-window', (event, arg) => {
     if (arg === 'max-window') {
-      return mainWindow.maximize()
+      return mainWindow.maximize();
     }
-    mainWindow.unmaximize()
-    mainWindow.setBounds({ x: 10, y: 10, width: screen.getPrimaryDisplay().workAreaSize.width - 20, height: screen.getPrimaryDisplay().workAreaSize.height - 20 });
-  })
+    mainWindow.unmaximize();
+    mainWindow.setBounds({
+      x: 10,
+      y: 10,
+      width: screen.getPrimaryDisplay().workAreaSize.width - 20,
+      height: screen.getPrimaryDisplay().workAreaSize.height - 20
+    });
+  });
   // 启动plc conPLC
   ipcMain.on('conPLC', (event, arg1, arg2) => {
     if (process.env.NODE_ENV === 'production') {
@@ -123,42 +148,76 @@ app.on('ready', () => {
     //   console.log(writeStrArr.toString());
     // }, 50);
     // sendHeartToPLC()
-  })
+  });
   mainWindow.on('maximize', () => {
-    mainWindow.webContents.send('mainWin-max', 'max-window')
-  })
+    mainWindow.webContents.send('mainWin-max', 'max-window');
+  });
   mainWindow.on('unmaximize', () => {
-    mainWindow.webContents.send('mainWin-max', 'unmax-window')
-  })
+    mainWindow.webContents.send('mainWin-max', 'unmax-window');
+  });
   mainWindow.on('close', (e) => {
     closeStatus = true;
     e.preventDefault(); //先阻止一下默认行为，不然直接关了，提示框只会闪一下
-    dialog.showMessageBox({
-      type: 'warning',
-      title: '提醒！',
-      message:'确认关闭程序吗？',
-      buttons: ['关闭程序', '放入托盘','取消'],   //选择按钮，点击确认则下面的idx为0，取消为1
-      cancelId: 2, //这个的值是如果直接把提示框×掉返回的值，这里设置成和"取消"按钮一样的值，下面的idx也会是1
-    }).then(idx => {
-      if (idx.response == 2) {
-        e.preventDefault();
-      } else if(idx.response == 0) {
-        mainWindow = null
-        app.exit();
-      }else{
-        mainWindow.setSkipTaskbar(true);
-        mainWindow.hide();
-      }
-    })
+    dialog
+      .showMessageBox({
+        type: 'warning',
+        title: '提醒！',
+        message: '确认关闭程序吗？',
+        buttons: ['关闭程序', '放入托盘', '取消'], //选择按钮，点击确认则下面的idx为0，取消为1
+        cancelId: 2 //这个的值是如果直接把提示框×掉返回的值，这里设置成和"取消"按钮一样的值，下面的idx也会是1
+      })
+      .then((idx) => {
+        if (idx.response == 2) {
+          e.preventDefault();
+        } else if (idx.response == 0) {
+          mainWindow = null;
+          app.exit();
+        } else {
+          mainWindow.setSkipTaskbar(true);
+          mainWindow.hide();
+        }
+      });
   });
   if (process.env.NODE_ENV === 'development') {
     let revert = false;
     setInterval(() => {
-      if(mainWindow) {
-        if(revert) {
-          mainWindow.webContents.send('receivedMsg', {DBW60:0,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:195,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
+      if (mainWindow) {
+        if (revert) {
+          mainWindow.webContents.send(
+            'receivedMsg',
+            {
+              DBW60: 0,
+              DBW62: 0,
+              DBW68: 35580,
+              DBW70: 512,
+              DBW72: -1793,
+              DBB100: 'HF800SR-1-H                   ',
+              DBB130: '83048880004868800784          ',
+              DBW76: 195,
+              DBW80: 6000,
+              DBW82: 6000,
+              DBW84: 6000
+            },
+            writeStrArr.toString()
+          );
         } else {
-          mainWindow.webContents.send('receivedMsg', {DBW60:1,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:195,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
+          mainWindow.webContents.send(
+            'receivedMsg',
+            {
+              DBW60: 1,
+              DBW62: 0,
+              DBW68: 35580,
+              DBW70: 512,
+              DBW72: -1793,
+              DBB100: 'HF800SR-1-H                   ',
+              DBB130: '83048880004868800784          ',
+              DBW76: 195,
+              DBW80: 6000,
+              DBW82: 6000,
+              DBW84: 6000
+            },
+            writeStrArr.toString()
+          );
         }
         revert = !revert;
       }
@@ -167,176 +226,205 @@ app.on('ready', () => {
   setAppTray();
   if (process.env.NODE_ENV === 'production') {
     // 启动Java进程
-    spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
+    spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), [
+      '-Xmx4096m',
+      '-Xms4096m',
+      '-jar',
+      path.join(__static, './jarlib', 'ccs-deliver-middle.jar')
+    ]);
   }
 
   // 开发者工具
   globalShortcut.register('CommandOrControl+L', () => {
-    mainWindow.webContents.openDevTools()
-  })
+    mainWindow.webContents.openDevTools();
+  });
   globalShortcut.register('CommandOrControl+F11', () => {
-    mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true);
-  })
+    mainWindow.isFullScreen()
+      ? mainWindow.setFullScreen(false)
+      : mainWindow.setFullScreen(true);
+  });
   // 定义自定义事件
-  ipcMain.on('full_screen', function() {
-    mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true);
-  })
+  ipcMain.on('full_screen', function () {
+    mainWindow.isFullScreen()
+      ? mainWindow.setFullScreen(false)
+      : mainWindow.setFullScreen(true);
+  });
   // 程序启动时判断是否存在报表、日志等本地文件夹，没有就创建
   createFile('batchReport.grf');
   createFile('boxreport.grf');
   // 定义自定义事件
   ipcMain.on('writeLogToLocal', (event, arg) => {
-    fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + ".txt").replaceAll('/','-'), arg + '\n', function(err) {});
-  })
+    fs.appendFile(
+      'D://css_temp_data/log/' +
+        (new Date().toLocaleDateString() + '.txt').replaceAll('/', '-'),
+      arg + '\n',
+      function (err) {}
+    );
+  });
   // 同步映射加速器数据
   // synAccData();
 });
 
 function synAccData() {
-  HttpUtil.get('/box/synAccData').then(() => {
-    pollingST = setTimeout(() => {
-      clearTimeout(pollingST);
-      synAccData();
-    }, 2000);
-  }).catch((err)=> {
-    HttpUtil.get('/box/recoverAccData').catch(()=> {});
-    pollingST = setTimeout(() => {
-      clearTimeout(pollingST);
-      synAccData();
-    }, 2000);
-  });
+  HttpUtil.get('/box/synAccData')
+    .then(() => {
+      pollingST = setTimeout(() => {
+        clearTimeout(pollingST);
+        synAccData();
+      }, 2000);
+    })
+    .catch((err) => {
+      HttpUtil.get('/box/recoverAccData').catch(() => {});
+      pollingST = setTimeout(() => {
+        clearTimeout(pollingST);
+        synAccData();
+      }, 2000);
+    });
 }
 
 function conPLC() {
-  logger.info('开始连接PLC')
+  logger.info('开始连接PLC');
   // 查询配置
-  HttpUtil.get('/cssConfig/getConfig').then((res)=> {
-    logger.info(JSON.stringify(res))
-    if(!res.data.plcPort) {
-      logger.info('配置查询失败')
-      // We have an error. Maybe the PLC is not reachable.
-      conPLC();
-      return false;
-    }
-    conn.initiateConnection( { port: Number(res.data.plcPort), host: res.data.plcIp, rack: 0, slot: 1, debug: false }, (err) => {
-      if (typeof(err) !== "undefined") {
-        logger.info('连接PLC失败' + JSON.stringify(err))
+  HttpUtil.get('/cssConfig/getConfig')
+    .then((res) => {
+      logger.info(JSON.stringify(res));
+      if (!res.data.plcPort) {
+        logger.info('配置查询失败');
         // We have an error. Maybe the PLC is not reachable.
         conPLC();
         return false;
-        // process.exit();
       }
-      conn.setTranslationCB(function(tag) { return variables[tag]; }); // This sets the "translation" to allow us to work with object names
-      logger.info('连接PLC成功')
-      // 输送线看门狗心跳
-      conn.addItems('DBW0')
-      // 输送线当前运行状态
-      conn.addItems('DBW2')
-      // 允许进料反馈
-      conn.addItems('DBW4')
-      // A线电机运行信号
-      conn.addItems('DBW6')
-      // A线光电检测信号
-      conn.addItems('DBW8')
-      // B线电机运行信号
-      conn.addItems('DBW10');
-      // B线光电检测信号
-      conn.addItems('DBW12');
-      // C线电机运行信号
-      conn.addItems('DBW14');
-      // C线光电检测信号
-      conn.addItems('DBW16');
-      // D线电机运行信号
-      conn.addItems('DBW18');
-      // D线光电检测信号
-      conn.addItems('DBW20');
-      // E线电机运行信号
-      conn.addItems('DBW22');
-      // E线光电检测信号
-      conn.addItems('DBW24');
-      // 输送线故障反馈
-      conn.addItems('DBW26');
-      // 缓存区数量
-      conn.addItems('DBW28');
-      // 请求上位机下发任务(判断去灭菌还是非灭菌）
-      conn.addItems('DBW30');
-      // A1数量
-      conn.addItems('DBW34');
-      // A2数量
-      conn.addItems('DBW36');
-      // A3数量
-      conn.addItems('DBW38');
-      // B1数量
-      conn.addItems('DBW40');
-      // B2数量
-      conn.addItems('DBW42');
-      // B3数量
-      conn.addItems('DBW44');
-      // C1数量
-      conn.addItems('DBW46');
-      // C2数量
-      conn.addItems('DBW48');
-      // C3数量
-      conn.addItems('DBW50');
-      // D数量
-      conn.addItems('DBW52');
-      // E数量
-      conn.addItems('DBW58');
-      // 上货区电机运行信号（扫码后入队）
-      conn.addItems('DBW64');
-      // 上货区输送线光电信号
-      conn.addItems('DBW66');
-      // 预热前小车电机运行信号1#车
-      conn.addItems('DBW68');
-      // 预热前小车检测信号1#车
-      conn.addItems('DBW70');
-      // 灭菌前小车电机运行信号2#车
-      conn.addItems('DBW72');
-      // 灭菌前小车检测信号2#车
-      conn.addItems('DBW74');
-      // 解析前小车电机运行信号3#车
-      conn.addItems('DBW76');
-      // 解析前小车检测信号3#车
-      conn.addItems('DBW78');
-      // 解析后小车电机运行信号4#车
-      conn.addItems('DBW80');
-      // 解析后小车检测信号4#车
-      conn.addItems('DBW82');
-      // 扫码枪处光电信号
-      conn.addItems('DBW84');
-      // 请求上位机下发任务(预热小车前）
-      conn.addItems('DBW86');
-      // 提升机一楼接货站台扫码数据（托盘号）
-      conn.addItems('DBB160');
-      // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
-      conn.addItems('DBB190');
-      // 提升机二楼接货站台扫码数据（托盘号）
-      conn.addItems('DBB220');
-      // 提升机三楼接货站台扫码数据（托盘号）
-      conn.addItems('DBB250');
-      // 提升机四楼接货站台扫码数据（托盘号）
-      conn.addItems('DBB280');
-      setInterval(() => {
-        conn.readAllItems(valuesReady);
-      }, 50);
-      setInterval(() => {
-        // nodes7 代码
-        conn.writeItems(writeAddArr, writeStrArr, valuesWritten);
-      }, 100);
-      // 发送心跳
-      sendHeartToPLC()
+      conn.initiateConnection(
+        {
+          port: Number(res.data.plcPort),
+          host: res.data.plcIp,
+          rack: 0,
+          slot: 1,
+          debug: false
+        },
+        (err) => {
+          if (typeof err !== 'undefined') {
+            logger.info('连接PLC失败' + JSON.stringify(err));
+            // We have an error. Maybe the PLC is not reachable.
+            conPLC();
+            return false;
+            // process.exit();
+          }
+          conn.setTranslationCB(function (tag) {
+            return variables[tag];
+          }); // This sets the "translation" to allow us to work with object names
+          logger.info('连接PLC成功');
+          // 输送线看门狗心跳
+          conn.addItems('DBW0');
+          // 输送线当前运行状态
+          conn.addItems('DBW2');
+          // 允许进料反馈
+          conn.addItems('DBW4');
+          // A线电机运行信号
+          conn.addItems('DBW6');
+          // A线光电检测信号
+          conn.addItems('DBW8');
+          // B线电机运行信号
+          conn.addItems('DBW10');
+          // B线光电检测信号
+          conn.addItems('DBW12');
+          // C线电机运行信号
+          conn.addItems('DBW14');
+          // C线光电检测信号
+          conn.addItems('DBW16');
+          // D线电机运行信号
+          conn.addItems('DBW18');
+          // D线光电检测信号
+          conn.addItems('DBW20');
+          // E线电机运行信号
+          conn.addItems('DBW22');
+          // E线光电检测信号
+          conn.addItems('DBW24');
+          // 输送线故障反馈
+          conn.addItems('DBW26');
+          // 缓存区数量
+          conn.addItems('DBW28');
+          // 请求上位机下发任务(判断去灭菌还是非灭菌）
+          conn.addItems('DBW30');
+          // A1数量
+          conn.addItems('DBW34');
+          // A2数量
+          conn.addItems('DBW36');
+          // A3数量
+          conn.addItems('DBW38');
+          // B1数量
+          conn.addItems('DBW40');
+          // B2数量
+          conn.addItems('DBW42');
+          // B3数量
+          conn.addItems('DBW44');
+          // C1数量
+          conn.addItems('DBW46');
+          // C2数量
+          conn.addItems('DBW48');
+          // C3数量
+          conn.addItems('DBW50');
+          // D数量
+          conn.addItems('DBW52');
+          // E数量
+          conn.addItems('DBW58');
+          // 上货区电机运行信号（扫码后入队）
+          conn.addItems('DBW64');
+          // 上货区输送线光电信号
+          conn.addItems('DBW66');
+          // 预热前小车电机运行信号1#车
+          conn.addItems('DBW68');
+          // 预热前小车检测信号1#车
+          conn.addItems('DBW70');
+          // 灭菌前小车电机运行信号2#车
+          conn.addItems('DBW72');
+          // 灭菌前小车检测信号2#车
+          conn.addItems('DBW74');
+          // 解析前小车电机运行信号3#车
+          conn.addItems('DBW76');
+          // 解析前小车检测信号3#车
+          conn.addItems('DBW78');
+          // 解析后小车电机运行信号4#车
+          conn.addItems('DBW80');
+          // 解析后小车检测信号4#车
+          conn.addItems('DBW82');
+          // 扫码枪处光电信号
+          conn.addItems('DBW84');
+          // 请求上位机下发任务(预热小车前）
+          conn.addItems('DBW86');
+          // 提升机一楼接货站台扫码数据（托盘号）
+          conn.addItems('DBB160');
+          // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
+          conn.addItems('DBB190');
+          // 提升机二楼接货站台扫码数据（托盘号）
+          conn.addItems('DBB220');
+          // 提升机三楼接货站台扫码数据（托盘号）
+          conn.addItems('DBB250');
+          // 提升机四楼接货站台扫码数据（托盘号）
+          conn.addItems('DBB280');
+          setInterval(() => {
+            conn.readAllItems(valuesReady);
+          }, 50);
+          setInterval(() => {
+            // nodes7 代码
+            conn.writeItems(writeAddArr, writeStrArr, valuesWritten);
+          }, 100);
+          // 发送心跳
+          sendHeartToPLC();
+        }
+      );
+    })
+    .catch((err) => {
+      logger.info('config error!');
     });
-  }).catch((err)=> {
-    logger.info('config error!')
-  });
 }
 let times = 1;
 let nowValue = 0;
 function sendHeartToPLC() {
   setInterval(() => {
-    if(times > 5) {
-        times = 1;
-        nowValue = 1 - nowValue;
+    if (times > 5) {
+      times = 1;
+      nowValue = 1 - nowValue;
     }
     times++;
     writeValuesToPLC('DBW0', nowValue);
@@ -344,7 +432,7 @@ function sendHeartToPLC() {
 }
 
 function createFile(fileNameVal) {
-  const sourcePath = path.join(__static, './report', fileNameVal);// 要复制的文件的路径=
+  const sourcePath = path.join(__static, './report', fileNameVal); // 要复制的文件的路径=
   const destinationPath = 'D://css_temp_data/report'; // 目标文件夹的路径
 
   // 检查源文件是否存在
@@ -468,13 +556,42 @@ var variables = {
   DBW548: 'DB101,INT548', // WCS-灭菌柜当前需要进货数量
   DBW550: 'DB101,INT550', // WCS-解析柜当前需要进货数量
   DBW552: 'DB101,INT552', // WCS-D灭菌柜当前需要进货数量
-  DBW554: 'DB101,INT554', // WCS-E灭菌柜当前需要进货数量
-  
-  
+  DBW554: 'DB101,INT554' // WCS-E灭菌柜当前需要进货数量
 };
 
-var writeStrArr = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-var writeAddArr = ['DBW500', 'DBW502', 'DBW504', 'DBW506', 'DBW508', 'DBW510', 'DBW512', 'DBW514', 'DBW516', 'DBW518', 'DBW520', 'DBW522', 'DBW524', 'DBW526', 'DBW528', 'DBW530', 'DBW532', 'DBW534', 'DBW536', 'DBW540', 'DBW542', 'DBW544', 'DBW546', 'DBW548', 'DBW550', 'DBW552', 'DBW554'];
+var writeStrArr = [
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0
+];
+var writeAddArr = [
+  'DBW500',
+  'DBW502',
+  'DBW504',
+  'DBW506',
+  'DBW508',
+  'DBW510',
+  'DBW512',
+  'DBW514',
+  'DBW516',
+  'DBW518',
+  'DBW520',
+  'DBW522',
+  'DBW524',
+  'DBW526',
+  'DBW528',
+  'DBW530',
+  'DBW532',
+  'DBW534',
+  'DBW536',
+  'DBW540',
+  'DBW542',
+  'DBW544',
+  'DBW546',
+  'DBW548',
+  'DBW550',
+  'DBW552',
+  'DBW554'
+];
 
 // 给PLC写值
 function writeValuesToPLC(add, values) {
@@ -487,46 +604,50 @@ function writeValuesToPLC(add, values) {
 }
 
 function valuesWritten(anythingBad) {
-  if (anythingBad) { console.log("SOMETHING WENT WRONG WRITING VALUES!!!!"); }
+  if (anythingBad) {
+    console.log('SOMETHING WENT WRONG WRITING VALUES!!!!');
+  }
 }
 
 function valuesReady(anythingBad, values) {
-  if (anythingBad) { console.log("SOMETHING WENT WRONG READING VALUES!!!!"); }
+  if (anythingBad) {
+    console.log('SOMETHING WENT WRONG READING VALUES!!!!');
+  }
   // console.log(values)
-  mainWindow.webContents.send('receivedMsg', values, writeStrArr.toString())
+  mainWindow.webContents.send('receivedMsg', values, writeStrArr.toString());
 }
 
-const setAppTray = () => {  
+const setAppTray = () => {
   // 系统托盘右键菜单
   var trayMenuTemplate = [
-      {
-          label: '退出',
-          click: function() {
-              app.quit()
-          }
+    {
+      label: '退出',
+      click: function () {
+        app.quit();
       }
-  ]
+    }
+  ];
 
   // 系统托盘图标目录
-  appTray = new Tray(path.join(__static, './icon.ico'))
+  appTray = new Tray(path.join(__static, './icon.ico'));
 
   // 图标的上下文菜单
-  const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+  const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   // 设置此托盘图标的悬停提示内容
-  appTray.setToolTip('WCS系统')
+  appTray.setToolTip('WCS系统');
 
   // 设置此图标的上下文菜单
-  appTray.setContextMenu(contextMenu)
+  appTray.setContextMenu(contextMenu);
 
-  appTray.on("click", function(){
+  appTray.on('click', function () {
     //主窗口显示隐藏切换
-    if(mainWindow.isVisible()){
+    if (mainWindow.isVisible()) {
       mainWindow.hide();
       mainWindow.setSkipTaskbar(true);
-    }else{
+    } else {
       mainWindow.show();
       mainWindow.setSkipTaskbar(false);
     }
-  })
-}
+  });
+};
