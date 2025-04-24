@@ -299,7 +299,6 @@
                   :data-x="cart.x"
                   :data-y="cart.y"
                   :data-width="cart.width"
-                  @click="handleCartClick(cart.id)"
                 >
                   <img :src="cart.image" :alt="cart.name" class="cart-image" />
                 </div>
@@ -352,8 +351,8 @@
                       <div class="data-panel-row">
                         <span class="data-panel-label">是否灭菌：</span>
                         <span>{{
-                          currentOutTrayInfo.isSterile
-                            ? currentOutTrayInfo.isSterile === '1'
+                          currentOutTrayInfo.isTerile
+                            ? currentOutTrayInfo.isTerile === 1
                               ? '灭菌'
                               : '非灭菌'
                             : '--'
@@ -421,6 +420,44 @@
                         <el-checkbox v-model="nonSterileFour"
                           >非灭菌</el-checkbox
                         >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="marker-with-panel" data-x="1490" data-y="200">
+                  <div
+                    class="data-panel"
+                    :class="['position-top', { 'always-show': true }]"
+                  >
+                    <div class="data-panel-content">
+                      <div class="data-panel-row">
+                        <span class="data-panel-label">D扫码信息：</span>
+                        <span>{{ elevatorDDisinfectionScanCode || '--' }}</span>
+                      </div>
+                      <div class="data-panel-row checkbox-group">
+                        <el-checkbox v-model="allowUploadD"
+                          >允许上货</el-checkbox
+                        >
+                        <el-checkbox v-model="nonSterileD">非灭菌</el-checkbox>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="marker-with-panel" data-x="1990" data-y="200">
+                  <div
+                    class="data-panel"
+                    :class="['position-top', { 'always-show': true }]"
+                  >
+                    <div class="data-panel-content">
+                      <div class="data-panel-row">
+                        <span class="data-panel-label">E扫码信息：</span>
+                        <span>{{ elevatorEDisinfectionScanCode || '--' }}</span>
+                      </div>
+                      <div class="data-panel-row checkbox-group">
+                        <el-checkbox v-model="allowUploadE"
+                          >允许上货</el-checkbox
+                        >
+                        <el-checkbox v-model="nonSterileE">非灭菌</el-checkbox>
                       </div>
                     </div>
                   </div>
@@ -1061,6 +1098,118 @@
                 >
                   <div class="marker-label">C-10#</div>
                 </div>
+                <!-- D线电机运行信号 -->
+                <div
+                  class="motor-marker marker-show-label label-right"
+                  :class="{ running: dLineMotorRunning.bit0 === '1' }"
+                  data-x="1850"
+                  data-y="480"
+                  @click="toggleBitValue(dLineMotorRunning, 'bit0')"
+                >
+                  <div class="marker-label">D1-1#</div>
+                </div>
+                <div
+                  class="motor-marker marker-show-label label-left"
+                  :class="{ running: dLineMotorRunning.bit1 === '1' }"
+                  data-x="2420"
+                  data-y="480"
+                  @click="toggleBitValue(dLineMotorRunning, 'bit1')"
+                >
+                  <div class="marker-label">D1-2#</div>
+                </div>
+                <!-- D线光电检测信号 -->
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: dLinePhotoelectricSignal.bit1 === '1' }"
+                  data-x="1830"
+                  data-y="510"
+                  @click="toggleBitValue(dLinePhotoelectricSignal, 'bit1')"
+                >
+                  <div class="marker-label">D-2#</div>
+                </div>
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: dLinePhotoelectricSignal.bit2 === '1' }"
+                  data-x="1860"
+                  data-y="510"
+                  @click="toggleBitValue(dLinePhotoelectricSignal, 'bit2')"
+                >
+                  <div class="marker-label">D-3#</div>
+                </div>
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: dLinePhotoelectricSignal.bit3 === '1' }"
+                  data-x="2420"
+                  data-y="510"
+                  @click="toggleBitValue(dLinePhotoelectricSignal, 'bit3')"
+                >
+                  <div class="marker-label">D-4#</div>
+                </div>
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: dLinePhotoelectricSignal.bit4 === '1' }"
+                  data-x="2460"
+                  data-y="510"
+                  @click="toggleBitValue(dLinePhotoelectricSignal, 'bit4')"
+                >
+                  <div class="marker-label">D-5#</div>
+                </div>
+                <!-- E线电机运行信号 -->
+                <div
+                  class="motor-marker marker-show-label label-right"
+                  :class="{ running: eLineMotorRunning.bit0 === '1' }"
+                  data-x="1850"
+                  data-y="330"
+                  @click="toggleBitValue(eLineMotorRunning, 'bit0')"
+                >
+                  <div class="marker-label">E1-1#</div>
+                </div>
+                <div
+                  class="motor-marker marker-show-label label-left"
+                  :class="{ running: eLineMotorRunning.bit1 === '1' }"
+                  data-x="2420"
+                  data-y="330"
+                  @click="toggleBitValue(eLineMotorRunning, 'bit1')"
+                >
+                  <div class="marker-label">E1-2#</div>
+                </div>
+                <!-- E线光电检测信号 -->
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: eLinePhotoelectricSignal.bit1 === '1' }"
+                  data-x="1830"
+                  data-y="360"
+                  @click="toggleBitValue(eLinePhotoelectricSignal, 'bit1')"
+                >
+                  <div class="marker-label">E-2#</div>
+                </div>
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: eLinePhotoelectricSignal.bit2 === '1' }"
+                  data-x="1860"
+                  data-y="360"
+                  @click="toggleBitValue(eLinePhotoelectricSignal, 'bit2')"
+                >
+                  <div class="marker-label">E-3#</div>
+                </div>
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: eLinePhotoelectricSignal.bit3 === '1' }"
+                  data-x="2420"
+                  data-y="360"
+                  @click="toggleBitValue(eLinePhotoelectricSignal, 'bit3')"
+                >
+                  <div class="marker-label">E-4#</div>
+                </div>
+                <div
+                  class="marker label-bottom"
+                  :class="{ scanning: eLinePhotoelectricSignal.bit4 === '1' }"
+                  data-x="2460"
+                  data-y="360"
+                  @click="toggleBitValue(eLinePhotoelectricSignal, 'bit4')"
+                >
+                  <div class="marker-label">E-5#</div>
+                </div>
 
                 <!-- 扫码枪处光电信号 -->
                 <div
@@ -1107,6 +1256,24 @@
                   @click="toggleBitValue(scanPhotoelectricSignal, 'bit5')"
                 >
                   <div class="marker-label">4-1#</div>
+                </div>
+                <div
+                  class="marker marker-show-label label-bottom"
+                  :class="{ scanning: scanPhotoelectricSignal.bit7 === '1' }"
+                  data-x="1740"
+                  data-y="500"
+                  @click="toggleBitValue(scanPhotoelectricSignal, 'bit7')"
+                >
+                  <div class="marker-label">D-1#</div>
+                </div>
+                <div
+                  class="marker marker-show-label label-bottom"
+                  :class="{ scanning: scanPhotoelectricSignal.bit8 === '1' }"
+                  data-x="1740"
+                  data-y="350"
+                  @click="toggleBitValue(scanPhotoelectricSignal, 'bit8')"
+                >
+                  <div class="marker-label">E-1#</div>
                 </div>
               </div>
             </div>
@@ -1192,9 +1359,25 @@
                     <div class="tray-info">
                       <div class="tray-info-row">
                         <span class="tray-name">{{ tray.name }}</span>
-                        <span class="tray-batch"
-                          >是否消毒:
-                          {{ tray.isTerile === '1' ? '消毒' : '不消毒' }}</span
+                        <span class="tray-batch">
+                          <span
+                            v-if="
+                              tray.sendTo &&
+                              ['A1', 'B1', 'C1'].includes(
+                                selectedQueue.queueName
+                              )
+                            "
+                            >预热房位置：{{ tray.sendTo }}</span
+                          ><span v-else>
+                            {{ tray.isTerile === 1 ? '消毒' : '不消毒' }}</span
+                          ></span
+                        >
+                        <span
+                          class="tray-batch"
+                          v-if="selectedQueue.queueName == '分发区'"
+                          >PLC命令：{{
+                            tray.state === '0' ? '未执行' : '已执行'
+                          }}</span
                         >
                       </div>
                       <span class="tray-time">{{ tray.time }}</span>
@@ -1325,6 +1508,24 @@
                 ></el-input>
               </div>
               <div class="qrcode-input-group">
+                <div class="qrcode-label">D灭菌柜扫码:</div>
+                <el-input
+                  v-model="elevatorDDisinfectionScanCode"
+                  size="small"
+                  placeholder="输入扫码信息"
+                  class="qrcode-input"
+                ></el-input>
+              </div>
+              <div class="qrcode-input-group">
+                <div class="qrcode-label">E灭菌柜扫码:</div>
+                <el-input
+                  v-model="elevatorEDisinfectionScanCode"
+                  size="small"
+                  placeholder="输入扫码信息"
+                  class="qrcode-input"
+                ></el-input>
+              </div>
+              <div class="qrcode-input-group">
                 <div class="qrcode-label">一楼缓冲区区扫码:</div>
                 <el-input
                   v-model="oneFloorElevatorScanCode"
@@ -1340,6 +1541,31 @@
               </div>
             </div>
           </div>
+
+          <!-- 添加上位机下发任务测试部分 -->
+          <div class="test-section">
+            <span class="test-label">上位机下发任务测试:</span>
+            <div class="task-test-container">
+              <div class="task-buttons">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="triggerRequestUploadTask"
+                >
+                  判断去灭/非灭菌 ({{ requestUploadTask }})
+                </el-button>
+                <el-button
+                  type="primary"
+                  size="small"
+                  style="margin-left: 0px"
+                  @click="triggerRequestUploadTaskPreheatingCar"
+                >
+                  预热小车前请求 ({{ requestUploadTaskPreheatingCar }})
+                </el-button>
+              </div>
+            </div>
+          </div>
+
           <!-- 添加数量控制测试部分 -->
           <div class="test-section">
             <span class="test-label">数量控制测试:</span>
@@ -1878,7 +2104,32 @@ export default {
         bit8: '0', // C-9#光电
         bit9: '0' // C-10#光电
       },
-      // 这里DE先不写对接，如果写对接后续再添加代码-读取PLC
+      // D线电机运行信号-读取PLC
+      dLineMotorRunning: {
+        bit0: '0', // D-1#电机运行信号
+        bit1: '0' // D-2#电机运行信号
+      },
+      // D线光电检测信号-读取PLC
+      dLinePhotoelectricSignal: {
+        bit0: '0', // D-1#光电
+        bit1: '0', // D-2#光电
+        bit2: '0', // D-3#光电
+        bit3: '0', // D-4#光电
+        bit4: '0' // D-5#光电
+      },
+      // E线电机运行信号-读取PLC
+      eLineMotorRunning: {
+        bit0: '0', // E-1#电机运行信号
+        bit1: '0' // E-2#电机运行信号
+      },
+      // E线光电检测信号-读取PLC
+      eLinePhotoelectricSignal: {
+        bit0: '0', // E-1#光电
+        bit1: '0', // E-2#光电
+        bit2: '0', // E-3#光电
+        bit3: '0', // E-4#光电
+        bit4: '0' // E-5#光电
+      },
       // 输送线故障反馈-读取PLC
       conveyorFaultFeedback: {
         bit0: '0', // A1预热故障
@@ -2008,6 +2259,10 @@ export default {
       elevatorThreeFloorScanCode: '',
       // 提升机四楼接货站台扫码数据（托盘号）
       elevatorFourFloorScanCode: '',
+      // 一楼D灭菌柜接货站台扫码数据（托盘号）
+      elevatorDDisinfectionScanCode: '',
+      // 一楼E灭菌柜接货站台扫码数据（托盘号）
+      elevatorEDisinfectionScanCode: '',
       // 添加复选框状态-一楼允许上货
       allowUploadOne: false,
       // 添加复选框状态-一楼是否非灭菌（默认灭菌）
@@ -2024,6 +2279,14 @@ export default {
       allowUploadFour: false,
       // 添加复选框状态-四楼是否非灭菌（默认灭菌）
       nonSterileFour: false,
+      // 添加复选框状态-D灭菌柜允许上货
+      allowUploadD: false,
+      // 添加复选框状态-D灭菌柜是否非灭菌（默认灭菌）
+      nonSterileD: false,
+      // 添加复选框状态-E灭菌柜允许上货
+      allowUploadE: false,
+      // 添加复选框状态-E灭菌柜是否非灭菌（默认灭菌）
+      nonSterileE: false,
       // 显示小车1设置去哪个预热房的按钮
       showCar1SetPreheatingRoom: false,
       // 显示小车设置去哪个预热房的按钮
@@ -2042,7 +2305,7 @@ export default {
       currentOutTrayInfo: {
         trayCode: '',
         productName: '',
-        isSterile: false
+        isTerile: ''
       }
     };
   },
@@ -2366,18 +2629,97 @@ export default {
         }
       }
     },
+    // 一楼D灭菌“有载信号”/光电占位,
+    'scanPhotoelectricSignal.bit7'(newVal) {
+      if (newVal === '0') {
+        this.elevatorDDisinfectionScanCode = '';
+        this.addLog('D扫码数据清空');
+      }
+      if (newVal === '1' && this.elevatorDDisinfectionScanCode !== '') {
+        this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
+        this.addToUpLoadQueueDE(
+          this.elevatorDDisinfectionScanCode,
+          'D',
+          this.nonSterileD
+        );
+      }
+    },
+    // 一楼D灭菌“有载信号”/光电占位,扫码数据
+    elevatorDDisinfectionScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit7 === '1') {
+          this.addLog(`D扫码数据：${newVal}`);
+          this.addToUpLoadQueueDE(newVal, 'D', this.nonSterileD);
+        }
+      }
+    },
+    // 一楼E灭菌“有载信号”/光电占位,
+    'scanPhotoelectricSignal.bit8'(newVal) {
+      if (newVal === '0') {
+        this.elevatorEDisinfectionScanCode = '';
+        this.addLog('E扫码数据清空');
+      }
+      if (newVal === '1' && this.elevatorEDisinfectionScanCode !== '') {
+        this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
+        this.addToUpLoadQueueDE(
+          this.elevatorEDisinfectionScanCode,
+          'E',
+          this.nonSterileE
+        );
+      }
+    },
+    // 一楼E灭菌“有载信号”/光电占位,扫码数据
+    elevatorEDisinfectionScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit8 === '1') {
+          this.addLog(`E扫码数据：${newVal}`);
+          this.addToUpLoadQueueDE(
+            newVal,
+            'E',
+            this.allowUploadE,
+            this.nonSterileE
+          );
+        }
+      }
+    },
     // 请求上位机下发任务(判断去灭菌还是非灭菌）
     requestUploadTask: {
       async handler(newVal) {
         if (newVal === '1') {
           this.addLog('请求上位机下发任务(判断去灭菌还是非灭菌）');
-          // 先筛选出分发区中未处理过的托盘数据
-          const unprocessedTrayInfo = this.queues[1].trayInfo.filter(
-            (tray) => !tray.isProcessed
-          );
-          // 如果未处理过的托盘数据大于0，则把未处理过的托盘数据加入到缓冲区
-          if (unprocessedTrayInfo.length > 0) {
-            this.queues[2].trayInfo.push(...unprocessedTrayInfo);
+          // 先筛选出分发区中未处理过的第一个托盘数据，属性state等于'1'代表已经处理过。'0'代表没有处理过
+          if (this.queues[1]?.trayInfo) {
+            const targetIndex = this.queues[1].trayInfo.findIndex(
+              (tray) => tray.state === '0'
+            );
+
+            if (targetIndex !== -1) {
+              const targetTray = this.queues[1].trayInfo[targetIndex];
+
+              if (targetTray.isTerile === 0) {
+                // 如果消毒属性是不消毒，直接把该托盘在分发区的数据删除
+                // 输出日志
+                this.addLog(
+                  `分发区中未处理过的第一个托盘数据：${targetTray.trayCode}，消毒属性：${targetTray.isTerile}，不消毒，直接发走`
+                );
+                this.queues[1].trayInfo.splice(targetIndex, 1);
+                // 给PLC发送出货消息
+                // 展示出货信息
+              } else {
+                // 如果消毒属性是消毒，把queues数组该元素的state设置为'1'
+                // 输出日志
+                this.addLog(
+                  `分发区中未处理过的第一个托盘数据：${targetTray.trayCode}，消毒属性：${targetTray.isTerile}`
+                );
+                this.queues[1].trayInfo[targetIndex] = {
+                  ...targetTray,
+                  state: '1'
+                };
+              }
+            } else {
+              // 报错
+              this.addLog('分发区中未处理过的第一个托盘数据不存在', 'error');
+            }
           }
         }
       }
@@ -2894,7 +3236,7 @@ export default {
               orderId: res.data[0].orderId,
               productCode: res.data[0].productCode,
               productName: res.data[0].productName,
-              isTerile: nonSterile ? '0' : res.data[0].isTerile,
+              isTerile: nonSterile ? 0 : res.data[0].isTerile,
               state: '0',
               sendTo: '' // 发到哪个预热房，发送的时候更新
             };
@@ -2904,7 +3246,7 @@ export default {
               trayCode: trayInfo.trayCode,
               orderId: trayInfo.orderId,
               productName: trayInfo.productName,
-              isTerile: trayInfo.isTerile === '1' ? '消毒' : '不消毒',
+              isTerile: trayInfo.isTerile === 1 ? '消毒' : '不消毒',
               inPut: trayFrom
             };
           } else {
@@ -2916,6 +3258,48 @@ export default {
           this.$message.error('查询队列失败，请重试' + err);
           // 没查询到货物信息，直接报警
           this.addLog(trayFrom + `上货区队列添加货物失败：${trayCode}`);
+          this.nowScanTrayInfo = {};
+        });
+    },
+    // 添加扫码数据到D队列,
+    addToUpLoadQueueDE(trayCode, trayFrom, nonSterile) {
+      // 通过trayCode 查询erp数据
+      const params = {
+        trayCode: trayCode,
+        invalidFlag: 0,
+        orderStatus: 0
+      };
+      HttpUtil.post('/order_info/selectList', params)
+        .then((res) => {
+          // this.queues[0]： 上货区
+          if (res.data && res.data.length > 0) {
+            const trayInfo = {
+              trayCode: res.data[0].trayCode,
+              trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+              orderId: res.data[0].orderId,
+              productCode: res.data[0].productCode,
+              productName: res.data[0].productName,
+              isTerile: nonSterile ? 0 : res.data[0].isTerile
+            };
+            const queueIndex = trayFrom === 'D' ? 12 : 13;
+            this.queues[queueIndex].trayInfo.push(trayInfo);
+            this.addLog(trayFrom + `${trayFrom}队列添加货物：${trayCode}`);
+            this.nowScanTrayInfo = {
+              trayCode: trayInfo.trayCode,
+              orderId: trayInfo.orderId,
+              productName: trayInfo.productName,
+              isTerile: trayInfo.isTerile === 1 ? '消毒' : '不消毒',
+              inPut: trayFrom
+            };
+          } else {
+            this.addLog(trayFrom + `${trayFrom}队列添加货物失败：${trayCode}`);
+            this.nowScanTrayInfo = {};
+          }
+        })
+        .catch((err) => {
+          this.$message.error('查询队列失败，请重试' + err);
+          // 没查询到货物信息，直接报警
+          this.addLog(trayFrom + `${trayFrom}队列添加货物失败：${trayCode}`);
           this.nowScanTrayInfo = {};
         });
     },
@@ -3103,7 +3487,9 @@ export default {
             id: tray.trayCode || '',
             name: tray.trayCode ? `托盘 ${tray.trayCode}` : '未知托盘',
             time: tray.trayTime || '',
-            isTerile: tray.isTerile
+            isTerile: tray.isTerile,
+            sendTo: tray.sendTo || '', // 添加sendTo属性
+            state: tray.state || '' // 添加state属性
           }))
           .filter((tray) => tray.id); // 过滤掉没有 id 的托盘
       } catch (error) {
@@ -3354,22 +3740,6 @@ export default {
     toggleBitValue(obj, bit) {
       obj[bit] = obj[bit] === '1' ? '0' : '1';
     },
-    handleCartClick(cartId) {
-      // 获取小车对象
-      const cart = this.carts.find((c) => c.id === cartId);
-      if (!cart || !cart.queueId) return;
-
-      // 展开队列面板
-      this.isQueueExpanded = true;
-
-      // 找到队列在数组中的索引
-      const queueIndex = this.queues.findIndex((q) => q.id === cart.queueId);
-      if (queueIndex !== -1) {
-        // 选中并显示对应队列
-        this.selectedQueueIndex = queueIndex;
-        this.showTrays(queueIndex);
-      }
-    },
     updateQuantity(quantityObj, key, change) {
       this[quantityObj][key] = Math.max(
         0,
@@ -3464,16 +3834,11 @@ export default {
     },
     // 发送到立库的方法
     sendToWarehouse() {
-      if (!this.warehouseSelectedFrom || !this.warehouseSelectedTo) {
+      if (!this.warehouseSelectedTo) {
         this.$message.warning('请先选择完整');
         return;
       }
-      this.addLog(
-        `执行发送从${this.warehouseSelectedFrom}灭菌房到${this.warehouseSelectedTo}立库操作`
-      );
-      this.$message.success(
-        `已发送从${this.warehouseSelectedFrom}灭菌房到${this.warehouseSelectedTo}立库`
-      );
+      this.addLog(`执行发送${this.warehouseSelectedTo}出库操作`);
     },
     // 显示小车选择按钮
     showCarSelect() {
@@ -3490,6 +3855,20 @@ export default {
       } else {
         return value; // 非负数保持不变
       }
+    },
+    // 触发请求上位机下发任务(判断去灭菌还是非灭菌)
+    triggerRequestUploadTask() {
+      this.requestUploadTask = '1';
+      setTimeout(() => {
+        this.requestUploadTask = '0';
+      }, 1000);
+    },
+    // 触发请求上位机下发任务(预热小车前)
+    triggerRequestUploadTaskPreheatingCar() {
+      this.requestUploadTaskPreheatingCar = '1';
+      setTimeout(() => {
+        this.requestUploadTaskPreheatingCar = '0';
+      }, 1000);
     }
   }
 };
@@ -4466,7 +4845,6 @@ export default {
                 transition: all 0.3s ease;
                 border: 1px solid rgba(255, 255, 255, 0.15);
                 position: relative;
-                padding-right: 50px;
 
                 .tray-info {
                   display: flex;
@@ -4976,6 +5354,17 @@ export default {
         }
       }
     }
+  }
+}
+
+/* 添加新的测试面板样式 */
+.task-test-container {
+  margin-top: 10px;
+
+  .task-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 }
 </style>
