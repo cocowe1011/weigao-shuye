@@ -72,16 +72,10 @@
             >
               <i class="el-icon-video-pause"></i><span>全线暂停</span>
             </button>
-            <button
-              @click="toggleButtonState('fault_reset')"
-              :class="{ pressed: buttonStates.fault_reset }"
-            >
+            <button @click="toggleButtonState('fault_reset')">
               <i class="el-icon-refresh"></i><span>故障复位</span>
             </button>
-            <button
-              @click="toggleButtonState('clear')"
-              :class="{ pressed: buttonStates.clear }"
-            >
+            <button @click="toggleButtonState('clear')">
               <i class="el-icon-delete"></i><span>全线清空</span>
             </button>
           </div>
@@ -1242,9 +1236,9 @@
             <span class="test-label">小车1测试:</span>
             <div class="position-buttons">
               <button
-                v-for="pos in ['O1', 'A1', 'B1', 'C1']"
+                v-for="pos in ['O1', 'A11', 'A12', 'B11', 'B12', 'C11', 'C12']"
                 :key="'test-cart1-pos-' + pos"
-                @click="updateCartPosition(1, pos)"
+                @click="simulateSensorTrigger(1, pos)"
                 class="position-btn"
               >
                 {{ pos }}
@@ -1257,7 +1251,7 @@
               <button
                 v-for="pos in ['A2', 'B2', 'C2']"
                 :key="'test-cart2-pos-' + pos"
-                @click="updateCartPosition(2, pos)"
+                @click="simulateSensorTrigger(2, pos)"
                 class="position-btn"
               >
                 {{ pos }}
@@ -1270,7 +1264,7 @@
               <button
                 v-for="pos in ['A3', 'B3', 'C3']"
                 :key="'test-cart3-pos-' + pos"
-                @click="updateCartPosition(3, pos)"
+                @click="simulateSensorTrigger(3, pos)"
                 class="position-btn"
               >
                 {{ pos }}
@@ -1281,9 +1275,9 @@
             <span class="test-label">小车4测试:</span>
             <div class="position-buttons">
               <button
-                v-for="pos in ['A', 'B', 'C', 'D', 'E', 'P']"
+                v-for="pos in ['O1', 'A', 'B', 'C', 'D', 'E', 'P']"
                 :key="'test-cart4-pos-' + pos"
-                @click="updateCartPosition(4, pos)"
+                @click="simulateSensorTrigger(4, pos)"
                 class="position-btn"
               >
                 {{ pos }}
@@ -1624,10 +1618,13 @@ export default {
       alarmLogs: [], // 修改为空数组
       positions: {
         cart1: {
-          O1: { x: 790, y: 1230 }, // 最下面
-          A1: { x: 790, y: 1068 }, // 最下面
-          B1: { x: 790, y: 850 },
-          C1: { x: 790, y: 645 } // 扫码位
+          O1: { x: 790, y: 1230 },
+          A11: { x: 790, y: 1095 },
+          A12: { x: 790, y: 1035 },
+          B11: { x: 790, y: 880 },
+          B12: { x: 790, y: 820 },
+          C11: { x: 790, y: 675 },
+          C12: { x: 790, y: 615 }
         },
         cart2: {
           A2: { x: 1375, y: 1067 },
@@ -1640,6 +1637,7 @@ export default {
           C3: { x: 1945, y: 647 }
         },
         cart4: {
+          O1: { x: 2510, y: 1230 },
           A: { x: 2510, y: 1066 },
           B: { x: 2510, y: 848 },
           C: { x: 2510, y: 647 },
@@ -2373,7 +2371,14 @@ export default {
       async handler(newVal) {
         if (newVal === '1') {
           this.addLog('请求上位机下发任务(判断去灭菌还是非灭菌）');
-          // 这地方需要判断托盘数据有没有处理过，每次只处理没处理过的托盘数据
+          // 先筛选出分发区中未处理过的托盘数据
+          const unprocessedTrayInfo = this.queues[1].trayInfo.filter(
+            (tray) => !tray.isProcessed
+          );
+          // 如果未处理过的托盘数据大于0，则把未处理过的托盘数据加入到缓冲区
+          if (unprocessedTrayInfo.length > 0) {
+            this.queues[2].trayInfo.push(...unprocessedTrayInfo);
+          }
         }
       }
     },
@@ -2752,7 +2757,112 @@ export default {
           }
         }
       }
+    },
+    // ---- 新增：监听小车位置光电信号 ----
+    // 监听小车1 (预热前) 位置信号
+    preheatingCar1PhotoelectricSignal: {
+      deep: true,
+      handler(newVal) {
+        const mapping = {
+          bit3: 'A11', // A1-1线位置定位-预热进货
+          bit4: 'A12', // A1-2线位置定位-预热进货
+          bit5: 'B11', // B1-1线位置定位-预热进货
+          bit6: 'B12', // B1-2线位置定位-预热进货
+          bit7: 'C11', // C1-1线位置定位-预热进货
+          bit8: 'C12' // C1-2线位置定位-预热进货
+        };
+        let activePosition = null;
+        for (const bit in mapping) {
+          if (newVal[bit] === '1') {
+            activePosition = mapping[bit];
+            break;
+          }
+        }
+        // 如果没有检测到特定预热位置信号，我们假设它在 O1 或上次已知位置
+        // 这里仅在检测到新位置时更新
+        if (activePosition) {
+          this.addLog(`传感器检测：小车1 到达 ${activePosition}`);
+          this.updateCartPosition(1, activePosition);
+        }
+        // 可以考虑增加 else 分支处理回到 O1 的逻辑，如果需要的话
+      }
+    },
+
+    // 监听小车2 (灭菌前) 位置信号
+    disinfectionCar2PhotoelectricSignal: {
+      deep: true,
+      handler(newVal) {
+        const mapping = {
+          bit4: 'A2', // A线位置定位-灭菌进货
+          bit5: 'B2', // B线位置定位-灭菌进货
+          bit6: 'C2' // C线位置定位-灭菌进货
+        };
+        let activePosition = null;
+        for (const bit in mapping) {
+          if (newVal[bit] === '1') {
+            activePosition = mapping[bit];
+            break;
+          }
+        }
+        if (activePosition) {
+          this.addLog(`传感器检测：小车2 到达 ${activePosition}`);
+          this.updateCartPosition(2, activePosition);
+        }
+      }
+    },
+
+    // 监听小车3 (解析前) 位置信号
+    analysisCar3PhotoelectricSignal: {
+      deep: true,
+      handler(newVal) {
+        const mapping = {
+          bit4: 'A3', // A线位置定位-解析进货
+          bit5: 'B3', // B线位置定位-解析进货
+          bit6: 'C3' // C线位置定位-解析进货
+        };
+        let activePosition = null;
+        for (const bit in mapping) {
+          if (newVal[bit] === '1') {
+            activePosition = mapping[bit];
+            break;
+          }
+        }
+        if (activePosition) {
+          this.addLog(`传感器检测：小车3 到达 ${activePosition}`);
+          this.updateCartPosition(3, activePosition);
+        }
+      }
+    },
+
+    // 监听小车4 (解析后) 位置信号
+    analysisCar4PhotoelectricSignal: {
+      deep: true,
+      handler(newVal) {
+        const mapping = {
+          bit4: 'A', // A线位置定位-解析出货
+          bit5: 'B', // B线位置定位-解析出货
+          bit6: 'C', // C线位置定位-解析出货
+          bit7: 'D', // D线位置定位-解析出货 (灭菌)
+          bit8: 'E', // E线位置定位-解析出货 (灭菌)
+          bit9: 'P', // 非灭菌接货位置定位
+          bit10: 'O1' // 去立库接口定位 (对应 O1 位置)
+        };
+        let activePosition = null;
+        for (const bit in mapping) {
+          if (newVal[bit] === '1') {
+            activePosition = mapping[bit];
+            break;
+          }
+        }
+        if (activePosition) {
+          this.addLog(`传感器检测：小车4 到达 ${activePosition}`);
+          this.updateCartPosition(4, activePosition);
+        }
+        // 可以考虑增加 else 分支处理回到 O1 的逻辑，如果需要的话
+      }
     }
+    // ---- 监听小车位置光电信号结束 ----
+    // 监听
   },
   methods: {
     // 判断是否消毒，如果消毒则此托盘进入分发区队列，如果不消毒直接发走
@@ -2904,6 +3014,68 @@ export default {
         this.$nextTick(() => {
           this.updateMarkerPositions();
         });
+      }
+    },
+    // 新增：模拟传感器触发方法
+    simulateSensorTrigger(cartId, positionName) {
+      let signalObject = null;
+      let positionToBitMapping = {};
+
+      // 根据 cartId 选择信号对象和映射
+      if (cartId === 1) {
+        signalObject = this.preheatingCar1PhotoelectricSignal;
+        positionToBitMapping = {
+          O1: null, // O1 通常没有直接的传感器位，这里假设点击O1只是重置其他位
+          A11: 'bit3',
+          A12: 'bit4',
+          B11: 'bit5',
+          B12: 'bit6',
+          C11: 'bit7',
+          C12: 'bit8'
+        };
+      } else if (cartId === 2) {
+        signalObject = this.disinfectionCar2PhotoelectricSignal;
+        positionToBitMapping = { A2: 'bit4', B2: 'bit5', C2: 'bit6' };
+      } else if (cartId === 3) {
+        signalObject = this.analysisCar3PhotoelectricSignal;
+        positionToBitMapping = { A3: 'bit4', B3: 'bit5', C3: 'bit6' };
+      } else if (cartId === 4) {
+        signalObject = this.analysisCar4PhotoelectricSignal;
+        positionToBitMapping = {
+          O1: 'bit10',
+          A: 'bit4',
+          B: 'bit5',
+          C: 'bit6',
+          D: 'bit7',
+          E: 'bit8',
+          P: 'bit9'
+        };
+      }
+
+      if (signalObject) {
+        this.addLog(`测试面板：模拟小车${cartId}触发 ${positionName} 传感器`);
+        // 1. 将该信号对象的所有位设置为 '0'
+        Object.keys(signalObject).forEach((key) => {
+          signalObject[key] = '0';
+        });
+
+        // 2. 根据 positionName 找到对应的 bit
+        const targetBit = positionToBitMapping[positionName];
+
+        // 3. 如果找到了对应的 bit，则将其设置为 '1'
+        if (targetBit) {
+          signalObject[targetBit] = '1';
+        } else if (positionName === 'O1' && cartId === 1) {
+          // 特殊处理小车1的 O1 位置，它没有直接传感器位，但我们可能需要更新UI
+          // 因为 watch 不会触发，所以直接调用更新 UI
+          this.updateCartPosition(1, 'O1');
+        }
+        // 注意：其他小车的O1位置有对应的bit10(小车4)，所以不需要特殊处理
+
+        // 强制 Vue 更新视图，如果 watch 没有正确触发（理论上应该会触发）
+        this.$forceUpdate();
+      } else {
+        console.error(`未找到 Cart ID ${cartId} 对应的信号对象`);
       }
     },
     showTrays(index) {
