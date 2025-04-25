@@ -19,7 +19,13 @@ module.exports = {
     'no-unused-vars': 'off',
     'space-before-function-paren': 0,
     'vue/multi-word-component-names': 'off',
-    'no-constant-condition': ['error', { checkLoops: false }]
+    'no-constant-condition': ['error', { checkLoops: false }],
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto' // 允许自动处理行尾符
+      }
+    ]
   },
   ignorePatterns: ['src/utils/grwebapp.js']
 };

@@ -161,9 +161,41 @@
                   @click="handleQueueMarkerClick(marker.queueId)"
                 >
                   <div class="queue-marker-content">
-                    <span class="queue-marker-count">{{
-                      queues.find((q) => q.id === marker.queueId)?.trayInfo
-                        ?.length || 0
+                    <span class="queue-marker-count" v-if="marker.id === 3">{{
+                      bufferQuantity
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 4">{{
+                      aLineQuantity.a1
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 5">{{
+                      bLineQuantity.b1
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 6">{{
+                      cLineQuantity.c1
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 7">{{
+                      aLineQuantity.a2
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 8">{{
+                      bLineQuantity.b2
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 9">{{
+                      cLineQuantity.c2
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 10">{{
+                      aLineQuantity.a3
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 11">{{
+                      bLineQuantity.b3
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 12">{{
+                      cLineQuantity.c3
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 13">{{
+                      dLineQuantity
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 14">{{
+                      eLineQuantity
                     }}</span>
                     <span class="queue-marker-name">{{ marker.name }}</span>
                   </div>
@@ -2169,7 +2201,10 @@ export default {
       },
       // 缓冲区数量
       bufferQuantity: 0,
-      // D线数量和E线数量先不对接-读取PLC
+      // D线数量-读取PLC
+      dLineQuantity: 0,
+      // E线数量-读取PLC
+      eLineQuantity: 0,
       //上货区电机运行信号（扫码后入队）-读取PLC
       upLoadMotorRunning: {
         bit0: '0', // S1#电机运行信号
@@ -3315,6 +3350,24 @@ export default {
         clear: false
       };
       this.buttonStates[button] = !this.buttonStates[button];
+      if (button === 'start') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW502', 1);
+      } else if (button === 'stop') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW504', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW504', 0);
+        }, 500);
+      } else if (button === 'reset') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW506', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW506', 0);
+        }, 500);
+      } else if (button === 'fault_reset') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW508', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW508', 0);
+        }, 500);
+      }
     },
     formatTime(timestamp) {
       const date = new Date(timestamp);

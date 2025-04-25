@@ -442,6 +442,10 @@ function conPLC() {
           conn.addItems('DBB250');
           // 提升机四楼接货站台扫码数据（托盘号）
           conn.addItems('DBB280');
+          // D扫码
+          conn.addItems('DBB310');
+          //E扫码
+          conn.addItems('DBB340');
           setInterval(() => {
             conn.readAllItems(valuesReady);
           }, 50);
@@ -467,7 +471,7 @@ function sendHeartToPLC() {
       nowValue = 1 - nowValue;
     }
     times++;
-    writeValuesToPLC('DBW0', nowValue);
+    writeValuesToPLC('DBW500', nowValue);
   }, 200); // 每200毫秒执行一次交替
 }
 
@@ -570,6 +574,8 @@ var variables = {
   DBB220: 'DB101,C220.30', // 提升机二楼接货站台扫码数据（托盘号）
   DBB250: 'DB101,C250.30', // 提升机三楼接货站台扫码数据（托盘号）
   DBB280: 'DB101,C280.30', // 提升机四楼接货站台扫码数据（托盘号）
+  DBB310: 'DB101,C310.30', // D扫码
+  DBB340: 'DB101,C340.30', // E扫码
   DBW500: 'DB101,INT500', // WCS看门狗心跳
   DBW502: 'DB101,INT502', // WCS-全线启动
   DBW504: 'DB101,INT504', // WCS-全线停止
