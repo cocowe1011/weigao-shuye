@@ -32,7 +32,7 @@
               </div>
               <div class="data-card">
                 <div class="data-card-border">
-                  <div class="data-card-border-borderTop">进货口</div>
+                  <div class="data-card-border-borderTop">当前进货口</div>
                   <div class="data-card-border-borderDown">
                     {{ nowScanTrayInfo.inPut || '--' }}
                   </div>
@@ -161,6 +161,14 @@
                   @click="handleQueueMarkerClick(marker.queueId)"
                 >
                   <div class="queue-marker-content">
+                    <span class="queue-marker-count" v-if="marker.id === 1">{{
+                      queues.find((q) => q.id === marker.queueId)?.trayInfo
+                        ?.length || 0
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 2">{{
+                      queues.find((q) => q.id === marker.queueId)?.trayInfo
+                        ?.length || 0
+                    }}</span>
                     <span class="queue-marker-count" v-if="marker.id === 3">{{
                       bufferQuantity
                     }}</span>
@@ -227,67 +235,125 @@
                     </div>
                   </div>
                 </div>
-                <div class="preheating-room-marker" data-x="1200" data-y="355">
+                <div
+                  class="preheating-room-marker"
+                  data-x="865"
+                  data-y="380"
+                  style="width: 160px"
+                >
                   <div class="preheating-room-content">
-                    <div class="preheating-room-header">灭菌房选择</div>
+                    <div class="preheating-room-header">预热房到灭菌柜选择</div>
                     <div class="preheating-room-body">
-                      <el-select
-                        v-model="disinfectionRoomSelectedFrom"
-                        placeholder="选择"
-                        size="mini"
-                      >
-                        <el-option label="A" value="A"></el-option>
-                        <el-option label="B" value="B"></el-option>
-                        <el-option label="C" value="C"></el-option>
-                      </el-select>
-                      <span style="font-size: 12px; color: #fff">发送到：</span>
-                      <el-select
-                        v-model="disinfectionRoomSelectedTo"
-                        placeholder="选择"
-                        size="mini"
-                      >
-                        <el-option label="A" value="A"></el-option>
-                        <el-option label="B" value="B"></el-option>
-                        <el-option label="C" value="C"></el-option>
-                      </el-select>
+                      <div style="display: flex; align-items: center">
+                        <el-select
+                          v-model="disinfectionRoomSelectedFrom"
+                          placeholder="预热"
+                          size="mini"
+                        >
+                          <el-option label="A" value="A"></el-option>
+                          <el-option label="B" value="B"></el-option>
+                          <el-option label="C" value="C"></el-option>
+                        </el-select>
+                        <span
+                          style="font-size: 12px; color: #fff; margin-left: 5px"
+                          >到：</span
+                        >
+                        <el-select
+                          v-model="disinfectionRoomSelectedTo"
+                          placeholder="灭菌"
+                          size="mini"
+                        >
+                          <el-option label="A" value="A"></el-option>
+                          <el-option label="B" value="B"></el-option>
+                          <el-option label="C" value="C"></el-option>
+                        </el-select>
+                      </div>
                       <el-button
                         type="primary"
                         size="mini"
                         @click="sendToDisinfectionRoom"
+                        style="width: 100%"
                         >执行</el-button
                       >
+                      <div style="display: flex; align-items: center">
+                        <span
+                          style="
+                            font-size: 12px;
+                            color: #fff;
+                            color: greenyellow;
+                          "
+                          >执行中：</span
+                        >
+                        <span
+                          style="
+                            font-size: 12px;
+                            color: #fff;
+                            color: greenyellow;
+                          "
+                          >123123</span
+                        >
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="preheating-room-marker" data-x="1600" data-y="400">
+                <div
+                  class="preheating-room-marker"
+                  data-x="1215"
+                  data-y="380"
+                  style="width: 160px"
+                >
                   <div class="preheating-room-content">
-                    <div class="preheating-room-header">解析库选择</div>
+                    <div class="preheating-room-header">灭菌柜到解析房选择</div>
                     <div class="preheating-room-body">
-                      <el-select
-                        v-model="warehouseSelectedFrom"
-                        placeholder="选择"
-                        size="mini"
-                      >
-                        <el-option label="A" value="A"></el-option>
-                        <el-option label="B" value="B"></el-option>
-                        <el-option label="C" value="C"></el-option>
-                      </el-select>
-                      <span style="font-size: 12px; color: #fff">发送到：</span>
-                      <el-select
-                        v-model="warehouseSelectedTo"
-                        placeholder="选择"
-                        size="mini"
-                      >
-                        <el-option label="A" value="A"></el-option>
-                        <el-option label="B" value="B"></el-option>
-                        <el-option label="C" value="C"></el-option>
-                      </el-select>
+                      <div style="display: flex; align-items: center">
+                        <el-select
+                          v-model="warehouseSelectedFrom"
+                          placeholder="灭菌"
+                          size="mini"
+                        >
+                          <el-option label="A" value="A"></el-option>
+                          <el-option label="B" value="B"></el-option>
+                          <el-option label="C" value="C"></el-option>
+                        </el-select>
+                        <span
+                          style="font-size: 12px; color: #fff; margin-left: 5px"
+                          >到：</span
+                        >
+                        <el-select
+                          v-model="warehouseSelectedTo"
+                          placeholder="解析"
+                          size="mini"
+                        >
+                          <el-option label="A" value="A"></el-option>
+                          <el-option label="B" value="B"></el-option>
+                          <el-option label="C" value="C"></el-option>
+                        </el-select>
+                      </div>
                       <el-button
                         type="primary"
                         size="mini"
                         @click="sendToWarehouse"
+                        style="width: 100%"
                         >执行</el-button
                       >
+                      <div style="display: flex; align-items: center">
+                        <span
+                          style="
+                            font-size: 12px;
+                            color: #fff;
+                            color: greenyellow;
+                          "
+                          >执行中：</span
+                        >
+                        <span
+                          style="
+                            font-size: 12px;
+                            color: #fff;
+                            color: greenyellow;
+                          "
+                          >123123</span
+                        >
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -335,7 +401,7 @@
                   <img :src="cart.image" :alt="cart.name" class="cart-image" />
                 </div>
                 <!-- 上货扫码区域提示 -->
-                <div class="marker-with-panel" data-x="490" data-y="1590">
+                <div class="marker-with-panel" data-x="480" data-y="1590">
                   <div
                     class="data-panel"
                     :class="['position-top', { 'always-show': true }]"
@@ -393,7 +459,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="marker-with-panel" data-x="490" data-y="920">
+                <div class="marker-with-panel" data-x="480" data-y="920">
                   <div
                     class="data-panel"
                     :class="['position-top', { 'always-show': true }]"
@@ -414,7 +480,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="marker-with-panel" data-x="490" data-y="535">
+                <div class="marker-with-panel" data-x="480" data-y="535">
                   <div
                     class="data-panel"
                     :class="['position-top', { 'always-show': true }]"
@@ -435,7 +501,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="marker-with-panel" data-x="490" data-y="200">
+                <div class="marker-with-panel" data-x="480" data-y="200">
                   <div
                     class="data-panel"
                     :class="['position-top', { 'always-show': true }]"
@@ -456,14 +522,15 @@
                     </div>
                   </div>
                 </div>
-                <div class="marker-with-panel" data-x="1490" data-y="200">
+                <div class="marker-with-panel" data-x="1560" data-y="600">
                   <div
                     class="data-panel"
                     :class="['position-top', { 'always-show': true }]"
+                    style="width: 140px; padding-left: 8px; padding-right: 8px"
                   >
                     <div class="data-panel-content">
                       <div class="data-panel-row">
-                        <span class="data-panel-label">D扫码信息：</span>
+                        <span class="data-panel-label">D扫码：</span>
                         <span>{{ elevatorDDisinfectionScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
@@ -475,14 +542,15 @@
                     </div>
                   </div>
                 </div>
-                <div class="marker-with-panel" data-x="1990" data-y="200">
+                <div class="marker-with-panel" data-x="1560" data-y="450">
                   <div
                     class="data-panel"
                     :class="['position-top', { 'always-show': true }]"
+                    style="width: 140px; padding-left: 8px; padding-right: 8px"
                   >
                     <div class="data-panel-content">
                       <div class="data-panel-row">
-                        <span class="data-panel-label">E扫码信息：</span>
+                        <span class="data-panel-label">E扫码：</span>
                         <span>{{ elevatorEDisinfectionScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
@@ -501,7 +569,7 @@
                   >
                     <div class="data-panel-content">
                       <div class="data-panel-row">
-                        <span class="data-panel-label">缓冲区扫码信息：</span>
+                        <span class="data-panel-label">缓冲区扫码：</span>
                         <span>{{ oneFloorElevatorScanCode || '--' }}</span>
                       </div>
                     </div>
@@ -1292,7 +1360,7 @@
                 <div
                   class="marker marker-show-label label-bottom"
                   :class="{ scanning: scanPhotoelectricSignal.bit7 === '1' }"
-                  data-x="1740"
+                  data-x="1760"
                   data-y="500"
                   @click="toggleBitValue(scanPhotoelectricSignal, 'bit7')"
                 >
@@ -1301,7 +1369,7 @@
                 <div
                   class="marker marker-show-label label-bottom"
                   :class="{ scanning: scanPhotoelectricSignal.bit8 === '1' }"
-                  data-x="1740"
+                  data-x="1760"
                   data-y="350"
                   @click="toggleBitValue(scanPhotoelectricSignal, 'bit8')"
                 >
@@ -1871,7 +1939,6 @@ export default {
         clear: false
       },
       activeLogType: 'running',
-      ordersList: [],
       runningLogs: [], // 修改为空数组
       alarmLogs: [], // 修改为空数组
       positions: {
@@ -2664,7 +2731,7 @@ export default {
         }
       }
     },
-    // 一楼D灭菌“有载信号”/光电占位,
+    // 一楼D灭菌"有载信号"/光电占位,
     'scanPhotoelectricSignal.bit7'(newVal) {
       if (newVal === '0') {
         this.elevatorDDisinfectionScanCode = '';
@@ -2679,7 +2746,7 @@ export default {
         );
       }
     },
-    // 一楼D灭菌“有载信号”/光电占位,扫码数据
+    // 一楼D灭菌"有载信号"/光电占位,扫码数据
     elevatorDDisinfectionScanCode: {
       async handler(newVal) {
         if (newVal !== '' && this.scanPhotoelectricSignal.bit7 === '1') {
@@ -2688,7 +2755,7 @@ export default {
         }
       }
     },
-    // 一楼E灭菌“有载信号”/光电占位,
+    // 一楼E灭菌"有载信号"/光电占位,
     'scanPhotoelectricSignal.bit8'(newVal) {
       if (newVal === '0') {
         this.elevatorEDisinfectionScanCode = '';
@@ -2703,7 +2770,7 @@ export default {
         );
       }
     },
-    // 一楼E灭菌“有载信号”/光电占位,扫码数据
+    // 一楼E灭菌"有载信号"/光电占位,扫码数据
     elevatorEDisinfectionScanCode: {
       async handler(newVal) {
         if (newVal !== '' && this.scanPhotoelectricSignal.bit8 === '1') {
@@ -3349,24 +3416,122 @@ export default {
         fault_reset: false,
         clear: false
       };
-      this.buttonStates[button] = !this.buttonStates[button];
       if (button === 'start') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW502', 1);
+        this.$confirm('确定要全线启动吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW502', 1);
+          setTimeout(() => {
+            ipcRenderer.send('writeValuesToPLC', 'DBW502', 0);
+          }, 500);
+          this.buttonStates[button] = !this.buttonStates[button];
+          this.$message.success('全线启动成功');
+          this.addLog('全线启动成功');
+        });
       } else if (button === 'stop') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW504', 1);
-        setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW504', 0);
-        }, 500);
+        this.$confirm('确定要全线停止吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW504', 1);
+          setTimeout(() => {
+            ipcRenderer.send('writeValuesToPLC', 'DBW504', 0);
+          }, 500);
+          this.buttonStates[button] = !this.buttonStates[button];
+          this.$message.success('全线停止成功');
+          this.addLog('全线停止成功');
+        });
       } else if (button === 'reset') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW506', 1);
-        setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW506', 0);
-        }, 500);
+        this.$confirm('确定要全线暂停吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.buttonStates[button] = !this.buttonStates[button];
+          ipcRenderer.send('writeValuesToPLC', 'DBW506', 1);
+          setTimeout(() => {
+            ipcRenderer.send('writeValuesToPLC', 'DBW506', 0);
+          }, 500);
+          this.$message.success('全线暂停成功');
+          this.addLog('全线暂停成功');
+        });
       } else if (button === 'fault_reset') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW508', 1);
-        setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW508', 0);
-        }, 500);
+        this.$confirm('确定要故障复位吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW508', 1);
+          setTimeout(() => {
+            ipcRenderer.send('writeValuesToPLC', 'DBW508', 0);
+          }, 500);
+          this.$message.success('故障复位成功');
+          this.addLog('故障复位成功');
+        });
+      } else if (button === 'clear') {
+        this.$confirm('确定要全线清空吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 把所有的队列，初试状态都清空
+          this.queues.forEach((queue) => {
+            queue.trayInfo = [];
+          });
+          this.nowScanTrayInfo = {};
+          this.runningLogs = []; // 修改为空数组
+          this.alarmLogs = []; // 修改为空数组
+          this.nowTrays = [];
+          // 添加复选框状态-一楼允许上货
+          this.allowUploadOne = false;
+          // 添加复选框状态-一楼是否非灭菌（默认灭菌）
+          this.nonSterileOne = false;
+          // 添加复选框状态-二楼允许上货
+          this.allowUploadTwo = false;
+          // 添加复选框状态-二楼是否非灭菌（默认灭菌）
+          this.nonSterileTwo = false;
+          // 添加复选框状态-三楼允许上货
+          this.allowUploadThree = false;
+          // 添加复选框状态-三楼是否非灭菌（默认灭菌）
+          this.nonSterileThree = false;
+          // 添加复选框状态-四楼允许上货
+          this.allowUploadFour = false;
+          // 添加复选框状态-四楼是否非灭菌（默认灭菌）
+          this.nonSterileFour = false;
+          // 添加复选框状态-D灭菌柜允许上货
+          this.allowUploadD = false;
+          // 添加复选框状态-D灭菌柜是否非灭菌（默认灭菌）
+          this.nonSterileD = false;
+          // 添加复选框状态-E灭菌柜允许上货
+          this.allowUploadE = false;
+          // 添加复选框状态-E灭菌柜是否非灭菌（默认灭菌）
+          this.nonSterileE = false;
+          // 显示小车1设置去哪个预热房的按钮
+          this.showCar1SetPreheatingRoom = false;
+          // 显示小车设置去哪个预热房的按钮
+          this.preheatingRoomSelected = '';
+          // 灭菌出发地
+          this.disinfectionRoomSelectedFrom = '';
+          // 灭菌目的地
+          this.disinfectionRoomSelectedTo = '';
+          // 立库出发地
+          this.warehouseSelectedFrom = '';
+          // 立库目的地
+          this.warehouseSelectedTo = '';
+          // 出库选择
+          this.outWarehouseSelected = '';
+          // 当前出库托盘数据
+          this.currentOutTrayInfo = {
+            trayCode: '',
+            productName: '',
+            isTerile: ''
+          };
+          this.$message.success('全线清空成功');
+          this.addLog('全线清空成功');
+        });
       }
     },
     formatTime(timestamp) {
