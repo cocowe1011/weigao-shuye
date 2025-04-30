@@ -205,6 +205,9 @@
                     <span class="queue-marker-count" v-if="marker.id === 14">{{
                       eLineQuantity
                     }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 15">{{
+                      nonSterileunload
+                    }}</span>
                     <span class="queue-marker-name">{{ marker.name }}</span>
                   </div>
                 </div>
@@ -231,6 +234,11 @@
                         size="mini"
                         @click="sendToPreheatingRoom"
                         >执行</el-button
+                      >
+                      <span
+                        style="font-size: 12px; color: greenyellow"
+                        v-if="preWarmTrayCode"
+                        >执行中：{{ preWarmTrayCode }}</span
                       >
                     </div>
                   </div>
@@ -282,15 +290,8 @@
                             color: #fff;
                             color: greenyellow;
                           "
-                          >执行中：</span
-                        >
-                        <span
-                          style="
-                            font-size: 12px;
-                            color: #fff;
-                            color: greenyellow;
-                          "
-                          >123123</span
+                          v-if="disinfectionTrayCode"
+                          >执行中：{{ disinfectionTrayCode }}</span
                         >
                       </div>
                     </div>
@@ -332,7 +333,7 @@
                       <el-button
                         type="primary"
                         size="mini"
-                        @click="sendToWarehouse"
+                        @click="sendDisinfectionRoomToWarehouse"
                         style="width: 100%"
                         >执行</el-button
                       >
@@ -343,15 +344,8 @@
                             color: #fff;
                             color: greenyellow;
                           "
-                          >执行中：</span
-                        >
-                        <span
-                          style="
-                            font-size: 12px;
-                            color: #fff;
-                            color: greenyellow;
-                          "
-                          >123123</span
+                          v-if="analysisTrayCode"
+                          >执行中：{{ analysisTrayCode }}</span
                         >
                       </div>
                     </div>
@@ -371,12 +365,18 @@
                         <el-option label="C" value="C"></el-option>
                         <el-option label="D" value="D"></el-option>
                         <el-option label="E" value="E"></el-option>
+                        <el-option label="DE" value="DE"></el-option>
                       </el-select>
                       <el-button
                         type="primary"
                         size="mini"
                         @click="sendToWarehouse"
                         >执行</el-button
+                      >
+                      <span
+                        style="font-size: 12px; color: #fff; color: greenyellow"
+                        v-if="outWarehouseTrayCode"
+                        >执行中：{{ outWarehouseTrayCode }}</span
                       >
                     </div>
                   </div>
@@ -412,7 +412,9 @@
                         <span>{{ elevatorOneFloorScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUploadOne"
+                        <el-checkbox
+                          v-model="allowUploadOne"
+                          @change="handleAllowUpload('1')"
                           >允许上货</el-checkbox
                         >
                         <el-checkbox v-model="nonSterileOne"
@@ -449,7 +451,7 @@
                       <div class="data-panel-row">
                         <span class="data-panel-label">是否灭菌：</span>
                         <span>{{
-                          currentOutTrayInfo.isTerile
+                          currentOutTrayInfo.trayCode
                             ? currentOutTrayInfo.isTerile === 1
                               ? '灭菌'
                               : '非灭菌'
@@ -470,7 +472,9 @@
                         <span>{{ elevatorTwoFloorScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUploadTwo"
+                        <el-checkbox
+                          v-model="allowUploadTwo"
+                          @change="handleAllowUpload('2')"
                           >允许上货</el-checkbox
                         >
                         <el-checkbox v-model="nonSterileTwo"
@@ -491,7 +495,9 @@
                         <span>{{ elevatorThreeFloorScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUploadThree"
+                        <el-checkbox
+                          v-model="allowUploadThree"
+                          @change="handleAllowUpload('3')"
                           >允许上货</el-checkbox
                         >
                         <el-checkbox v-model="nonSterileThree"
@@ -512,7 +518,9 @@
                         <span>{{ elevatorFourFloorScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUploadFour"
+                        <el-checkbox
+                          v-model="allowUploadFour"
+                          @change="handleAllowUpload('4')"
                           >允许上货</el-checkbox
                         >
                         <el-checkbox v-model="nonSterileFour"
@@ -534,7 +542,9 @@
                         <span>{{ elevatorDDisinfectionScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUploadD"
+                        <el-checkbox
+                          v-model="allowUploadD"
+                          @change="handleAllowUpload('D')"
                           >允许上货</el-checkbox
                         >
                         <el-checkbox v-model="nonSterileD">非灭菌</el-checkbox>
@@ -554,7 +564,9 @@
                         <span>{{ elevatorEDisinfectionScanCode || '--' }}</span>
                       </div>
                       <div class="data-panel-row checkbox-group">
-                        <el-checkbox v-model="allowUploadE"
+                        <el-checkbox
+                          v-model="allowUploadE"
+                          @change="handleAllowUpload('E')"
                           >允许上货</el-checkbox
                         >
                         <el-checkbox v-model="nonSterileE">非灭菌</el-checkbox>
@@ -1385,7 +1397,10 @@
     <!-- 右侧队列信息区 -->
     <div
       class="side-info-panel-queue"
-      :style="{ width: isQueueExpanded ? '800px' : 'auto' }"
+      :style="{
+        width: isQueueExpanded ? '800px' : 'auto',
+        height: isQueueExpanded ? 'calc(100% - 40px)' : 'auto'
+      }"
     >
       <!-- 队列信息区域 -->
       <div class="queue-section" :class="{ expanded: isQueueExpanded }">
@@ -1852,7 +1867,52 @@
                   </div>
                 </div>
               </div>
-
+              <!-- D数量控制 -->
+              <div class="quantity-group">
+                <div class="quantity-title">D灭菌柜数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-value">{{ dLineQuantity }}</span>
+                    <div class="quantity-buttons">
+                      <button
+                        @click="updateDLineQuantity(1)"
+                        class="quantity-btn plus"
+                      >
+                        +
+                      </button>
+                      <button
+                        @click="updateDLineQuantity(-1)"
+                        class="quantity-btn minus"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- E数量控制 -->
+              <div class="quantity-group">
+                <div class="quantity-title">E灭菌柜数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-value">{{ eLineQuantity }}</span>
+                    <div class="quantity-buttons">
+                      <button
+                        @click="updateELineQuantity(1)"
+                        class="quantity-btn plus"
+                      >
+                        +
+                      </button>
+                      <button
+                        @click="updateELineQuantity(-1)"
+                        class="quantity-btn minus"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <!-- 缓冲区数量控制 -->
               <div class="quantity-group">
                 <div class="quantity-title">缓冲区数量:</div>
@@ -1868,6 +1928,29 @@
                       </button>
                       <button
                         @click="updateBufferQuantity(-1)"
+                        class="quantity-btn minus"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- 非灭菌缓存区数量控制 -->
+              <div class="quantity-group">
+                <div class="quantity-title">非灭菌缓存区数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-value">{{ nonSterileunload }}</span>
+                    <div class="quantity-buttons">
+                      <button
+                        @click="updateNonSterileUnload(1)"
+                        class="quantity-btn plus"
+                      >
+                        +
+                      </button>
+                      <button
+                        @click="updateNonSterileUnload(-1)"
                         class="quantity-btn minus"
                       >
                         -
@@ -2106,6 +2189,11 @@ export default {
           id: 14,
           queueName: 'E',
           trayInfo: []
+        },
+        {
+          id: 15,
+          queueName: '非灭菌缓存区',
+          trayInfo: []
         }
       ],
       // 添加队列位置标识数据
@@ -2123,7 +2211,8 @@ export default {
         { id: 11, name: 'B3', queueId: 11, x: 2190, y: 845 },
         { id: 12, name: 'C3', queueId: 12, x: 2190, y: 645 },
         { id: 13, name: 'D', queueId: 13, x: 2165, y: 490 },
-        { id: 14, name: 'E', queueId: 14, x: 2165, y: 340 }
+        { id: 14, name: 'E', queueId: 14, x: 2165, y: 340 },
+        { id: 15, name: '非灭菌缓存区', queueId: 15, x: 2630, y: 1280 }
       ],
       logId: 1000, // 添加一个日志ID计数器
       // 输送线当前运行状态-读取PLC
@@ -2272,6 +2361,8 @@ export default {
       dLineQuantity: 0,
       // E线数量-读取PLC
       eLineQuantity: 0,
+      // 非灭菌下货区数量-读取PLC
+      nonSterileunload: 0,
       //上货区电机运行信号（扫码后入队）-读取PLC
       upLoadMotorRunning: {
         bit0: '0', // S1#电机运行信号
@@ -2408,7 +2499,15 @@ export default {
         trayCode: '',
         productName: '',
         isTerile: ''
-      }
+      },
+      // 正在执行的预热托盘号
+      preWarmTrayCode: '',
+      // 正在执行出库的预热托盘号
+      disinfectionTrayCode: '',
+      // 正在执行出库的解析托盘号
+      analysisTrayCode: '',
+      // 正在执行的出库托盘号
+      outWarehouseTrayCode: ''
     };
   },
   computed: {
@@ -2429,6 +2528,15 @@ export default {
     // ipcRenderer.on('receivedMsg', (event, values, values2) => {
     //   // 使用位运算优化赋值
     //   const getBit = (word, bitIndex) => ((word >> bitIndex) & 1).toString();
+
+    //   // 允许进料反馈
+    //   let word4 = this.convertToWord(values.DBW4);
+    //   this.allowFeedBack.bit0 = getBit(word4, 8);
+    //   this.allowFeedBack.bit1 = getBit(word4, 9);
+    //   this.allowFeedBack.bit2 = getBit(word4, 10);
+    //   this.allowFeedBack.bit3 = getBit(word4, 11);
+    //   this.allowFeedBack.bit4 = getBit(word4, 12);
+    //   this.allowFeedBack.bit5 = getBit(word4, 13);
 
     //   // A线电机运行信号 (DBW6)
     //   let word6 = this.convertToWord(values.DBW6);
@@ -2516,7 +2624,12 @@ export default {
     //   this.cLineQuantity.c1 = Number(values.DBW46);
     //   this.cLineQuantity.c2 = Number(values.DBW48);
     //   this.cLineQuantity.c3 = Number(values.DBW50);
-
+    //   // D灭菌柜数量-读取PLC
+    //   this.dDisinfectionQuantity = Number(values.DBW52);
+    //   // E灭菌柜数量-读取PLC
+    //   this.eDisinfectionQuantity = Number(values.DBW58);
+    //   // 非灭菌区数量-读取PLC
+    //   this.nonSterileunload = Number(values.DBW32);
     //   // 上货区电机运行信号（扫码后入队） (DBW64)
     //   let word64 = this.convertToWord(values.DBW64);
     //   this.upLoadMotorRunning.bit0 = getBit(word64, 8);
@@ -2797,32 +2910,36 @@ export default {
 
             if (targetIndex !== -1) {
               const targetTray = this.queues[1].trayInfo[targetIndex];
-
               if (targetTray.isTerile === 0) {
-                // 如果消毒属性是不消毒，直接把该托盘在分发区的数据删除
-                // 输出日志
-                this.addLog(
-                  `分发区中未处理过的第一个托盘数据：${targetTray.trayCode}，消毒属性：${targetTray.isTerile}，不消毒，直接发走`
-                );
-                this.queues[1].trayInfo.splice(targetIndex, 1);
-                // 给PLC发送出货消息
-                // 展示出货信息
+                // 给PLC发送去立库的命令
+                ipcRenderer.send('writeValuesToPLC', 'DBW542', 1);
+                setTimeout(() => {
+                  ipcRenderer.send('writeValuesToPLC', 'DBW542', 0);
+                }, 500);
               } else {
-                // 如果消毒属性是消毒，把queues数组该元素的state设置为'1'
-                // 输出日志
-                this.addLog(
-                  `分发区中未处理过的第一个托盘数据：${targetTray.trayCode}，消毒属性：${targetTray.isTerile}`
-                );
-                this.queues[1].trayInfo[targetIndex] = {
-                  ...targetTray,
-                  state: '1'
-                };
+                // 给PLC发送去预热房的命令
+                ipcRenderer.send('writeValuesToPLC', 'DBW542', 2);
+                setTimeout(() => {
+                  ipcRenderer.send('writeValuesToPLC', 'DBW542', 0);
+                }, 500);
               }
+              this.queues[1].trayInfo[targetIndex] = {
+                ...targetTray,
+                state: '1'
+              };
             } else {
               // 报错
               this.addLog('分发区中未处理过的第一个托盘数据不存在', 'error');
             }
           }
+        }
+      }
+    },
+    requestUploadTaskPreheatingCar: {
+      async handler(newVal) {
+        // 请求上位机下发任务(预热小车前）
+        if (newVal === '1') {
+          this.sendToPreheatingRoom();
         }
       }
     },
@@ -2832,13 +2949,79 @@ export default {
         // 判断与老数据相比是增加1还是减少1，如果增加1则把分发区的第一个托盘信息加入到缓冲区，同时把原队列的第一个托盘信息删除
         if (newVal > oldVal) {
           if (this.queues[1].trayInfo.length > 0) {
-            this.addLog(this.queues[1].trayInfo[0].trayCode + '进入缓冲区。');
-            // 把分发区的托盘信息加入到缓冲区
-            this.queues[2].trayInfo.push(this.queues[1].trayInfo[0]);
-            this.queues[1].trayInfo.shift();
+            // 查找state为1，并且isTerile为1的第一个托盘，加入到缓冲区队列
+            const targetTrayIndex = this.queues[1].trayInfo.findIndex(
+              (tray) => tray.state === '1' && tray.isTerile === 1
+            );
+            if (targetTrayIndex !== -1) {
+              // 找到符合条件的托盘
+              this.addLog(
+                this.queues[1].trayInfo[targetTrayIndex].trayCode +
+                  '进入缓冲区。'
+              );
+              // 把符合条件的托盘信息加入到缓冲区
+              this.queues[2].trayInfo.push(
+                this.queues[1].trayInfo[targetTrayIndex]
+              );
+              // 从分发区删除该托盘信息
+              this.queues[1].trayInfo.splice(targetTrayIndex, 1);
+            } else {
+              this.addLog('分发区没有找到符合条件的托盘(已执行且灭菌的托盘)');
+            }
             // 如果bufferQuantity达到16个，则显示小车1设置去哪个预热房的按钮
             if (newVal === 16) {
               this.showCar1SetPreheatingRoom = true;
+            }
+          }
+        } else {
+          // 减少到0说明不再执行了。
+          if (newVal === 0) {
+            this.preWarmTrayCode = '';
+          }
+        }
+      }
+    },
+    // 监听非灭菌缓存区数量变化,
+    nonSterileunload: {
+      async handler(newVal, oldVal) {
+        if (newVal > oldVal) {
+          if (this.queues[1].trayInfo.length > 0) {
+            // 查找state为1，并且isTerile为1的第一个托盘，加入到缓冲区队列
+            const targetTrayIndex = this.queues[1].trayInfo.findIndex(
+              (tray) => tray.state === '1' && tray.isTerile === 0
+            );
+            if (targetTrayIndex !== -1) {
+              // 找到符合条件的托盘
+              this.addLog(
+                this.queues[1].trayInfo[targetTrayIndex].trayCode +
+                  '进入非灭菌缓存区。'
+              );
+              // 把符合条件的托盘信息加入到缓冲区
+              this.queues[14].trayInfo.push(
+                this.queues[1].trayInfo[targetTrayIndex]
+              );
+              // 从分发区删除该托盘信息
+              this.queues[1].trayInfo.splice(targetTrayIndex, 1);
+            } else {
+              this.addLog('分发区没有找到符合条件的托盘(已执行且不灭菌的托盘)');
+            }
+            // 如果bufferQuantity达到16个，则显示小车1设置去哪个预热房的按钮
+            if (newVal === 16) {
+              this.showCar1SetPreheatingRoom = true;
+            }
+          }
+        } else {
+          // 说明是减少了,说明是出库了
+          if (newVal < oldVal) {
+            if (this.queues[14].trayInfo.length > 0) {
+              // 把B3队列的第一个元素数据展示到下货
+              this.addLog(
+                `托盘信息：${this.queues[14].trayInfo[0].trayCode} 出库`
+              );
+              this.currentOutTrayInfo = this.queues[14].trayInfo[0];
+              console.log(this.currentOutTrayInfo);
+              // 删除B3队列的第一个元素
+              this.queues[14].trayInfo.shift();
             }
           }
         }
@@ -2858,6 +3041,11 @@ export default {
             this.showCar1SetPreheatingRoom = false;
           }
         }
+      } else {
+        // 说明是减少了,说明是出库了
+        if (newVal === 0) {
+          this.disinfectionTrayCode = '';
+        }
       }
     },
     // 监听B1数量变化
@@ -2874,6 +3062,11 @@ export default {
             this.showCar1SetPreheatingRoom = false;
           }
         }
+      } else {
+        // 说明是减少了,说明是出库了
+        if (newVal === 0) {
+          this.disinfectionTrayCode = '';
+        }
       }
     },
     // 监听C1数量变化
@@ -2889,6 +3082,11 @@ export default {
           if (this.queues[2].trayInfo.length === 0) {
             this.showCar1SetPreheatingRoom = false;
           }
+        }
+      } else {
+        // 说明是减少了,说明是出库了
+        if (newVal === 0) {
+          this.disinfectionTrayCode = '';
         }
       }
     },
@@ -3202,6 +3400,54 @@ export default {
         }
       }
     },
+    // 监听D数量变化,
+    dLineQuantity(newVal, oldVal) {
+      // 说明是减少了,说明是出库了
+      if (newVal < oldVal) {
+        // 先判断当前选择发送的是D么
+        if (this.outWarehouseSelected === 'D') {
+          // 把D第一个元素数据展示到下货 删除，同时把D队列的第一个元素删除
+          if (this.queues[12].trayInfo.length > 0) {
+            // 把D队列的第一个元素数据展示到下货
+            this.addLog(
+              `托盘信息：${this.queues[12].trayInfo[0].trayCode} 出库`
+            );
+            this.currentOutTrayInfo = this.queues[12].trayInfo[0];
+            // 删除D队列的第一个元素
+            this.queues[12].trayInfo.shift();
+          } else {
+            this.addLog('D队列空，无法出库');
+          }
+        } else {
+          // 不是设置出库D的，但是D却减少了，说明有问题，直接报警
+          this.addLog('未设置出库D，程序错误！报警！');
+        }
+      }
+    },
+    // 监听E数量变化,
+    eLineQuantity(newVal, oldVal) {
+      // 说明是减少了,说明是出库了
+      if (newVal < oldVal) {
+        // 先判断当前选择发送的是E么
+        if (this.outWarehouseSelected === 'E') {
+          // 把E第一个元素数据展示到下货 删除，同时把E队列的第一个元素删除
+          if (this.queues[13].trayInfo.length > 0) {
+            // 把E队列的第一个元素数据展示到下货
+            this.addLog(
+              `托盘信息：${this.queues[13].trayInfo[0].trayCode} 出库`
+            );
+            this.currentOutTrayInfo = this.queues[13].trayInfo[0];
+            // 删除E队列的第一个元素
+            this.queues[13].trayInfo.shift();
+          } else {
+            this.addLog('E队列空，无法出库');
+          }
+        } else {
+          // 不是设置出库E的，但是E却减少了，说明有问题，直接报警
+          this.addLog('未设置出库E，程序错误！报警！');
+        }
+      }
+    },
     // ---- 新增：监听小车位置光电信号 ----
     // 监听小车1 (预热前) 位置信号
     preheatingCar1PhotoelectricSignal: {
@@ -3407,6 +3653,10 @@ export default {
     },
     changeQueueExpanded() {
       this.isQueueExpanded = !this.isQueueExpanded;
+      // 当展开面板时，刷新当前选中队列的托盘信息
+      if (this.isQueueExpanded && this.selectedQueueIndex !== -1) {
+        this.showTrays(this.selectedQueueIndex);
+      }
     },
     toggleButtonState(button) {
       this.buttonStates = {
@@ -3967,6 +4217,18 @@ export default {
     updateBufferQuantity(change) {
       this.bufferQuantity = Math.max(0, parseInt(this.bufferQuantity) + change);
     },
+    updateNonSterileUnload(change) {
+      this.nonSterileunload = Math.max(
+        0,
+        parseInt(this.nonSterileunload) + change
+      ).toString();
+    },
+    updateDLineQuantity(change) {
+      this.dLineQuantity = Math.max(0, parseInt(this.dLineQuantity) + change);
+    },
+    updateELineQuantity(change) {
+      this.eLineQuantity = Math.max(0, parseInt(this.eLineQuantity) + change);
+    },
     // 发送到预热房的方法
     sendToPreheatingRoom() {
       if (!this.preheatingRoomSelected) {
@@ -4013,6 +4275,8 @@ export default {
               tray.sendTo = targetSendTo;
               trayFoundAndUpdated = true;
               this.addLog(`托盘 ${tray.trayCode} 将发送到 ${targetSendTo}`);
+              this.preWarmTrayCode = tray.trayCode;
+              this.sendPreheatingToPLC(targetSendTo);
               break; // 找到并更新后退出循环
             }
           }
@@ -4025,13 +4289,43 @@ export default {
           this.$message.warning('缓冲区队列没有需要发送的托盘信息');
           return;
         }
-
-        this.addLog(
-          `执行发送到预热房 ${this.preheatingRoomSelected} (${targetSendTo}) 的操作`
-        );
         this.$message.success(`已将托盘分配到预热房 ${targetSendTo}`);
       } else {
         this.$message.error('无效的预热房选项');
+      }
+    },
+    sendPreheatingToPLC(targetSendTo) {
+      if (targetSendTo === 'A1-1') {
+        // 使用nodeS7协议，给PLC发送 011预热房A1-1启用进货、012预热房A1-2启用进货
+        ipcRenderer.send('writeValuesToPLC', 'DBW524', 11);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
+        }, 500);
+      } else if (targetSendTo === 'A1-2') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW524', 12);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
+        }, 500);
+      } else if (targetSendTo === 'B1-1') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW524', 21);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
+        }, 500);
+      } else if (targetSendTo === 'B1-2') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW524', 22);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
+        }, 500);
+      } else if (targetSendTo === 'C1-1') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW524', 31);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
+        }, 500);
+      } else if (targetSendTo === 'C1-2') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW524', 32);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
+        }, 500);
       }
     },
     // 发送到灭菌房的方法
@@ -4043,6 +4337,41 @@ export default {
         this.$message.warning('请先选择完整');
         return;
       }
+      if (this.disinfectionRoomSelectedFrom === 'A') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW526', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW526', 0);
+        }, 500);
+        this.disinfectionTrayCode = this.queues[3].trayInfo[0].trayCode;
+      } else if (this.disinfectionRoomSelectedFrom === 'B') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW526', 2);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW526', 0);
+        }, 500);
+        this.disinfectionTrayCode = this.queues[4].trayInfo[0].trayCode;
+      } else if (this.disinfectionRoomSelectedFrom === 'C') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW526', 3);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW526', 0);
+        }, 500);
+        this.disinfectionTrayCode = this.queues[5].trayInfo[0].trayCode;
+      }
+      if (this.disinfectionRoomSelectedTo === 'A') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW528', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW528', 0);
+        }, 500);
+      } else if (this.disinfectionRoomSelectedTo === 'B') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW528', 2);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW528', 0);
+        }, 500);
+      } else if (this.disinfectionRoomSelectedTo === 'C') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW528', 3);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW528', 0);
+        }, 500);
+      }
       this.addLog(
         `执行发送从${this.disinfectionRoomSelectedFrom}预热房到${this.disinfectionRoomSelectedTo}灭菌房操作`
       );
@@ -4050,13 +4379,88 @@ export default {
         `已发送从${this.disinfectionRoomSelectedFrom}预热房到${this.disinfectionRoomSelectedTo}灭菌房`
       );
     },
-    // 发送到立库的方法
-    sendToWarehouse() {
-      if (!this.warehouseSelectedTo) {
+    sendDisinfectionRoomToWarehouse() {
+      if (!this.warehouseSelectedFrom || !this.warehouseSelectedTo) {
         this.$message.warning('请先选择完整');
         return;
       }
-      this.addLog(`执行发送${this.warehouseSelectedTo}出库操作`);
+      if (this.warehouseSelectedFrom === 'A') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW530', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
+        }, 500);
+      } else if (this.warehouseSelectedFrom === 'B') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW530', 2);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
+        }, 500);
+      } else if (this.warehouseSelectedFrom === 'C') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW530', 3);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
+        }, 500);
+      }
+      if (this.warehouseSelectedTo === 'A') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW532', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW532', 0);
+        }, 500);
+      } else if (this.warehouseSelectedTo === 'B') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW532', 2);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW532', 0);
+        }, 500);
+      } else if (this.warehouseSelectedTo === 'C') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW532', 3);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW532', 0);
+        }, 500);
+      }
+      this.addLog(
+        `执行发送从灭菌柜${this.warehouseSelectedFrom}出库到解析库${this.warehouseSelectedTo}入库操作`
+      );
+      this.$message.success(
+        `已发送从灭菌柜${this.warehouseSelectedFrom}出库到解析库${this.warehouseSelectedTo}入库`
+      );
+    },
+    // 发送到立库的方法
+    sendToWarehouse() {
+      if (!this.outWarehouseSelected) {
+        this.$message.warning('请先选择完整');
+        return;
+      }
+      if (this.outWarehouseSelected === 'A') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW534', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
+        }, 500);
+      } else if (this.outWarehouseSelected === 'B') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW534', 2);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
+        }, 500);
+      } else if (this.outWarehouseSelected === 'C') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW534', 3);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
+        }, 500);
+      } else if (this.outWarehouseSelected === 'D') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW536', 1);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
+        }, 500);
+      } else if (this.outWarehouseSelected === 'E') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW536', 2);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
+        }, 500);
+      } else if (this.outWarehouseSelected === 'DE') {
+        ipcRenderer.send('writeValuesToPLC', 'DBW536', 3);
+        setTimeout(() => {
+          ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
+        }, 500);
+      }
+      this.addLog(`${this.outWarehouseSelected}执行发送出库操作`);
     },
     // 显示小车选择按钮
     showCarSelect() {
@@ -4087,6 +4491,58 @@ export default {
       setTimeout(() => {
         this.requestUploadTaskPreheatingCar = '0';
       }, 1000);
+    },
+    handleAllowUpload(type) {
+      if (type === '1') {
+        console.log('一楼', this.allowUploadOne);
+        if (this.allowUploadOne) {
+          ipcRenderer.send('writeValuesToPLC', 'DBW512', 1);
+          this.addLog('一楼允许上货');
+        } else {
+          ipcRenderer.send('writeValuesToPLC', 'DBW512', 0);
+          this.addLog('一楼禁止上货');
+        }
+      } else if (type === '2') {
+        if (this.allowUploadTwo) {
+          ipcRenderer.send('writeValuesToPLC', 'DBW514', 1);
+          this.addLog('二楼允许上货');
+        } else {
+          ipcRenderer.send('writeValuesToPLC', 'DBW514', 0);
+          this.addLog('二楼禁止上货');
+        }
+      } else if (type === '3') {
+        if (this.allowUploadThree) {
+          ipcRenderer.send('writeValuesToPLC', 'DBW516', 1);
+          this.addLog('三楼允许上货');
+        } else {
+          ipcRenderer.send('writeValuesToPLC', 'DBW516', 0);
+          this.addLog('三楼禁止上货');
+        }
+      } else if (type === '4') {
+        if (this.allowUploadFour) {
+          ipcRenderer.send('writeValuesToPLC', 'DBW518', 1);
+          this.addLog('四楼允许上货');
+        } else {
+          ipcRenderer.send('writeValuesToPLC', 'DBW518', 0);
+          this.addLog('四楼禁止上货');
+        }
+      } else if (type === 'D') {
+        if (this.allowUploadD) {
+          ipcRenderer.send('writeValuesToPLC', 'DBW520', 1);
+          this.addLog('D允许上货');
+        } else {
+          ipcRenderer.send('writeValuesToPLC', 'DBW520', 0);
+          this.addLog('D禁止上货');
+        }
+      } else if (type === 'E') {
+        if (this.allowUploadE) {
+          ipcRenderer.send('writeValuesToPLC', 'DBW522', 1);
+          this.addLog('E允许上货');
+        } else {
+          ipcRenderer.send('writeValuesToPLC', 'DBW522', 0);
+          this.addLog('E禁止上货');
+        }
+      }
     }
   }
 };
@@ -4893,7 +5349,6 @@ export default {
     box-sizing: border-box;
     transition: all 0.3s ease;
     pointer-events: auto;
-    height: calc(100% - 40px);
     /* 基础样式 */
     .queue-section {
       background: rgba(30, 42, 56, 0.95);
