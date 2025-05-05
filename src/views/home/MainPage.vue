@@ -3043,7 +3043,9 @@ export default {
         }
       } else {
         // 说明是减少了,说明是出库了
+        console.log('a1减少', newVal);
         if (newVal === 0) {
+          console.log('a1减少为0');
           this.disinfectionTrayCode = '';
         }
       }
@@ -3129,6 +3131,11 @@ export default {
           // 不是设置发往A2的，但是A2却减少了，说明有问题，直接报警
           this.addLog('未设置发送到A2，程序错误！报警！');
         }
+      } else {
+        // 说明是减少了,说明是出库了
+        if (newVal === 0) {
+          this.analysisTrayCode = '';
+        }
       }
     },
     // 监视B2数量变化
@@ -3170,6 +3177,11 @@ export default {
           // 不是设置发往B2的，但是B2却减少了，说明有问题，直接报警
           this.addLog('未设置发送到B2，程序错误！报警！');
         }
+      } else {
+        // 说明是减少了,说明是出库了
+        if (newVal === 0) {
+          this.analysisTrayCode = '';
+        }
       }
     },
     // 监视C2数量变化
@@ -3210,6 +3222,11 @@ export default {
         } else {
           // 不是设置发往C2的，但是C2却减少了，说明有问题，直接报警
           this.addLog('未设置发送到C2，程序错误！报警！');
+        }
+      } else {
+        // 说明是减少了,说明是出库了
+        if (newVal === 0) {
+          this.analysisTrayCode = '';
         }
       }
     },
@@ -3268,6 +3285,9 @@ export default {
               this.queues[9].trayInfo.shift();
             } else {
               this.addLog('A3队列空，无法出库');
+            }
+            if (newVal === 0) {
+              this.outWarehouseTrayCode = '';
             }
           } else {
             // 不是设置出库A3的，但是A3却减少了，说明有问题，直接报警
@@ -3334,6 +3354,9 @@ export default {
             // 不是设置出库B3的，但是B3却减少了，说明有问题，直接报警
             this.addLog('未设置出库B3，程序错误！报警！');
           }
+          if (newVal === 0) {
+            this.outWarehouseTrayCode = '';
+          }
         }
       }
     },
@@ -3396,6 +3419,9 @@ export default {
           } else {
             // 不是设置出库C3的，但是C3却减少了，说明有问题，直接报警
             this.addLog('未设置出库C3，程序错误！报警！');
+          }
+          if (newVal === 0) {
+            this.outWarehouseTrayCode = '';
           }
         }
       }
@@ -4212,7 +4238,7 @@ export default {
       this[quantityObj][key] = Math.max(
         0,
         parseInt(this[quantityObj][key]) + change
-      ).toString();
+      );
     },
     updateBufferQuantity(change) {
       this.bufferQuantity = Math.max(0, parseInt(this.bufferQuantity) + change);
@@ -4221,7 +4247,7 @@ export default {
       this.nonSterileunload = Math.max(
         0,
         parseInt(this.nonSterileunload) + change
-      ).toString();
+      );
     },
     updateDLineQuantity(change) {
       this.dLineQuantity = Math.max(0, parseInt(this.dLineQuantity) + change);
@@ -4389,16 +4415,19 @@ export default {
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
         }, 500);
+        this.analysisTrayCode = this.queues[6].trayInfo[0].trayCode;
       } else if (this.warehouseSelectedFrom === 'B') {
         ipcRenderer.send('writeValuesToPLC', 'DBW530', 2);
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
         }, 500);
+        this.analysisTrayCode = this.queues[7].trayInfo[0].trayCode;
       } else if (this.warehouseSelectedFrom === 'C') {
         ipcRenderer.send('writeValuesToPLC', 'DBW530', 3);
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
         }, 500);
+        this.analysisTrayCode = this.queues[8].trayInfo[0].trayCode;
       }
       if (this.warehouseSelectedTo === 'A') {
         ipcRenderer.send('writeValuesToPLC', 'DBW532', 1);
@@ -4434,26 +4463,31 @@ export default {
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
         }, 500);
+        this.outWarehouseTrayCode = this.queues[9].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'B') {
         ipcRenderer.send('writeValuesToPLC', 'DBW534', 2);
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
         }, 500);
+        this.outWarehouseTrayCode = this.queues[10].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'C') {
         ipcRenderer.send('writeValuesToPLC', 'DBW534', 3);
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
         }, 500);
+        this.outWarehouseTrayCode = this.queues[11].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'D') {
         ipcRenderer.send('writeValuesToPLC', 'DBW536', 1);
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
         }, 500);
+        this.outWarehouseTrayCode = this.queues[12].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'E') {
         ipcRenderer.send('writeValuesToPLC', 'DBW536', 2);
         setTimeout(() => {
           ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
         }, 500);
+        this.outWarehouseTrayCode = this.queues[13].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'DE') {
         ipcRenderer.send('writeValuesToPLC', 'DBW536', 3);
         setTimeout(() => {
