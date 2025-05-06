@@ -3576,9 +3576,89 @@ export default {
         }
         // 可以考虑增加 else 分支处理回到 O1 的逻辑，如果需要的话
       }
-    }
+    },
     // ---- 监听小车位置光电信号结束 ----
     // 监听
+
+    // ---- 新增：监听指定队列的 trayInfo 变化 ----
+    'queues.3.trayInfo': {
+      // 监听 A1 (ID: 4)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(4);
+      }
+    },
+    'queues.4.trayInfo': {
+      // 监听 B1 (ID: 5)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(5);
+      }
+    },
+    'queues.5.trayInfo': {
+      // 监听 C1 (ID: 6)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(6);
+      }
+    },
+    'queues.6.trayInfo': {
+      // 监听 A2 (ID: 7)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(7);
+      }
+    },
+    'queues.7.trayInfo': {
+      // 监听 B2 (ID: 8)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(8);
+      }
+    },
+    'queues.8.trayInfo': {
+      // 监听 C2 (ID: 9)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(9);
+      }
+    },
+    'queues.9.trayInfo': {
+      // 监听 A3 (ID: 10)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(10);
+      }
+    },
+    'queues.10.trayInfo': {
+      // 监听 B3 (ID: 11)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(11);
+      }
+    },
+    'queues.11.trayInfo': {
+      // 监听 C3 (ID: 12)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(12);
+      }
+    },
+    'queues.12.trayInfo': {
+      // 监听 D (ID: 13)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(13);
+      }
+    },
+    'queues.13.trayInfo': {
+      // 监听 E (ID: 14)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(14);
+      }
+    }
+    // ---- 监听指定队列的 trayInfo 变化结束 ----
   },
   methods: {
     // 判断是否消毒，如果消毒则此托盘进入分发区队列，如果不消毒直接发走
@@ -4577,6 +4657,16 @@ export default {
           this.addLog('E禁止上货');
         }
       }
+    },
+    // 更新数据库队列信息
+    updateQueueInfo(id) {
+      const param = {
+        id: id,
+        trayInfo: JSON.stringify(this.queues[id - 1].trayInfo)
+      };
+      HttpUtil.post('/queue_info/update', param).catch((err) => {
+        this.$message.error(err);
+      });
     }
   }
 };
