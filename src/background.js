@@ -289,9 +289,6 @@ app.on('ready', () => {
       ? mainWindow.setFullScreen(false)
       : mainWindow.setFullScreen(true);
   });
-  // 程序启动时判断是否存在报表、日志等本地文件夹，没有就创建
-  createFile('batchReport.grf');
-  createFile('boxreport.grf');
   // 定义自定义事件
   ipcMain.on('writeLogToLocal', (event, arg) => {
     fs.appendFile(
@@ -301,26 +298,7 @@ app.on('ready', () => {
       function (err) {}
     );
   });
-  // 同步映射加速器数据
-  // synAccData();
 });
-
-function synAccData() {
-  HttpUtil.get('/box/synAccData')
-    .then(() => {
-      pollingST = setTimeout(() => {
-        clearTimeout(pollingST);
-        synAccData();
-      }, 2000);
-    })
-    .catch((err) => {
-      HttpUtil.get('/box/recoverAccData').catch(() => {});
-      pollingST = setTimeout(() => {
-        clearTimeout(pollingST);
-        synAccData();
-      }, 2000);
-    });
-}
 
 function conPLC() {
   logger.info('开始连接PLC');
@@ -473,60 +451,6 @@ function sendHeartToPLC() {
     times++;
     writeValuesToPLC('DBW500', nowValue);
   }, 200); // 每200毫秒执行一次交替
-}
-
-function createFile(fileNameVal) {
-  const sourcePath = path.join(__static, './report', fileNameVal); // 要复制的文件的路径=
-  const destinationPath = 'D://css_temp_data/report'; // 目标文件夹的路径
-
-  // 检查源文件是否存在
-  if (!fs.existsSync(sourcePath)) {
-    console.error('源文件不存在');
-    return;
-  }
-
-  // 获取源文件的文件名
-  const fileName = path.basename(sourcePath);
-
-  // 构建目标文件的完整路径
-  const destinationFilePath = path.join(destinationPath, fileName);
-
-  // 检查目标文件夹是否存在，如果不存在则创建它
-  if (!fs.existsSync(destinationPath)) {
-    try {
-      fs.mkdirSync(destinationPath, { recursive: true });
-      console.log('目标文件夹已成功创建');
-    } catch (err) {
-      console.error('创建目标文件夹时出现错误：', err);
-      return;
-    }
-  }
-
-  const destinationLogPath = 'D://css_temp_data/log'; // 目标文件夹的路径
-
-  // 创建日志的文件夹
-  if (!fs.existsSync(destinationLogPath)) {
-    try {
-      fs.mkdirSync(destinationLogPath, { recursive: true });
-      console.log('目标文件夹已成功创建');
-    } catch (err) {
-      console.error('创建目标文件夹时出现错误：', err);
-      return;
-    }
-  }
-
-  // 检查目标文件是否已经存在
-  if (fs.existsSync(destinationFilePath)) {
-    console.log('目标文件已存在，跳过复制操作');
-  } else {
-    try {
-      // 使用流的方式复制文件
-      fs.copyFileSync(sourcePath, destinationFilePath);
-      console.log('文件已成功复制到目标文件夹');
-    } catch (err) {
-      console.error('文件复制过程中出现错误：', err);
-    }
-  }
 }
 
 var variables = {
