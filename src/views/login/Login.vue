@@ -136,7 +136,7 @@
 import { ipcRenderer } from 'electron';
 import HttpUtil from '@/utils/HttpUtil';
 import axios from 'axios';
-import ipcBridge from '@/utils/ipcBridge';
+const remote = require('electron').remote;
 export default {
   name: 'Login',
   components: {},
@@ -247,7 +247,7 @@ export default {
       HttpUtil.post('/login/login', param)
         .then((res) => {
           if (res.data) {
-            ipcBridge.setGlobal('userInfo', res.data);
+            remote.getGlobal('sharedObject').userInfo = res.data;
             setTimeout(() => {
               this.loadingStatus = false;
               // 跳转主页
@@ -266,12 +266,12 @@ export default {
           this.$message.error(err);
           this.loadingStatus = false;
         });
-      // 本地测试无需用账号时，用下面代码
-      // ipcBridge.setGlobal('userInfo', {
+      // 本地测试时，注释掉上面代码，使用下面代码
+      // remote.getGlobal('sharedObject').userInfo = {
       //   userCode: this.userCode,
       //   userPassword: this.userPassword,
       //   userName: '测试'
-      // });
+      // };
       // setTimeout(() => {
       //   this.loadingStatus = false;
       //   // 跳转主页
