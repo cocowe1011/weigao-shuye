@@ -3496,6 +3496,27 @@ export default {
     // ---- 监听小车位置数值变化结束 ----
 
     // ---- 新增：监听指定队列的 trayInfo 变化 ----
+    'queues.0.trayInfo': {
+      // 监听上货区 (ID: 1)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(1);
+      }
+    },
+    'queues.1.trayInfo': {
+      // 监听分发区 (ID: 2)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(2);
+      }
+    },
+    'queues.2.trayInfo': {
+      // 监听缓存区 (ID: 3)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(3);
+      }
+    },
     'queues.3.trayInfo': {
       // 监听 A1 (ID: 4)
       deep: true,
@@ -3571,6 +3592,13 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(14);
+      }
+    },
+    'queues.14.trayInfo': {
+      // 监听非灭菌缓存区 (ID: 15)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(15);
       }
     }
     // ---- 监听指定队列的 trayInfo 变化结束 ----
