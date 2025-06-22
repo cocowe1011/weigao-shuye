@@ -263,7 +263,7 @@ app.on('ready', () => {
       const jarPath = path.join(
         __static,
         './jarlib',
-        'wcs-agv-jinan-middle-anxin.jar'
+        'ccs-disinfection-changzhou-middle.jar'
       );
 
       // 优化的Java启动参数
