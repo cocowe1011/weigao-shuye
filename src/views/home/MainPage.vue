@@ -2519,181 +2519,181 @@ export default {
   mounted() {
     this.initializeMarkers();
     this.loadQueueInfoFromDatabase();
-    // ipcRenderer.on('receivedMsg', (event, values, values2) => {
-    //   // 使用位运算优化赋值
-    //   const getBit = (word, bitIndex) => ((word >> bitIndex) & 1).toString();
+    ipcRenderer.on('receivedMsg', (event, values, values2) => {
+      // 使用位运算优化赋值
+      const getBit = (word, bitIndex) => ((word >> bitIndex) & 1).toString();
 
-    //   // 允许进料反馈
-    //   let word4 = this.convertToWord(values.DBW4);
-    //   this.allowFeedBack.bit0 = getBit(word4, 8);
-    //   this.allowFeedBack.bit1 = getBit(word4, 9);
-    //   this.allowFeedBack.bit2 = getBit(word4, 10);
-    //   this.allowFeedBack.bit3 = getBit(word4, 11);
-    //   this.allowFeedBack.bit4 = getBit(word4, 12);
-    //   this.allowFeedBack.bit5 = getBit(word4, 13);
+      // 允许进料反馈
+      let word4 = this.convertToWord(values.DBW4);
+      this.allowFeedBack.bit0 = getBit(word4, 8);
+      this.allowFeedBack.bit1 = getBit(word4, 9);
+      this.allowFeedBack.bit2 = getBit(word4, 10);
+      this.allowFeedBack.bit3 = getBit(word4, 11);
+      this.allowFeedBack.bit4 = getBit(word4, 12);
+      this.allowFeedBack.bit5 = getBit(word4, 13);
 
-    //   // A线电机运行信号 (DBW6)
-    //   let word6 = this.convertToWord(values.DBW6);
-    //   this.aLineMotorRunning.bit0 = getBit(word6, 8);
-    //   this.aLineMotorRunning.bit1 = getBit(word6, 9);
-    //   this.aLineMotorRunning.bit2 = getBit(word6, 10);
-    //   this.aLineMotorRunning.bit3 = getBit(word6, 11);
-    //   this.aLineMotorRunning.bit4 = getBit(word6, 12);
-    //   this.aLineMotorRunning.bit5 = getBit(word6, 13);
+      // A线电机运行信号 (DBW6)
+      let word6 = this.convertToWord(values.DBW6);
+      this.aLineMotorRunning.bit0 = getBit(word6, 8);
+      this.aLineMotorRunning.bit1 = getBit(word6, 9);
+      this.aLineMotorRunning.bit2 = getBit(word6, 10);
+      this.aLineMotorRunning.bit3 = getBit(word6, 11);
+      this.aLineMotorRunning.bit4 = getBit(word6, 12);
+      this.aLineMotorRunning.bit5 = getBit(word6, 13);
 
-    //   // A线光电检测信号 (DBW8)
-    //   let word8 = this.convertToWord(values.DBW8);
-    //   this.aLinePhotoelectricSignal.bit0 = getBit(word8, 8);
-    //   this.aLinePhotoelectricSignal.bit1 = getBit(word8, 9);
-    //   this.aLinePhotoelectricSignal.bit2 = getBit(word8, 10);
-    //   this.aLinePhotoelectricSignal.bit3 = getBit(word8, 11);
-    //   this.aLinePhotoelectricSignal.bit4 = getBit(word8, 12);
-    //   this.aLinePhotoelectricSignal.bit5 = getBit(word8, 13);
-    //   this.aLinePhotoelectricSignal.bit6 = getBit(word8, 14);
-    //   this.aLinePhotoelectricSignal.bit7 = getBit(word8, 15);
-    //   this.aLinePhotoelectricSignal.bit8 = getBit(word8, 0);
-    //   this.aLinePhotoelectricSignal.bit9 = getBit(word8, 1);
+      // A线光电检测信号 (DBW8)
+      let word8 = this.convertToWord(values.DBW8);
+      this.aLinePhotoelectricSignal.bit0 = getBit(word8, 8);
+      this.aLinePhotoelectricSignal.bit1 = getBit(word8, 9);
+      this.aLinePhotoelectricSignal.bit2 = getBit(word8, 10);
+      this.aLinePhotoelectricSignal.bit3 = getBit(word8, 11);
+      this.aLinePhotoelectricSignal.bit4 = getBit(word8, 12);
+      this.aLinePhotoelectricSignal.bit5 = getBit(word8, 13);
+      this.aLinePhotoelectricSignal.bit6 = getBit(word8, 14);
+      this.aLinePhotoelectricSignal.bit7 = getBit(word8, 15);
+      this.aLinePhotoelectricSignal.bit8 = getBit(word8, 0);
+      this.aLinePhotoelectricSignal.bit9 = getBit(word8, 1);
 
-    //   // B线电机运行信号 (DBW10)
-    //   let word10 = this.convertToWord(values.DBW10);
-    //   this.bLineMotorRunning.bit0 = getBit(word10, 8);
-    //   this.bLineMotorRunning.bit1 = getBit(word10, 9);
-    //   this.bLineMotorRunning.bit2 = getBit(word10, 10);
-    //   this.bLineMotorRunning.bit3 = getBit(word10, 11);
-    //   this.bLineMotorRunning.bit4 = getBit(word10, 12);
-    //   this.bLineMotorRunning.bit5 = getBit(word10, 13);
+      // B线电机运行信号 (DBW10)
+      let word10 = this.convertToWord(values.DBW10);
+      this.bLineMotorRunning.bit0 = getBit(word10, 8);
+      this.bLineMotorRunning.bit1 = getBit(word10, 9);
+      this.bLineMotorRunning.bit2 = getBit(word10, 10);
+      this.bLineMotorRunning.bit3 = getBit(word10, 11);
+      this.bLineMotorRunning.bit4 = getBit(word10, 12);
+      this.bLineMotorRunning.bit5 = getBit(word10, 13);
 
-    //   // B线光电检测信号 (DBW12)
-    //   let word12 = this.convertToWord(values.DBW12);
-    //   this.bLinePhotoelectricSignal.bit0 = getBit(word12, 8);
-    //   this.bLinePhotoelectricSignal.bit1 = getBit(word12, 9);
-    //   this.bLinePhotoelectricSignal.bit2 = getBit(word12, 10);
-    //   this.bLinePhotoelectricSignal.bit3 = getBit(word12, 11);
-    //   this.bLinePhotoelectricSignal.bit4 = getBit(word12, 12);
-    //   this.bLinePhotoelectricSignal.bit5 = getBit(word12, 13);
-    //   this.bLinePhotoelectricSignal.bit6 = getBit(word12, 14);
-    //   this.bLinePhotoelectricSignal.bit7 = getBit(word12, 15);
-    //   this.bLinePhotoelectricSignal.bit8 = getBit(word12, 0);
-    //   this.bLinePhotoelectricSignal.bit9 = getBit(word12, 1);
+      // B线光电检测信号 (DBW12)
+      let word12 = this.convertToWord(values.DBW12);
+      this.bLinePhotoelectricSignal.bit0 = getBit(word12, 8);
+      this.bLinePhotoelectricSignal.bit1 = getBit(word12, 9);
+      this.bLinePhotoelectricSignal.bit2 = getBit(word12, 10);
+      this.bLinePhotoelectricSignal.bit3 = getBit(word12, 11);
+      this.bLinePhotoelectricSignal.bit4 = getBit(word12, 12);
+      this.bLinePhotoelectricSignal.bit5 = getBit(word12, 13);
+      this.bLinePhotoelectricSignal.bit6 = getBit(word12, 14);
+      this.bLinePhotoelectricSignal.bit7 = getBit(word12, 15);
+      this.bLinePhotoelectricSignal.bit8 = getBit(word12, 0);
+      this.bLinePhotoelectricSignal.bit9 = getBit(word12, 1);
 
-    //   // C线电机运行信号 (DBW14)
-    //   let word14 = this.convertToWord(values.DBW14);
-    //   this.cLineMotorRunning.bit0 = getBit(word14, 8);
-    //   this.cLineMotorRunning.bit1 = getBit(word14, 9);
-    //   this.cLineMotorRunning.bit2 = getBit(word14, 10);
-    //   this.cLineMotorRunning.bit3 = getBit(word14, 11);
-    //   this.cLineMotorRunning.bit4 = getBit(word14, 12);
-    //   this.cLineMotorRunning.bit5 = getBit(word14, 13);
+      // C线电机运行信号 (DBW14)
+      let word14 = this.convertToWord(values.DBW14);
+      this.cLineMotorRunning.bit0 = getBit(word14, 8);
+      this.cLineMotorRunning.bit1 = getBit(word14, 9);
+      this.cLineMotorRunning.bit2 = getBit(word14, 10);
+      this.cLineMotorRunning.bit3 = getBit(word14, 11);
+      this.cLineMotorRunning.bit4 = getBit(word14, 12);
+      this.cLineMotorRunning.bit5 = getBit(word14, 13);
 
-    //   // C线光电检测信号 (DBW16)
-    //   let word16 = this.convertToWord(values.DBW16);
-    //   this.cLinePhotoelectricSignal.bit0 = getBit(word16, 8);
-    //   this.cLinePhotoelectricSignal.bit1 = getBit(word16, 9);
-    //   this.cLinePhotoelectricSignal.bit2 = getBit(word16, 10);
-    //   this.cLinePhotoelectricSignal.bit3 = getBit(word16, 11);
-    //   this.cLinePhotoelectricSignal.bit4 = getBit(word16, 12);
-    //   this.cLinePhotoelectricSignal.bit5 = getBit(word16, 13);
-    //   this.cLinePhotoelectricSignal.bit6 = getBit(word16, 14);
-    //   this.cLinePhotoelectricSignal.bit7 = getBit(word16, 15);
-    //   this.cLinePhotoelectricSignal.bit8 = getBit(word16, 0);
-    //   this.cLinePhotoelectricSignal.bit9 = getBit(word16, 1);
+      // C线光电检测信号 (DBW16)
+      let word16 = this.convertToWord(values.DBW16);
+      this.cLinePhotoelectricSignal.bit0 = getBit(word16, 8);
+      this.cLinePhotoelectricSignal.bit1 = getBit(word16, 9);
+      this.cLinePhotoelectricSignal.bit2 = getBit(word16, 10);
+      this.cLinePhotoelectricSignal.bit3 = getBit(word16, 11);
+      this.cLinePhotoelectricSignal.bit4 = getBit(word16, 12);
+      this.cLinePhotoelectricSignal.bit5 = getBit(word16, 13);
+      this.cLinePhotoelectricSignal.bit6 = getBit(word16, 14);
+      this.cLinePhotoelectricSignal.bit7 = getBit(word16, 15);
+      this.cLinePhotoelectricSignal.bit8 = getBit(word16, 0);
+      this.cLinePhotoelectricSignal.bit9 = getBit(word16, 1);
 
-    //   // 缓冲区数量-读取PLC
-    //   this.bufferQuantity = Number(values.DBW28);
+      // 缓冲区数量-读取PLC
+      this.bufferQuantity = Number(values.DBW28);
 
-    //   // 请求上位机下发任务(判断去灭菌还是非灭菌）
-    //   this.requestUploadTask = Number(values.DBW30);
+      // 请求上位机下发任务(判断去灭菌还是非灭菌）
+      this.requestUploadTask = Number(values.DBW30);
 
-    //   // A线数量-读取PLC
-    //   this.aLineQuantity.a1 = Number(values.DBW34);
-    //   this.aLineQuantity.a2 = Number(values.DBW36);
-    //   this.aLineQuantity.a3 = Number(values.DBW38);
+      // A线数量-读取PLC
+      this.aLineQuantity.a1 = Number(values.DBW34);
+      this.aLineQuantity.a2 = Number(values.DBW36);
+      this.aLineQuantity.a3 = Number(values.DBW38);
 
-    //   // B线数量-读取PLC
-    //   this.bLineQuantity.b1 = Number(values.DBW40);
-    //   this.bLineQuantity.b2 = Number(values.DBW42);
-    //   this.bLineQuantity.b3 = Number(values.DBW44);
+      // B线数量-读取PLC
+      this.bLineQuantity.b1 = Number(values.DBW40);
+      this.bLineQuantity.b2 = Number(values.DBW42);
+      this.bLineQuantity.b3 = Number(values.DBW44);
 
-    //   // C线数量-读取PLC
-    //   this.cLineQuantity.c1 = Number(values.DBW46);
-    //   this.cLineQuantity.c2 = Number(values.DBW48);
-    //   this.cLineQuantity.c3 = Number(values.DBW50);
-    //   // D灭菌柜数量-读取PLC
-    //   this.dDisinfectionQuantity = Number(values.DBW52);
-    //   // E灭菌柜数量-读取PLC
-    //   this.eDisinfectionQuantity = Number(values.DBW58);
-    //   // 非灭菌区数量-读取PLC
-    //   this.nonSterileunload = Number(values.DBW32);
-    //   // 上货区电机运行信号（扫码后入队） (DBW64)
-    //   let word64 = this.convertToWord(values.DBW64);
-    //   this.upLoadMotorRunning.bit0 = getBit(word64, 8);
-    //   this.upLoadMotorRunning.bit1 = getBit(word64, 9);
-    //   this.upLoadMotorRunning.bit2 = getBit(word64, 10);
-    //   this.upLoadMotorRunning.bit3 = getBit(word64, 11);
-    //   this.upLoadMotorRunning.bit4 = getBit(word64, 12);
-    //   this.upLoadMotorRunning.bit5 = getBit(word64, 13);
-    //   this.upLoadMotorRunning.bit6 = getBit(word64, 14);
-    //   this.upLoadMotorRunning.bit7 = getBit(word64, 15);
-    //   this.upLoadMotorRunning.bit8 = getBit(word64, 0);
-    //   this.upLoadMotorRunning.bit9 = getBit(word64, 1);
-    //   this.upLoadMotorRunning.bit10 = getBit(word64, 2);
+      // C线数量-读取PLC
+      this.cLineQuantity.c1 = Number(values.DBW46);
+      this.cLineQuantity.c2 = Number(values.DBW48);
+      this.cLineQuantity.c3 = Number(values.DBW50);
+      // D灭菌柜数量-读取PLC
+      this.dDisinfectionQuantity = Number(values.DBW52);
+      // E灭菌柜数量-读取PLC
+      this.eDisinfectionQuantity = Number(values.DBW58);
+      // 非灭菌区数量-读取PLC
+      this.nonSterileunload = Number(values.DBW32);
+      // 上货区电机运行信号（扫码后入队） (DBW64)
+      let word64 = this.convertToWord(values.DBW64);
+      this.upLoadMotorRunning.bit0 = getBit(word64, 8);
+      this.upLoadMotorRunning.bit1 = getBit(word64, 9);
+      this.upLoadMotorRunning.bit2 = getBit(word64, 10);
+      this.upLoadMotorRunning.bit3 = getBit(word64, 11);
+      this.upLoadMotorRunning.bit4 = getBit(word64, 12);
+      this.upLoadMotorRunning.bit5 = getBit(word64, 13);
+      this.upLoadMotorRunning.bit6 = getBit(word64, 14);
+      this.upLoadMotorRunning.bit7 = getBit(word64, 15);
+      this.upLoadMotorRunning.bit8 = getBit(word64, 0);
+      this.upLoadMotorRunning.bit9 = getBit(word64, 1);
+      this.upLoadMotorRunning.bit10 = getBit(word64, 2);
 
-    //   //上货区输送线光电信号 (DBW66)
-    //   let word66 = this.convertToWord(values.DBW66);
-    //   this.upLoadPhotoelectricSignal.bit0 = getBit(word66, 8);
-    //   this.upLoadPhotoelectricSignal.bit1 = getBit(word66, 9);
-    //   this.upLoadPhotoelectricSignal.bit2 = getBit(word66, 10);
-    //   this.upLoadPhotoelectricSignal.bit3 = getBit(word66, 11);
-    //   this.upLoadPhotoelectricSignal.bit4 = getBit(word66, 12);
-    //   this.upLoadPhotoelectricSignal.bit5 = getBit(word66, 13);
-    //   this.upLoadPhotoelectricSignal.bit6 = getBit(word66, 14);
-    //   this.upLoadPhotoelectricSignal.bit7 = getBit(word66, 15);
-    //   this.upLoadPhotoelectricSignal.bit8 = getBit(word66, 0);
-    //   this.upLoadPhotoelectricSignal.bit9 = getBit(word66, 1);
-    //   this.upLoadPhotoelectricSignal.bit10 = getBit(word66, 2);
+      //上货区输送线光电信号 (DBW66)
+      let word66 = this.convertToWord(values.DBW66);
+      this.upLoadPhotoelectricSignal.bit0 = getBit(word66, 8);
+      this.upLoadPhotoelectricSignal.bit1 = getBit(word66, 9);
+      this.upLoadPhotoelectricSignal.bit2 = getBit(word66, 10);
+      this.upLoadPhotoelectricSignal.bit3 = getBit(word66, 11);
+      this.upLoadPhotoelectricSignal.bit4 = getBit(word66, 12);
+      this.upLoadPhotoelectricSignal.bit5 = getBit(word66, 13);
+      this.upLoadPhotoelectricSignal.bit6 = getBit(word66, 14);
+      this.upLoadPhotoelectricSignal.bit7 = getBit(word66, 15);
+      this.upLoadPhotoelectricSignal.bit8 = getBit(word66, 0);
+      this.upLoadPhotoelectricSignal.bit9 = getBit(word66, 1);
+      this.upLoadPhotoelectricSignal.bit10 = getBit(word66, 2);
 
-    //   // 扫码枪处光电信号 (DBW84)
-    //   let word84 = this.convertToWord(values.DBW84);
-    //   this.scanPhotoelectricSignal.bit0 = getBit(word84, 8);
-    //   this.scanPhotoelectricSignal.bit1 = getBit(word84, 9);
-    //   this.scanPhotoelectricSignal.bit2 = getBit(word84, 10);
-    //   this.scanPhotoelectricSignal.bit3 = getBit(word84, 11);
-    //   this.scanPhotoelectricSignal.bit4 = getBit(word84, 12);
-    //   this.scanPhotoelectricSignal.bit5 = getBit(word84, 13);
-    //   this.scanPhotoelectricSignal.bit6 = getBit(word84, 14);
-    //   this.scanPhotoelectricSignal.bit7 = getBit(word84, 15);
-    //   this.scanPhotoelectricSignal.bit8 = getBit(word84, 0);
+      // 扫码枪处光电信号 (DBW84)
+      let word84 = this.convertToWord(values.DBW84);
+      this.scanPhotoelectricSignal.bit0 = getBit(word84, 8);
+      this.scanPhotoelectricSignal.bit1 = getBit(word84, 9);
+      this.scanPhotoelectricSignal.bit2 = getBit(word84, 10);
+      this.scanPhotoelectricSignal.bit3 = getBit(word84, 11);
+      this.scanPhotoelectricSignal.bit4 = getBit(word84, 12);
+      this.scanPhotoelectricSignal.bit5 = getBit(word84, 13);
+      this.scanPhotoelectricSignal.bit6 = getBit(word84, 14);
+      this.scanPhotoelectricSignal.bit7 = getBit(word84, 15);
+      this.scanPhotoelectricSignal.bit8 = getBit(word84, 0);
 
-    //   // 请求上位机下发任务(预热小车前）
-    //   this.requestUploadTaskPreheatingCar = Number(values.DBW86);
+      // 请求上位机下发任务(预热小车前）
+      this.requestUploadTaskPreheatingCar = Number(values.DBW86);
 
-    //   // 提升机一楼接货站台扫码数据（托盘号）
-    //   this.elevatorOneFloorScanCode = values.DBB160 ?? '';
+      // 提升机一楼接货站台扫码数据（托盘号）
+      this.elevatorOneFloorScanCode = values.DBB160 ?? '';
 
-    //   // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
-    //   this.oneFloorElevatorScanCode = values.DBB190;
+      // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
+      this.oneFloorElevatorScanCode = values.DBB190;
 
-    //   // 提升机二楼接货站台扫码数据（托盘号）
-    //   this.elevatorTwoFloorScanCode = values.DBB220 ?? '';
+      // 提升机二楼接货站台扫码数据（托盘号）
+      this.elevatorTwoFloorScanCode = values.DBB220 ?? '';
 
-    //   // 提升机三楼接货站台扫码数据（托盘号）
-    //   this.elevatorThreeFloorScanCode = values.DBB250 ?? '';
+      // 提升机三楼接货站台扫码数据（托盘号）
+      this.elevatorThreeFloorScanCode = values.DBB250 ?? '';
 
-    //   // 提升机四楼接货站台扫码数据（托盘号）
-    //   this.elevatorFourFloorScanCode = values.DBB280 ?? '';
+      // 提升机四楼接货站台扫码数据（托盘号）
+      this.elevatorFourFloorScanCode = values.DBB280 ?? '';
 
-    //   // 一楼D灭菌柜接货站台扫码数据（托盘号）
-    //   this.elevatorDDisinfectionScanCode = values.DBB310 ?? '';
+      // 一楼D灭菌柜接货站台扫码数据（托盘号）
+      this.elevatorDDisinfectionScanCode = values.DBB310 ?? '';
 
-    //   // 一楼E灭菌柜接货站台扫码数据（托盘号）
-    //   this.elevatorEDisinfectionScanCode = values.DBB340 ?? '';
+      // 一楼E灭菌柜接货站台扫码数据（托盘号）
+      this.elevatorEDisinfectionScanCode = values.DBB340 ?? '';
 
-    //   // 读取小车位置数值
-    //   this.cartPositionValues.cart1 = Number(values.DBW88) || 0;
-    //   this.cartPositionValues.cart2 = Number(values.DBW90) || 0;
-    //   this.cartPositionValues.cart3 = Number(values.DBW92) || 0;
-    //   this.cartPositionValues.cart4 = Number(values.DBW94) || 0;
-    // });
+      // 读取小车位置数值
+      this.cartPositionValues.cart1 = Number(values.DBW88) || 0;
+      this.cartPositionValues.cart2 = Number(values.DBW90) || 0;
+      this.cartPositionValues.cart3 = Number(values.DBW92) || 0;
+      this.cartPositionValues.cart4 = Number(values.DBW94) || 0;
+    });
   },
   watch: {
     // 一楼接货站台光电信号
