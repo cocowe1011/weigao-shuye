@@ -416,6 +416,8 @@ function conPLC() {
           conn.addItems('DBW28');
           // 请求上位机下发任务(判断去灭菌还是非灭菌）
           conn.addItems('DBW30');
+          // 非灭菌缓存区数量
+          conn.addItems('DBW32');
           // A1数量
           conn.addItems('DBW34');
           // A2数量
@@ -522,6 +524,7 @@ var variables = {
   DBW26: 'DB101,INT26', // 输送线故障反馈
   DBW28: 'DB101,INT28', // 缓存区数量
   DBW30: 'DB101,INT30', // 请求上位机下发任务(判断去灭菌还是非灭菌）
+  DBW32: 'DB101,INT32', // 非灭菌缓存区数量
   DBW34: 'DB101,INT34', // A1数量
   DBW36: 'DB101,INT36', // A2数量
   DBW38: 'DB101,INT38', // A3数量
