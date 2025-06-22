@@ -2726,7 +2726,7 @@ export default {
       this.elevatorOneFloorScanCode = values.DBB160 ?? '';
 
       // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
-      this.oneFloorElevatorScanCode = values.DBW190;
+      this.oneFloorElevatorScanCode = values.DBB190;
 
       // 提升机二楼接货站台扫码数据（托盘号）
       this.elevatorTwoFloorScanCode = values.DBB220 ?? '';
@@ -2736,6 +2736,12 @@ export default {
 
       // 提升机四楼接货站台扫码数据（托盘号）
       this.elevatorFourFloorScanCode = values.DBB280 ?? '';
+
+      // 一楼D灭菌柜接货站台扫码数据（托盘号）
+      this.elevatorDDisinfectionScanCode = values.DBB310 ?? '';
+
+      // 一楼E灭菌柜接货站台扫码数据（托盘号）
+      this.elevatorEDisinfectionScanCode = values.DBB340 ?? '';
     });
   },
   watch: {
