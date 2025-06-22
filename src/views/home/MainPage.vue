@@ -2518,6 +2518,7 @@ export default {
   },
   mounted() {
     this.initializeMarkers();
+    this.loadQueueInfoFromDatabase();
     // ipcRenderer.on('receivedMsg', (event, values, values2) => {
     //   // 使用位运算优化赋值
     //   const getBit = (word, bitIndex) => ((word >> bitIndex) & 1).toString();
@@ -3606,14 +3607,23 @@ export default {
   methods: {
     // 判断是否消毒，如果消毒则此托盘进入分发区队列，如果不消毒直接发走
     addToCartLoadQueue(trayCode) {
-      // 通过trayCode 查询this.queues[0].trayInfo的托盘信息
-      const trayInfo = this.queues[0].trayInfo.find(
-        (tray) => tray.trayCode === trayCode
-      );
-      // 托盘信息进入下一队列，并且把托盘信息从this.queues[0].trayInfo中删除
-      this.queues[1].trayInfo.push(trayInfo);
-      this.queues[0].trayInfo.shift();
-      this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
+      // 判断上货区队列是否有托盘信息
+      if (this.queues[0].trayInfo.length > 0) {
+        // 检查第一个托盘的托盘号是否与入参匹配
+        if (this.queues[0].trayInfo[0].trayCode === trayCode) {
+          // 取出队列中的第一个托盘信息
+          const trayInfo = this.queues[0].trayInfo.shift();
+          // 托盘信息进入下一队列
+          this.queues[1].trayInfo.push(trayInfo);
+          this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
+        } else {
+          this.addLog(
+            `托盘号不匹配，读码：${trayCode}，队列第一个托盘：${this.queues[0].trayInfo[0].trayCode}`
+          );
+        }
+      } else {
+        this.addLog(`上货区队列为空，无法执行出库操作`);
+      }
     },
     // 添加货物到上货区队列
     addToUpLoadQueue(trayCode, trayFrom, nonSterile) {
@@ -4623,6 +4633,50 @@ export default {
       HttpUtil.post('/queue_info/update', param).catch((err) => {
         this.$message.error(err);
       });
+    },
+    // 从数据库加载队列信息
+    loadQueueInfoFromDatabase() {
+      HttpUtil.post('/queue_info/queryQueueList', {})
+        .then((res) => {
+          if (res.data && res.data.length > 0) {
+            // 遍历数据库返回的队列信息
+            res.data.forEach((queueData) => {
+              const queueId = queueData.id;
+              const queueIndex = queueId - 1; // 数组索引从0开始，队列ID从1开始
+
+              // 确保队列索引有效
+              if (queueIndex >= 0 && queueIndex < this.queues.length) {
+                try {
+                  // 解析托盘信息JSON字符串
+                  const trayInfo = queueData.trayInfo
+                    ? JSON.parse(queueData.trayInfo)
+                    : [];
+                  // 赋值给对应的队列
+                  this.queues[queueIndex].trayInfo = Array.isArray(trayInfo)
+                    ? trayInfo
+                    : [];
+                  this.addLog(
+                    `已加载队列${queueData.queueName || queueId}的托盘信息，共${
+                      this.queues[queueIndex].trayInfo.length
+                    }个托盘`
+                  );
+                } catch (error) {
+                  console.error(`解析队列${queueId}的托盘信息失败:`, error);
+                  this.queues[queueIndex].trayInfo = [];
+                  this.addLog(`队列${queueId}托盘信息解析失败，已重置为空`);
+                }
+              }
+            });
+            this.addLog('队列信息加载完成');
+          } else {
+            this.addLog('数据库中暂无队列信息');
+          }
+        })
+        .catch((err) => {
+          console.error('加载队列信息失败:', err);
+          this.$message.error('加载队列信息失败: ' + err);
+          this.addLog('队列信息加载失败');
+        });
     }
   }
 };
