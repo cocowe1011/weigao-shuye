@@ -198,10 +198,7 @@ export default {
           }
         });
 
-        const response = await HttpUtil.post(
-          '/order_info/selectListByPage',
-          params
-        );
+        const response = await HttpUtil.post('/order/selectListByPage', params);
         if (response && response.data) {
           this.tableData = response.data.list || [];
           this.pagination.total = response.data.total || 0;

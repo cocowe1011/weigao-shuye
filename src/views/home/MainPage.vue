@@ -3644,7 +3644,7 @@ export default {
         invalidFlag: 0,
         orderStatus: 0
       };
-      HttpUtil.post('/order_info/selectList', params)
+      HttpUtil.post('/order/selectList', params)
         .then((res) => {
           // this.queues[0]： 上货区
           if (res.data && res.data.length > 0) {
@@ -3687,7 +3687,7 @@ export default {
         invalidFlag: 0,
         orderStatus: 0
       };
-      HttpUtil.post('/order_info/selectList', params)
+      HttpUtil.post('/order/selectList', params)
         .then((res) => {
           // this.queues[0]： 上货区
           if (res.data && res.data.length > 0) {
