@@ -2082,7 +2082,7 @@ export default {
           id: 1,
           name: '小车1',
           x: 790,
-          y: 1230,
+          y: 615, // 对应PLC值0的位置（y轴最小值）
           width: 72,
           image: require('@/assets/changzhou-img/cart1.png')
         },
@@ -2090,7 +2090,7 @@ export default {
           id: 2,
           name: '小车2',
           x: 1375,
-          y: 1067,
+          y: 647, // 对应PLC值0的位置（y轴最小值）
           width: 68,
           image: require('@/assets/changzhou-img/cart2.png')
         },
@@ -2098,7 +2098,7 @@ export default {
           id: 3,
           name: '小车3',
           x: 1945,
-          y: 1066,
+          y: 647, // 对应PLC值0的位置（y轴最小值）
           width: 72,
           image: require('@/assets/changzhou-img/cart3.png')
         },
@@ -2106,7 +2106,7 @@ export default {
           id: 4,
           name: '小车4',
           x: 2510,
-          y: 1230,
+          y: 425, // 对应PLC值0的位置（y轴最小值）
           width: 72,
           image: require('@/assets/changzhou-img/cart4.png')
         }
@@ -2689,10 +2689,10 @@ export default {
       this.elevatorEDisinfectionScanCode = values.DBB340 ?? '';
 
       // 读取小车位置数值
-      this.cartPositionValues.cart1 = Number(values.DBW88) || 0;
-      this.cartPositionValues.cart2 = Number(values.DBW90) || 0;
-      this.cartPositionValues.cart3 = Number(values.DBW92) || 0;
-      this.cartPositionValues.cart4 = Number(values.DBW94) || 0;
+      this.cartPositionValues.cart1 = Number(values.DBW88 ?? 0);
+      this.cartPositionValues.cart2 = Number(values.DBW90 ?? 0);
+      this.cartPositionValues.cart3 = Number(values.DBW92 ?? 0);
+      this.cartPositionValues.cart4 = Number(values.DBW94 ?? 0);
     });
   },
   watch: {
