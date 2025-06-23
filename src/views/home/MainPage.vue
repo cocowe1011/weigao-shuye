@@ -3609,17 +3609,28 @@ export default {
     addToCartLoadQueue(trayCode) {
       // 判断上货区队列是否有托盘信息
       if (this.queues[0].trayInfo.length > 0) {
-        // 检查第一个托盘的托盘号是否与入参匹配
-        if (this.queues[0].trayInfo[0].trayCode === trayCode) {
+        // 如果启用无码上货模式，直接处理第一个托盘，不检查托盘号匹配
+        if (this.noCodeUpload) {
           // 取出队列中的第一个托盘信息
           const trayInfo = this.queues[0].trayInfo.shift();
           // 托盘信息进入下一队列
           this.queues[1].trayInfo.push(trayInfo);
-          this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
-        } else {
           this.addLog(
-            `托盘号不匹配，读码：${trayCode}，队列第一个托盘：${this.queues[0].trayInfo[0].trayCode}`
+            `无码上货模式 - 托盘信息：${trayInfo.trayCode} 进入分发区`
           );
+        } else {
+          // 正常模式下检查第一个托盘的托盘号是否与入参匹配
+          if (this.queues[0].trayInfo[0].trayCode === trayCode) {
+            // 取出队列中的第一个托盘信息
+            const trayInfo = this.queues[0].trayInfo.shift();
+            // 托盘信息进入下一队列
+            this.queues[1].trayInfo.push(trayInfo);
+            this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
+          } else {
+            this.addLog(
+              `托盘号不匹配，读码：${trayCode}，队列第一个托盘：${this.queues[0].trayInfo[0].trayCode}`
+            );
+          }
         }
       } else {
         this.addLog(`上货区队列为空，无法执行出库操作`);
