@@ -2047,6 +2047,7 @@
 
 <script>
 import HttpUtil from '@/utils/HttpUtil';
+import HttpUtilwms from '@/utils/HttpUtilwms';
 import moment from 'moment';
 import { ipcRenderer } from 'electron';
 import OrderQueryDialog from '@/components/OrderQueryDialog.vue';
@@ -3638,37 +3639,71 @@ export default {
     },
     // 添加货物到上货区队列
     addToUpLoadQueue(trayCode, trayFrom, nonSterile) {
+      // 遍历上货区托盘号，先通过托盘号判断此托盘是不是已经在上货区上货了
+      if (this.queues[0].trayInfo.length > 0) {
+        for (const tray of this.queues[0].trayInfo) {
+          if (tray.trayCode === trayCode) {
+            this.addLog(`托盘号：${trayCode} 已在上货区上货`);
+            this.$message.warning(`托盘号：${trayCode} 已在上货区上货`);
+            return; // 这样就会跳出整个 addToUpLoadQueue 方法
+          }
+        }
+      }
       // 通过trayCode 查询erp数据
       const params = {
-        trayCode: trayCode,
-        invalidFlag: 0,
-        orderStatus: 0
+        trayCode: trayCode
       };
-      HttpUtil.post('/order/selectList', params)
+      HttpUtilwms.post('/api/app/query_received_record', params)
         .then((res) => {
           // this.queues[0]： 上货区
-          if (res.data && res.data.length > 0) {
-            const trayInfo = {
-              trayCode: res.data[0].trayCode,
-              trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
-              orderId: res.data[0].orderId,
-              productCode: res.data[0].productCode,
-              productName: res.data[0].productName,
-              isTerile: nonSterile ? 0 : res.data[0].isTerile,
-              state: '0',
-              sendTo: '' // 发到哪个预热房，发送的时候更新
+          if (res.data && res.data.items && res.data.items.length > 0) {
+            const paramInsert = {
+              orderId: res.data.items[0].orderId,
+              productCode: res.data.items
+                .map((item) => item.materialCode)
+                .join('/'),
+              productName: res.data.items
+                .map((item) => item.materialName)
+                .join('/'),
+              trayCode: trayCode,
+              receiptOrderCode: res.data.receiptOrderCode,
+              inPut: res.data.items[0].inPut,
+              isTerile: nonSterile ? 0 : res.data.items[0].isTerile,
+              detailList: JSON.stringify(res.data.items),
+              orderStatus: '0'
             };
-            this.queues[0].trayInfo.push(trayInfo);
-            this.addLog(trayFrom + `上货区队列添加货物：${trayCode}`);
-            this.nowScanTrayInfo = {
-              trayCode: trayInfo.trayCode,
-              orderId: trayInfo.orderId,
-              productName: trayInfo.productName,
-              isTerile: trayInfo.isTerile === 1 ? '消毒' : '不消毒',
-              inPut: trayFrom
-            };
+            HttpUtil.post('/order/insert', paramInsert).then((resInsert) => {
+              if (resInsert.data == 1) {
+                this.addLog(
+                  trayFrom + `上货区队列添加货物：${trayCode}，插入成功`
+                );
+                const trayInfo = {
+                  trayCode: trayCode,
+                  trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+                  orderId: paramInsert.orderId,
+                  productCode: paramInsert.productCode,
+                  productName: paramInsert.productName,
+                  isTerile: paramInsert.isTerile,
+                  receiptOrderCode: paramInsert.receiptOrderCode,
+                  state: '0',
+                  sendTo: '' // 发到哪个预热房，发送的时候更新
+                };
+                this.queues[0].trayInfo.push(trayInfo);
+                this.addLog(trayFrom + `上货区队列添加货物：${trayCode}`);
+                this.nowScanTrayInfo = {
+                  trayCode: trayInfo.trayCode,
+                  orderId: trayInfo.orderId,
+                  productName: trayInfo.productName,
+                  isTerile: trayInfo.isTerile === 1 ? '消毒' : '不消毒',
+                  inPut: trayFrom
+                };
+              }
+            });
           } else {
-            this.addLog(trayFrom + `上货区队列添加货物失败：${trayCode}`);
+            this.addLog(
+              trayFrom +
+                `托盘信息接口查询失败！：${trayCode}，远程托盘接口返回信息${res.data}`
+            );
             this.nowScanTrayInfo = {};
           }
         })
@@ -4842,6 +4877,12 @@ export default {
               font-size: 24px;
               line-height: 21px;
               padding-left: 12px;
+              /* 添加省略号效果 */
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 100%;
+              display: block;
             }
           }
         }

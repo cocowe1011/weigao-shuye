@@ -40,6 +40,7 @@
             type="password"
             v-model="userPassword"
             autocomplete="off"
+            show-password
           ></el-input>
           <p class="tips">
             没有帐户？<span id="look-help" @click="registerPage">立即注册</span
@@ -99,6 +100,7 @@
             v-model="userPasswordReg"
             autocomplete="off"
             style="margin-top: 15px"
+            show-password
           ></el-input>
           <el-input
             placeholder="确认密码"
@@ -108,6 +110,7 @@
             v-model="userPasswordAgain"
             autocomplete="off"
             style="margin-top: 15px"
+            show-password
           ></el-input>
           <el-button
             class="user-login-button"
