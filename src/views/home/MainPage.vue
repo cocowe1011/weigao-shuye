@@ -3639,6 +3639,7 @@ export default {
     },
     // 添加货物到上货区队列
     addToUpLoadQueue(trayCode, trayFrom, nonSterile) {
+      trayCode = trayCode.trim();
       // 遍历上货区托盘号，先通过托盘号判断此托盘是不是已经在上货区上货了
       if (this.queues[0].trayInfo.length > 0) {
         for (const tray of this.queues[0].trayInfo) {
