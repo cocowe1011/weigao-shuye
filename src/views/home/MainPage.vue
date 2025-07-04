@@ -3651,7 +3651,7 @@ export default {
       }
       // 通过trayCode 查询erp数据
       const params = {
-        trayCode: trayCode
+        trayCode: trayCode.trim()
       };
       HttpUtilwms.post('/api/app/query_received_record', params)
         .then((res) => {
