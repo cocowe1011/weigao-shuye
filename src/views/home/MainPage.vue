@@ -3802,13 +3802,6 @@ export default {
       this.orderQueryDialogVisible = true;
     },
     toggleButtonState(button) {
-      this.buttonStates = {
-        start: false,
-        stop: false,
-        reset: false,
-        fault_reset: false,
-        clear: false
-      };
       if (button === 'start') {
         this.$confirm('确定要全线启动吗？', '提示', {
           confirmButtonText: '确定',
@@ -3816,6 +3809,13 @@ export default {
           type: 'warning'
         })
           .then(() => {
+            this.buttonStates = {
+              start: false,
+              stop: false,
+              reset: false,
+              fault_reset: false,
+              clear: false
+            };
             ipcRenderer.send('writeValuesToPLC', 'DBW502', 1);
             setTimeout(() => {
               ipcRenderer.send('writeValuesToPLC', 'DBW502', 0);
@@ -3834,6 +3834,13 @@ export default {
           type: 'warning'
         })
           .then(() => {
+            this.buttonStates = {
+              start: false,
+              stop: false,
+              reset: false,
+              fault_reset: false,
+              clear: false
+            };
             ipcRenderer.send('writeValuesToPLC', 'DBW504', 1);
             setTimeout(() => {
               ipcRenderer.send('writeValuesToPLC', 'DBW504', 0);
@@ -3852,6 +3859,13 @@ export default {
           type: 'warning'
         })
           .then(() => {
+            this.buttonStates = {
+              start: false,
+              stop: false,
+              reset: false,
+              fault_reset: false,
+              clear: false
+            };
             this.buttonStates[button] = !this.buttonStates[button];
             ipcRenderer.send('writeValuesToPLC', 'DBW506', 1);
             setTimeout(() => {
