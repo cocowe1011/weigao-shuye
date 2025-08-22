@@ -3606,8 +3606,8 @@ export default {
       const addrs = this.getPortAddresses(portKey);
       if (!addrs) return;
       ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 1);
-      ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, 1);
-      ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, 0);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, true);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, false);
       this.addLog(`${portKey}口：允许通行，异常复位`);
     },
     // 扫码异常：置异常 + 不允许
@@ -3616,8 +3616,8 @@ export default {
       const addrs = this.getPortAddresses(portKey);
       if (!addrs) return;
       ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 0);
-      ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, 0);
-      ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, 1);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, false);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, true);
       this.addLog(`${portKey}口：扫码异常，禁行并置异常`);
     },
     // 光电复0：停止发送允许通行命令
