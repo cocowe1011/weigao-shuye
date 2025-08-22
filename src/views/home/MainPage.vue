@@ -2702,12 +2702,15 @@ export default {
       if (newVal === '0') {
         this.elevatorOneFloorScanCode = '';
         this.addLog('一楼接货站台光电信号无货，已清空一楼接货站台扫码数据');
+        // 光电复0，停止允许通行
+        this.stopAllowForPort('1');
       }
       if (newVal === '1') {
         if (this.noCodeUpload) {
           // 无码上货模式，直接添加托盘信息
           this.addLog('一楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('一楼接货站台', this.nonSterileOne);
+          this.sendAllowForPort('1');
         } else if (this.elevatorOneFloorScanCode !== '') {
           this.addLog(`一楼接货站台扫码数据：${this.elevatorOneFloorScanCode}`);
           this.addToUpLoadQueue(
@@ -2718,51 +2721,20 @@ export default {
         }
       }
     },
-    // 一楼接货站台扫码数据
-    elevatorOneFloorScanCode: {
-      async handler(newVal) {
-        if (
-          newVal !== '' &&
-          this.scanPhotoelectricSignal.bit0 === '1' &&
-          !this.noCodeUpload
-        ) {
-          this.addLog(`一楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '一楼接货站台', this.nonSterileOne);
-        }
-      }
-    },
-    // 一楼缓存区光电信号
-    'scanPhotoelectricSignal.bit1'(newVal) {
-      if (newVal === '0') {
-        this.oneFloorElevatorScanCode = '';
-        this.addLog('一楼缓存区光电信号无货，已清空一楼缓存区扫码数据');
-      }
-      if (newVal === '1' && this.oneFloorElevatorScanCode !== '') {
-        this.addLog(`一楼缓存区扫码数据：${this.oneFloorElevatorScanCode}`);
-        // 判断是否消毒，如果消毒则此托盘进入下一队列，如果不消毒直接发走
-        this.addToCartLoadQueue(this.oneFloorElevatorScanCode);
-      }
-    },
-    // 一楼缓存区扫码数据
-    oneFloorElevatorScanCode: {
-      async handler(newVal) {
-        if (newVal !== '' && this.scanPhotoelectricSignal.bit1 === '1') {
-          this.addLog(`一楼缓存区扫码数据：${newVal}`);
-          this.addToCartLoadQueue(newVal);
-        }
-      }
-    },
     // 二楼接货站台光电信号
     'scanPhotoelectricSignal.bit2'(newVal) {
       if (newVal === '0') {
         this.elevatorTwoFloorScanCode = '';
         this.addLog('二楼接货站台光电信号无货，已清空二楼接货站台扫码数据');
+        // 光电复0，停止允许通行
+        this.stopAllowForPort('2');
       }
       if (newVal === '1') {
         if (this.noCodeUpload) {
           // 无码上货模式，直接添加托盘信息
           this.addLog('二楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('二楼接货站台', this.nonSterileTwo);
+          this.sendAllowForPort('2');
         } else if (this.elevatorTwoFloorScanCode !== '') {
           this.addLog(`二楼接货站台扫码数据：${this.elevatorTwoFloorScanCode}`);
           this.addToUpLoadQueue(
@@ -2773,26 +2745,20 @@ export default {
         }
       }
     },
-    // 二楼接货站台扫码数据
-    elevatorTwoFloorScanCode: {
-      async handler(newVal) {
-        if (newVal !== '' && this.scanPhotoelectricSignal.bit2 === '1') {
-          this.addLog(`二楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '二楼接货站台', this.nonSterileTwo);
-        }
-      }
-    },
     // 三楼接货站台光电信号
     'scanPhotoelectricSignal.bit4'(newVal) {
       if (newVal === '0') {
         this.elevatorThreeFloorScanCode = '';
         this.addLog('三楼接货站台光电信号无货，已清空三楼接货站台扫码数据');
+        // 光电复0，停止允许通行
+        this.stopAllowForPort('3');
       }
       if (newVal === '1') {
         if (this.noCodeUpload) {
           // 无码上货模式，直接添加托盘信息
           this.addLog('三楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('三楼接货站台', this.nonSterileThree);
+          this.sendAllowForPort('3');
         } else if (this.elevatorThreeFloorScanCode !== '') {
           this.addLog(
             `三楼接货站台扫码数据：${this.elevatorThreeFloorScanCode}`
@@ -2806,31 +2772,20 @@ export default {
         }
       }
     },
-    // 三楼接货站台扫码数据
-    elevatorThreeFloorScanCode: {
-      async handler(newVal) {
-        if (newVal !== '' && this.scanPhotoelectricSignal.bit4 === '1') {
-          this.addLog(`三楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(
-            newVal,
-            '三楼接货站台',
-            this.allowUploadThree,
-            this.nonSterileThree
-          );
-        }
-      }
-    },
     // 四楼接货站台光电信号
     'scanPhotoelectricSignal.bit5'(newVal) {
       if (newVal === '0') {
         this.elevatorFourFloorScanCode = '';
         this.addLog('四楼接货站台光电信号无货，已清空四楼接货站台扫码数据');
+        // 光电复0，停止允许通行
+        this.stopAllowForPort('4');
       }
       if (newVal === '1') {
         if (this.noCodeUpload) {
           // 无码上货模式，直接添加托盘信息
           this.addLog('四楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('四楼接货站台', this.nonSterileFour);
+          this.sendAllowForPort('4');
         } else if (this.elevatorFourFloorScanCode !== '') {
           this.addLog(
             `四楼接货站台扫码数据：${this.elevatorFourFloorScanCode}`
@@ -2843,20 +2798,17 @@ export default {
         }
       }
     },
-    // 四楼接货站台扫码数据
-    elevatorFourFloorScanCode: {
-      async handler(newVal) {
-        if (newVal !== '' && this.scanPhotoelectricSignal.bit5 === '1') {
-          this.addLog(`四楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '四楼接货站台', this.nonSterileFour);
-        }
-      }
-    },
     // 一楼D灭菌"有载信号"/光电占位,
     'scanPhotoelectricSignal.bit7'(newVal) {
       if (newVal === '0') {
         this.elevatorDDisinfectionScanCode = '';
         this.addLog('D扫码数据清空');
+        // 光电复0，停止允许通行
+        this.stopAllowForPort('D');
+      }
+      if (newVal === '1' && this.noCodeUpload) {
+        this.addLog('D口光电触发，无码上货模式，强制允许通行');
+        this.sendAllowForPort('D');
       }
       if (newVal === '1' && this.elevatorDDisinfectionScanCode !== '') {
         this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
@@ -2867,20 +2819,17 @@ export default {
         );
       }
     },
-    // 一楼D灭菌"有载信号"/光电占位,扫码数据
-    elevatorDDisinfectionScanCode: {
-      async handler(newVal) {
-        if (newVal !== '' && this.scanPhotoelectricSignal.bit7 === '1') {
-          this.addLog(`D扫码数据：${newVal}`);
-          this.addToUpLoadQueueDE(newVal, 'D', this.nonSterileD);
-        }
-      }
-    },
     // 一楼E灭菌"有载信号"/光电占位,
     'scanPhotoelectricSignal.bit8'(newVal) {
       if (newVal === '0') {
         this.elevatorEDisinfectionScanCode = '';
         this.addLog('E扫码数据清空');
+        // 光电复0，停止允许通行
+        this.stopAllowForPort('E');
+      }
+      if (newVal === '1' && this.noCodeUpload) {
+        this.addLog('E口光电触发，无码上货模式，强制允许通行');
+        this.sendAllowForPort('E');
       }
       if (newVal === '1' && this.elevatorEDisinfectionScanCode !== '') {
         this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
@@ -2891,18 +2840,16 @@ export default {
         );
       }
     },
-    // 一楼E灭菌"有载信号"/光电占位,扫码数据
-    elevatorEDisinfectionScanCode: {
-      async handler(newVal) {
-        if (newVal !== '' && this.scanPhotoelectricSignal.bit8 === '1') {
-          this.addLog(`E扫码数据：${newVal}`);
-          this.addToUpLoadQueueDE(
-            newVal,
-            'E',
-            this.allowUploadE,
-            this.nonSterileE
-          );
-        }
+    // 一楼缓存区光电信号
+    'scanPhotoelectricSignal.bit1'(newVal) {
+      if (newVal === '0') {
+        this.oneFloorElevatorScanCode = '';
+        this.addLog('一楼缓存区光电信号无货，已清空一楼缓存区扫码数据');
+      }
+      if (newVal === '1' && this.oneFloorElevatorScanCode !== '') {
+        this.addLog(`一楼缓存区扫码数据：${this.oneFloorElevatorScanCode}`);
+        // 判断是否消毒，如果消毒则此托盘进入下一队列，如果不消毒直接发走
+        this.addToCartLoadQueue(this.oneFloorElevatorScanCode);
       }
     },
     // 请求上位机下发任务(判断去灭菌还是非灭菌）
@@ -3606,6 +3553,81 @@ export default {
     // ---- 监听指定队列的 trayInfo 变化结束 ----
   },
   methods: {
+    // 由来源名称映射到端口键值
+    getPortKeyByTrayFrom(trayFrom) {
+      if (!trayFrom) return '';
+      if (trayFrom.includes('一楼')) return '1';
+      if (trayFrom.includes('二楼')) return '2';
+      if (trayFrom.includes('三楼')) return '3';
+      if (trayFrom.includes('四楼')) return '4';
+      if (trayFrom === 'D') return 'D';
+      if (trayFrom === 'E') return 'E';
+      return '';
+    },
+    // 根据端口键值返回写入地址
+    getPortAddresses(portKey) {
+      const map = {
+        1: {
+          enableWord: 'DBW512',
+          errorBit: 'DBW544_BIT0',
+          allowBit: 'DBW544_BIT6'
+        },
+        2: {
+          enableWord: 'DBW514',
+          errorBit: 'DBW544_BIT1',
+          allowBit: 'DBW544_BIT7'
+        },
+        3: {
+          enableWord: 'DBW516',
+          errorBit: 'DBW544_BIT2',
+          allowBit: 'DBW544_BIT8'
+        },
+        4: {
+          enableWord: 'DBW518',
+          errorBit: 'DBW544_BIT3',
+          allowBit: 'DBW544_BIT9'
+        },
+        D: {
+          enableWord: 'DBW520',
+          errorBit: 'DBW544_BIT4',
+          allowBit: 'DBW544_BIT10'
+        },
+        E: {
+          enableWord: 'DBW522',
+          errorBit: 'DBW544_BIT5',
+          allowBit: 'DBW544_BIT11'
+        }
+      };
+      return map[portKey] || null;
+    },
+    // 扫码正常：允许通行 + 异常复位
+    sendAllowForPort(portKey) {
+      if (!portKey || this.noCodeUpload) return;
+      const addrs = this.getPortAddresses(portKey);
+      if (!addrs) return;
+      ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 1);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, 1);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, 0);
+      this.addLog(`${portKey}口：允许通行，异常复位`);
+    },
+    // 扫码异常：置异常 + 不允许
+    sendErrorForPort(portKey) {
+      if (!portKey || this.noCodeUpload) return;
+      const addrs = this.getPortAddresses(portKey);
+      if (!addrs) return;
+      ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 0);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, 0);
+      ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, 1);
+      this.addLog(`${portKey}口：扫码异常，禁行并置异常`);
+    },
+    // 光电复0：停止发送允许通行命令
+    stopAllowForPort(portKey) {
+      if (!portKey) return;
+      const addrs = this.getPortAddresses(portKey);
+      if (!addrs) return;
+      ipcRenderer.send('cancelWriteToPLC', addrs.allowBit);
+      this.addLog(`${portKey}口：光电复0，停止发送允许通行命令`);
+    },
     // 判断是否消毒，如果消毒则此托盘进入分发区队列，如果不消毒直接发走
     addToCartLoadQueue(trayCode) {
       // 判断上货区队列是否有托盘信息
@@ -3639,6 +3661,7 @@ export default {
     },
     // 添加货物到上货区队列
     addToUpLoadQueue(trayCode, trayFrom, nonSterile) {
+      const portKey = this.getPortKeyByTrayFrom(trayFrom);
       trayCode = trayCode.trim();
       // 遍历上货区托盘号，先通过托盘号判断此托盘是不是已经在上货区上货了
       if (this.queues[0].trayInfo.length > 0) {
@@ -3646,6 +3669,7 @@ export default {
           if (tray.trayCode === trayCode) {
             this.addLog(`托盘号：${trayCode} 已在上货区上货`);
             this.$message.warning(`托盘号：${trayCode} 已在上货区上货`);
+            this.sendErrorForPort(portKey);
             return; // 这样就会跳出整个 addToUpLoadQueue 方法
           }
         }
@@ -3691,6 +3715,8 @@ export default {
                 };
                 this.queues[0].trayInfo.push(trayInfo);
                 this.addLog(trayFrom + `上货区队列添加货物：${trayCode}`);
+                // 扫码正常：允许通行并异常复位
+                this.sendAllowForPort(portKey);
                 this.nowScanTrayInfo = {
                   trayCode: trayInfo.trayCode,
                   orderId: trayInfo.orderId,
@@ -3701,6 +3727,8 @@ export default {
               }
             });
           } else {
+            // 扫码不正常：置异常并不允许进货
+            this.sendErrorForPort(portKey);
             this.addLog(
               trayFrom +
                 `托盘信息接口查询失败！：${trayCode}，远程托盘接口返回信息${res.data}`
@@ -3712,11 +3740,14 @@ export default {
           this.$message.error('查询队列失败，请重试' + err);
           // 没查询到货物信息，直接报警
           this.addLog(trayFrom + `上货区队列添加货物失败：${trayCode}`);
+          // 扫码不正常：置异常并不允许进货
+          this.sendErrorForPort(portKey);
           this.nowScanTrayInfo = {};
         });
     },
     // 添加扫码数据到D队列,
     addToUpLoadQueueDE(trayCode, trayFrom, nonSterile) {
+      const portKey = trayFrom; // D 或 E
       // 通过trayCode 查询erp数据
       const params = {
         trayCode: trayCode,
@@ -3727,6 +3758,8 @@ export default {
         .then((res) => {
           // this.queues[0]： 上货区
           if (res.data && res.data.length > 0) {
+            // 扫码正常：允许通行并异常复位
+            this.sendAllowForPort(portKey);
             const trayInfo = {
               trayCode: res.data[0].trayCode,
               trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
@@ -3746,6 +3779,8 @@ export default {
               inPut: trayFrom
             };
           } else {
+            // 扫码不正常：置异常并不允许进货
+            this.sendErrorForPort(portKey);
             this.addLog(trayFrom + `${trayFrom}队列添加货物失败：${trayCode}`);
             this.nowScanTrayInfo = {};
           }
@@ -3754,6 +3789,8 @@ export default {
           this.$message.error('查询队列失败，请重试' + err);
           // 没查询到货物信息，直接报警
           this.addLog(trayFrom + `${trayFrom}队列添加货物失败：${trayCode}`);
+          // 扫码不正常：置异常并不允许进货
+          this.sendErrorForPort(portKey);
           this.nowScanTrayInfo = {};
         });
     },
