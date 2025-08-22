@@ -2867,16 +2867,16 @@ export default {
               const targetTray = this.queues[1].trayInfo[targetIndex];
               if (targetTray.isTerile === 0) {
                 // 给PLC发送去立库的命令
-                ipcRenderer.send('writeValuesToPLC', 'DBW542', 1);
+                ipcRenderer.send('writeSingleValueToPLC', 'DBW542', 1);
                 setTimeout(() => {
-                  ipcRenderer.send('writeValuesToPLC', 'DBW542', 0);
-                }, 500);
+                  ipcRenderer.send('cancelWriteToPLC', 'DBW542');
+                }, 2000);
               } else {
                 // 给PLC发送去预热房的命令
-                ipcRenderer.send('writeValuesToPLC', 'DBW542', 2);
+                ipcRenderer.send('writeSingleValueToPLC', 'DBW542', 2);
                 setTimeout(() => {
-                  ipcRenderer.send('writeValuesToPLC', 'DBW542', 0);
-                }, 500);
+                  ipcRenderer.send('cancelWriteToPLC', 'DBW542');
+                }, 2000);
               }
               this.queues[1].trayInfo[targetIndex] = {
                 ...targetTray,
@@ -3856,7 +3856,7 @@ export default {
             ipcRenderer.send('writeValuesToPLC', 'DBW502', 1);
             setTimeout(() => {
               ipcRenderer.send('writeValuesToPLC', 'DBW502', 0);
-            }, 500);
+            }, 2000);
             this.buttonStates[button] = !this.buttonStates[button];
             this.$message.success('全线启动成功');
             this.addLog('全线启动成功');
@@ -3881,7 +3881,7 @@ export default {
             ipcRenderer.send('writeValuesToPLC', 'DBW504', 1);
             setTimeout(() => {
               ipcRenderer.send('writeValuesToPLC', 'DBW504', 0);
-            }, 500);
+            }, 2000);
             this.buttonStates[button] = !this.buttonStates[button];
             this.$message.success('全线停止成功');
             this.addLog('全线停止成功');
@@ -3907,7 +3907,7 @@ export default {
             ipcRenderer.send('writeValuesToPLC', 'DBW506', 1);
             setTimeout(() => {
               ipcRenderer.send('writeValuesToPLC', 'DBW506', 0);
-            }, 500);
+            }, 2000);
             this.$message.success('全线暂停成功');
             this.addLog('全线暂停成功');
           })
@@ -3924,7 +3924,7 @@ export default {
             ipcRenderer.send('writeValuesToPLC', 'DBW508', 1);
             setTimeout(() => {
               ipcRenderer.send('writeValuesToPLC', 'DBW508', 0);
-            }, 500);
+            }, 2000);
             this.$message.success('故障复位成功');
             this.addLog('故障复位成功');
           })
@@ -4467,35 +4467,35 @@ export default {
     sendPreheatingToPLC(targetSendTo) {
       if (targetSendTo === 'A1-1') {
         // 使用nodeS7协议，给PLC发送 011预热房A1-1启用进货、012预热房A1-2启用进货
-        ipcRenderer.send('writeValuesToPLC', 'DBW524', 11);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW524', 11);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW524');
+        }, 2000);
       } else if (targetSendTo === 'A1-2') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW524', 12);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW524', 12);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW524');
+        }, 2000);
       } else if (targetSendTo === 'B1-1') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW524', 21);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW524', 21);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW524');
+        }, 2000);
       } else if (targetSendTo === 'B1-2') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW524', 22);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW524', 22);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW524');
+        }, 2000);
       } else if (targetSendTo === 'C1-1') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW524', 31);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW524', 31);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW524');
+        }, 2000);
       } else if (targetSendTo === 'C1-2') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW524', 32);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW524', 32);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW524', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW524');
+        }, 2000);
       }
     },
     // 发送到灭菌房的方法
@@ -4508,39 +4508,39 @@ export default {
         return;
       }
       if (this.disinfectionRoomSelectedFrom === 'A') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW526', 1);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW526', 1);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW526', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW526');
+        }, 2000);
         this.disinfectionTrayCode = this.queues[3].trayInfo[0].trayCode;
       } else if (this.disinfectionRoomSelectedFrom === 'B') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW526', 2);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW526', 2);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW526', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW526');
+        }, 2000);
         this.disinfectionTrayCode = this.queues[4].trayInfo[0].trayCode;
       } else if (this.disinfectionRoomSelectedFrom === 'C') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW526', 3);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW526', 3);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW526', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW526');
+        }, 2000);
         this.disinfectionTrayCode = this.queues[5].trayInfo[0].trayCode;
       }
       if (this.disinfectionRoomSelectedTo === 'A') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW528', 1);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW528', 1);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW528', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW528');
+        }, 2000);
       } else if (this.disinfectionRoomSelectedTo === 'B') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW528', 2);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW528', 2);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW528', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW528');
+        }, 2000);
       } else if (this.disinfectionRoomSelectedTo === 'C') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW528', 3);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW528', 3);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW528', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW528');
+        }, 2000);
       }
       this.addLog(
         `执行发送从${this.disinfectionRoomSelectedFrom}预热房到${this.disinfectionRoomSelectedTo}灭菌房操作`
@@ -4555,39 +4555,39 @@ export default {
         return;
       }
       if (this.warehouseSelectedFrom === 'A') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW530', 1);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW530', 1);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW530');
+        }, 2000);
         this.analysisTrayCode = this.queues[6].trayInfo[0].trayCode;
       } else if (this.warehouseSelectedFrom === 'B') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW530', 2);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW530', 2);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW530');
+        }, 2000);
         this.analysisTrayCode = this.queues[7].trayInfo[0].trayCode;
       } else if (this.warehouseSelectedFrom === 'C') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW530', 3);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW530', 3);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW530', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW530');
+        }, 2000);
         this.analysisTrayCode = this.queues[8].trayInfo[0].trayCode;
       }
       if (this.warehouseSelectedTo === 'A') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW532', 1);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW532', 1);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW532', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW532');
+        }, 2000);
       } else if (this.warehouseSelectedTo === 'B') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW532', 2);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW532', 2);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW532', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW532');
+        }, 2000);
       } else if (this.warehouseSelectedTo === 'C') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW532', 3);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW532', 3);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW532', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW532');
+        }, 2000);
       }
       this.addLog(
         `执行发送从灭菌柜${this.warehouseSelectedFrom}出库到解析库${this.warehouseSelectedTo}入库操作`
@@ -4603,40 +4603,40 @@ export default {
         return;
       }
       if (this.outWarehouseSelected === 'A') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW534', 1);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW534', 1);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW534');
+        }, 2000);
         this.outWarehouseTrayCode = this.queues[9].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'B') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW534', 2);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW534', 2);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW534');
         }, 500);
         this.outWarehouseTrayCode = this.queues[10].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'C') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW534', 3);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW534', 3);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW534', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW534');
+        }, 2000);
         this.outWarehouseTrayCode = this.queues[11].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'D') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW536', 1);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 1);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+        }, 2000);
         this.outWarehouseTrayCode = this.queues[12].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'E') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW536', 2);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 2);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+        }, 2000);
         this.outWarehouseTrayCode = this.queues[13].trayInfo[0].trayCode;
       } else if (this.outWarehouseSelected === 'DE') {
-        ipcRenderer.send('writeValuesToPLC', 'DBW536', 3);
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 3);
         setTimeout(() => {
-          ipcRenderer.send('writeValuesToPLC', 'DBW536', 0);
-        }, 500);
+          ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+        }, 2000);
       }
       this.addLog(`${this.outWarehouseSelected}执行发送出库操作`);
     },
