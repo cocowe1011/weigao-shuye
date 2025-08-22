@@ -3602,7 +3602,7 @@ export default {
     },
     // 扫码正常：允许通行 + 异常复位
     sendAllowForPort(portKey) {
-      if (!portKey || this.noCodeUpload) return;
+      if (!portKey) return;
       const addrs = this.getPortAddresses(portKey);
       if (!addrs) return;
       ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 1);
@@ -3612,7 +3612,7 @@ export default {
     },
     // 扫码异常：置异常 + 不允许
     sendErrorForPort(portKey) {
-      if (!portKey || this.noCodeUpload) return;
+      if (!portKey) return;
       const addrs = this.getPortAddresses(portKey);
       if (!addrs) return;
       ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 0);
