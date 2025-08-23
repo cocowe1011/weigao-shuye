@@ -106,7 +106,7 @@
               <div
                 class="log-tab"
                 :class="{ active: activeLogType === 'alarm' }"
-                @click="activeLogType = 'alarm'"
+                @click="switchToAlarmLog"
               >
                 报警日志
                 <div v-if="unreadAlarms > 0" class="alarm-badge">
@@ -125,7 +125,6 @@
                     'log-item',
                     { alarm: log.type === 'alarm', unread: log.unread }
                   ]"
-                  @click="markAsRead(log)"
                 >
                   <div class="log-time">{{ formatTime(log.timestamp) }}</div>
                   <div class="log-item-content">{{ log.message }}</div>
@@ -381,7 +380,6 @@
                         <el-option label="C" value="C"></el-option>
                         <el-option label="D" value="D"></el-option>
                         <el-option label="E" value="E"></el-option>
-                        <el-option label="DE" value="DE"></el-option>
                       </el-select>
                       <el-button
                         type="primary"
@@ -2039,6 +2037,16 @@
               placeholder="请输入批次号"
             ></el-input>
           </el-form-item>
+          <el-form-item label="是否灭菌" prop="isSterile">
+            <el-switch
+              v-model="newTrayForm.isSterile"
+              active-text="灭菌"
+              inactive-text="不灭菌"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+            >
+            </el-switch>
+          </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -2065,6 +2073,7 @@ export default {
   data() {
     return {
       nowScanTrayInfo: {},
+      isDataReady: false, // 添加数据准备就绪标志位
       showTestPanel: false,
       orderQueryDialogVisible: false,
       buttonStates: {
@@ -2129,7 +2138,8 @@ export default {
       isSubmitting: false,
       newTrayForm: {
         trayCode: '',
-        batchId: ''
+        batchId: '',
+        isSterile: true
       },
       trayFormRules: {
         trayCode: [
@@ -2700,11 +2710,19 @@ export default {
       this.cartPositionValues.cart2 = Number(values.DBW90 ?? 0);
       this.cartPositionValues.cart3 = Number(values.DBW92 ?? 0);
       this.cartPositionValues.cart4 = Number(values.DBW94 ?? 0);
+
+      // 只在第一次接收到数据时设置标志位为 true
+      if (!this.isDataReady) {
+        this.isDataReady = true;
+      }
     });
   },
   watch: {
     // 一楼接货站台光电信号
     'scanPhotoelectricSignal.bit0'(newVal) {
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+
       if (newVal === '0') {
         this.elevatorOneFloorScanCode = '';
         this.addLog('一楼接货站台光电信号无货，已清空一楼接货站台扫码数据');
@@ -2729,6 +2747,9 @@ export default {
     },
     // 二楼接货站台光电信号
     'scanPhotoelectricSignal.bit2'(newVal) {
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+
       if (newVal === '0') {
         this.elevatorTwoFloorScanCode = '';
         this.addLog('二楼接货站台光电信号无货，已清空二楼接货站台扫码数据');
@@ -2753,6 +2774,9 @@ export default {
     },
     // 三楼接货站台光电信号
     'scanPhotoelectricSignal.bit4'(newVal) {
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+
       if (newVal === '0') {
         this.elevatorThreeFloorScanCode = '';
         this.addLog('三楼接货站台光电信号无货，已清空三楼接货站台扫码数据');
@@ -2779,6 +2803,9 @@ export default {
     },
     // 四楼接货站台光电信号
     'scanPhotoelectricSignal.bit5'(newVal) {
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+
       if (newVal === '0') {
         this.elevatorFourFloorScanCode = '';
         this.addLog('四楼接货站台光电信号无货，已清空四楼接货站台扫码数据');
@@ -2805,6 +2832,9 @@ export default {
     },
     // 一楼D灭菌"有载信号"/光电占位,
     'scanPhotoelectricSignal.bit7'(newVal) {
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+
       if (newVal === '0') {
         this.elevatorDDisinfectionScanCode = '';
         this.addLog('D扫码数据清空');
@@ -2829,6 +2859,9 @@ export default {
     },
     // 一楼E灭菌"有载信号"/光电占位,
     'scanPhotoelectricSignal.bit8'(newVal) {
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+
       if (newVal === '0') {
         this.elevatorEDisinfectionScanCode = '';
         this.addLog('E扫码数据清空');
@@ -2853,6 +2886,9 @@ export default {
     },
     // 一楼缓存区光电信号
     'scanPhotoelectricSignal.bit1'(newVal) {
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+
       if (newVal === '0') {
         this.oneFloorElevatorScanCode = '';
         this.addLog('一楼缓存区光电信号无货，已清空一楼缓存区扫码数据');
@@ -2866,6 +2902,9 @@ export default {
     // 请求上位机下发任务(判断去灭菌还是非灭菌）
     requestUploadTask: {
       async handler(newVal) {
+        // 只有在数据准备就绪后才执行监听逻辑
+        if (!this.isDataReady) return;
+
         if (newVal === '1') {
           this.addLog('请求上位机下发任务(判断去灭菌还是非灭菌）');
           // 先筛选出分发区中未处理过的第一个托盘数据，属性state等于'1'代表已经处理过。'0'代表没有处理过
@@ -2903,6 +2942,9 @@ export default {
     },
     requestUploadTaskPreheatingCar: {
       async handler(newVal) {
+        // 只有在数据准备就绪后才执行监听逻辑
+        if (!this.isDataReady) return;
+
         // 请求上位机下发任务(预热小车前）
         if (newVal === '1') {
           this.sendToPreheatingRoom();
@@ -2912,6 +2954,9 @@ export default {
     // 监听缓冲区数量变化
     bufferQuantity: {
       async handler(newVal, oldVal) {
+        // 只有在数据准备就绪后才执行监听逻辑
+        if (!this.isDataReady) return;
+
         // 判断与老数据相比是增加1还是减少1，如果增加1则把分发区的第一个托盘信息加入到缓冲区，同时把原队列的第一个托盘信息删除
         if (newVal > oldVal) {
           if (this.queues[1].trayInfo.length > 0) {
@@ -2950,6 +2995,9 @@ export default {
     // 监听非灭菌缓存区数量变化,
     nonSterileunload: {
       async handler(newVal, oldVal) {
+        // 只有在数据准备就绪后才执行监听逻辑
+        if (!this.isDataReady) return;
+
         if (newVal > oldVal) {
           if (this.queues[1].trayInfo.length > 0) {
             // 查找state为1，并且isTerile为1的第一个托盘，加入到缓冲区队列
@@ -2995,17 +3043,38 @@ export default {
     },
     // 监听A1数量变化
     'aLineQuantity.a1'(newVal, oldVal) {
-      // 判断与老数据相比是增加1还是减少1，如果增加1则把缓冲区的第一个托盘信息加入到A1队列，同时把原队列的第一个托盘信息删除
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
-        if (this.queues[2].trayInfo.length > 0) {
-          this.addLog(this.queues[2].trayInfo[0].trayCode + '进入A1队列。');
-          // 把缓冲区的托盘信息加入到A1队列
-          this.queues[3].trayInfo.push(this.queues[2].trayInfo[0]);
-          this.queues[2].trayInfo.shift();
+        const increaseCount = newVal - oldVal;
+        const availableTrays = this.queues[2].trayInfo || [];
+
+        if (availableTrays.length >= increaseCount) {
+          // 批量移动托盘
+          for (let i = 0; i < increaseCount; i++) {
+            if (this.queues[2].trayInfo.length > 0) {
+              this.addLog(this.queues[2].trayInfo[0].trayCode + '进入A1队列。');
+              // 把缓冲区的托盘信息加入到A1队列
+              this.queues[3].trayInfo.push(this.queues[2].trayInfo[0]);
+              this.queues[2].trayInfo.shift();
+            }
+          }
           // 如果缓冲区队列数量变为0，则重新隐藏小车1设置去哪个预热房的按钮
           if (this.queues[2].trayInfo.length === 0) {
             this.showCar1SetPreheatingRoom = false;
           }
+        } else {
+          this.addLog(
+            `A1队列数量增加${increaseCount}，但缓冲区托盘不足，仅移动${availableTrays.length}个托盘`
+          );
+          // 移动所有可用的托盘
+          while (this.queues[2].trayInfo.length > 0) {
+            this.addLog(this.queues[2].trayInfo[0].trayCode + '进入A1队列。');
+            this.queues[3].trayInfo.push(this.queues[2].trayInfo[0]);
+            this.queues[2].trayInfo.shift();
+          }
+          this.showCar1SetPreheatingRoom = false;
         }
       } else {
         // 说明是减少了,说明是出库了
@@ -3018,17 +3087,38 @@ export default {
     },
     // 监听B1数量变化
     'bLineQuantity.b1'(newVal, oldVal) {
-      // 判断与老数据相比是增加1还是减少1，如果增加1则把A1队列的第一个托盘信息加入到B1队列，同时把原队列的第一个托盘信息删除
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
-        if (this.queues[2].trayInfo.length > 0) {
-          this.addLog(this.queues[2].trayInfo[0].trayCode + '进入B1队列。');
-          // 把A1队列的托盘信息加入到B1队列
-          this.queues[4].trayInfo.push(this.queues[2].trayInfo[0]);
-          this.queues[2].trayInfo.shift();
+        const increaseCount = newVal - oldVal;
+        const availableTrays = this.queues[2].trayInfo || [];
+
+        if (availableTrays.length >= increaseCount) {
+          // 批量移动托盘
+          for (let i = 0; i < increaseCount; i++) {
+            if (this.queues[2].trayInfo.length > 0) {
+              this.addLog(this.queues[2].trayInfo[0].trayCode + '进入B1队列。');
+              // 把缓冲区的托盘信息加入到B1队列
+              this.queues[4].trayInfo.push(this.queues[2].trayInfo[0]);
+              this.queues[2].trayInfo.shift();
+            }
+          }
           // 如果缓冲区队列数量变为0，则重新隐藏小车1设置去哪个预热房的按钮
           if (this.queues[2].trayInfo.length === 0) {
             this.showCar1SetPreheatingRoom = false;
           }
+        } else {
+          this.addLog(
+            `B1队列数量增加${increaseCount}，但缓冲区托盘不足，仅移动${availableTrays.length}个托盘`
+          );
+          // 移动所有可用的托盘
+          while (this.queues[2].trayInfo.length > 0) {
+            this.addLog(this.queues[2].trayInfo[0].trayCode + '进入B1队列。');
+            this.queues[4].trayInfo.push(this.queues[2].trayInfo[0]);
+            this.queues[2].trayInfo.shift();
+          }
+          this.showCar1SetPreheatingRoom = false;
         }
       } else {
         // 说明是减少了,说明是出库了
@@ -3039,17 +3129,38 @@ export default {
     },
     // 监听C1数量变化
     'cLineQuantity.c1'(newVal, oldVal) {
-      // 判断与老数据相比是增加1还是减少1，如果增加1则把B1队列的第一个托盘信息加入到C1队列，同时把原队列的第一个托盘信息删除
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
-        if (this.queues[2].trayInfo.length > 0) {
-          this.addLog(this.queues[2].trayInfo[0].trayCode + '进入C1队列。');
-          // 把B1队列的托盘信息加入到C1队列
-          this.queues[5].trayInfo.push(this.queues[2].trayInfo[0]);
-          this.queues[2].trayInfo.shift();
+        const increaseCount = newVal - oldVal;
+        const availableTrays = this.queues[2].trayInfo || [];
+
+        if (availableTrays.length >= increaseCount) {
+          // 批量移动托盘
+          for (let i = 0; i < increaseCount; i++) {
+            if (this.queues[2].trayInfo.length > 0) {
+              this.addLog(this.queues[2].trayInfo[0].trayCode + '进入C1队列。');
+              // 把缓冲区的托盘信息加入到C1队列
+              this.queues[5].trayInfo.push(this.queues[2].trayInfo[0]);
+              this.queues[2].trayInfo.shift();
+            }
+          }
           // 如果缓冲区队列数量变为0，则重新隐藏小车1设置去哪个预热房的按钮
           if (this.queues[2].trayInfo.length === 0) {
             this.showCar1SetPreheatingRoom = false;
           }
+        } else {
+          this.addLog(
+            `C1队列数量增加${increaseCount}，但缓冲区托盘不足，仅移动${availableTrays.length}个托盘`
+          );
+          // 移动所有可用的托盘
+          while (this.queues[2].trayInfo.length > 0) {
+            this.addLog(this.queues[2].trayInfo[0].trayCode + '进入C1队列。');
+            this.queues[5].trayInfo.push(this.queues[2].trayInfo[0]);
+            this.queues[2].trayInfo.shift();
+          }
+          this.showCar1SetPreheatingRoom = false;
         }
       } else {
         // 说明是减少了,说明是出库了
@@ -3060,41 +3171,55 @@ export default {
     },
     // 监听A2数量变化
     'aLineQuantity.a2'(newVal, oldVal) {
-      // 说明是增加了
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
         // 先判断当前选择发送的是A2么
         if (this.disinfectionRoomSelectedTo === 'A') {
+          let sourceQueueIndex;
+          let sourceName;
           // 看看A2是从disinfectionRoomSelectedFrom哪个口发过来
           if (this.disinfectionRoomSelectedFrom === 'A') {
-            // 把A1的第一个元素加到A2队列,同时删除A1的第一个元素
-            // 判断A1队列是否为空
-            if (this.queues[3].trayInfo.length > 0) {
-              this.queues[6].trayInfo.push(this.queues[3].trayInfo[0]);
-              this.queues[3].trayInfo.shift();
-            } else {
-              this.addLog('A1队列空，无法发送A2');
-            }
+            sourceQueueIndex = 3; // A1队列
+            sourceName = 'A1';
           } else if (this.disinfectionRoomSelectedFrom === 'B') {
-            // 把B1的第一个元素加到A2队列,同时删除B1的第一个元素
-            // 判断B1队列是否为空
-            if (this.queues[4].trayInfo.length > 0) {
-              this.queues[6].trayInfo.push(this.queues[4].trayInfo[0]);
-              this.queues[4].trayInfo.shift();
-            } else {
-              this.addLog('B1队列空，无法发送A2');
-            }
+            sourceQueueIndex = 4; // B1队列
+            sourceName = 'B1';
           } else if (this.disinfectionRoomSelectedFrom === 'C') {
-            // 把C1的第一个元素加到A2队列,同时删除C1的第一个元素
-            // 判断C1队列是否为空
-            if (this.queues[5].trayInfo.length > 0) {
-              this.queues[6].trayInfo.push(this.queues[5].trayInfo[0]);
-              this.queues[5].trayInfo.shift();
+            sourceQueueIndex = 5; // C1队列
+            sourceName = 'C1';
+          }
+
+          if (sourceQueueIndex !== undefined) {
+            const sourceQueue = this.queues[sourceQueueIndex];
+            const availableTrays = sourceQueue.trayInfo || [];
+
+            if (availableTrays.length >= increaseCount) {
+              // 批量移动托盘
+              for (let i = 0; i < increaseCount; i++) {
+                if (sourceQueue.trayInfo.length > 0) {
+                  this.queues[6].trayInfo.push(sourceQueue.trayInfo[0]);
+                  sourceQueue.trayInfo.shift();
+                }
+              }
+              this.addLog(
+                `从${sourceName}队列移动${increaseCount}个托盘到A2队列`
+              );
             } else {
-              this.addLog('C1队列空，无法发送A2');
+              this.addLog(
+                `A2队列数量增加${increaseCount}，但${sourceName}队列托盘不足，仅移动${availableTrays.length}个托盘`
+              );
+              // 移动所有可用的托盘
+              while (sourceQueue.trayInfo.length > 0) {
+                this.queues[6].trayInfo.push(sourceQueue.trayInfo[0]);
+                sourceQueue.trayInfo.shift();
+              }
             }
           }
         } else {
-          // 不是设置发往A2的，但是A2却减少了，说明有问题，直接报警
+          // 不是设置发往A2的，但是A2却增加了，说明有问题，直接报警
           this.addLog('未设置发送到A2，程序错误！报警！');
         }
       } else {
@@ -3106,41 +3231,55 @@ export default {
     },
     // 监视B2数量变化
     'bLineQuantity.b2'(newVal, oldVal) {
-      // 说明是增加了
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
         // 先判断当前选择发送的是B2么
         if (this.disinfectionRoomSelectedTo === 'B') {
+          let sourceQueueIndex;
+          let sourceName;
           // 看看B2是从disinfectionRoomSelectedFrom哪个口发过来
           if (this.disinfectionRoomSelectedFrom === 'A') {
-            // 把A1的第一个元素加到B2队列,同时删除A1的第一个元素
-            // 判断A1队列是否为空
-            if (this.queues[3].trayInfo.length > 0) {
-              this.queues[7].trayInfo.push(this.queues[3].trayInfo[0]);
-              this.queues[3].trayInfo.shift();
-            } else {
-              this.addLog('A1队列空，无法发送B2');
-            }
+            sourceQueueIndex = 3; // A1队列
+            sourceName = 'A1';
           } else if (this.disinfectionRoomSelectedFrom === 'B') {
-            // 把B1的第一个元素加到B2队列,同时删除B1的第一个元素
-            // 判断B1队列是否为空
-            if (this.queues[4].trayInfo.length > 0) {
-              this.queues[7].trayInfo.push(this.queues[4].trayInfo[0]);
-              this.queues[4].trayInfo.shift();
-            } else {
-              this.addLog('B1队列空，无法发送B2');
-            }
+            sourceQueueIndex = 4; // B1队列
+            sourceName = 'B1';
           } else if (this.disinfectionRoomSelectedFrom === 'C') {
-            // 把C1的第一个元素加到B2队列,同时删除C1的第一个元素
-            // 判断C1队列是否为空
-            if (this.queues[5].trayInfo.length > 0) {
-              this.queues[7].trayInfo.push(this.queues[5].trayInfo[0]);
-              this.queues[5].trayInfo.shift();
+            sourceQueueIndex = 5; // C1队列
+            sourceName = 'C1';
+          }
+
+          if (sourceQueueIndex !== undefined) {
+            const sourceQueue = this.queues[sourceQueueIndex];
+            const availableTrays = sourceQueue.trayInfo || [];
+
+            if (availableTrays.length >= increaseCount) {
+              // 批量移动托盘
+              for (let i = 0; i < increaseCount; i++) {
+                if (sourceQueue.trayInfo.length > 0) {
+                  this.queues[7].trayInfo.push(sourceQueue.trayInfo[0]);
+                  sourceQueue.trayInfo.shift();
+                }
+              }
+              this.addLog(
+                `从${sourceName}队列移动${increaseCount}个托盘到B2队列`
+              );
             } else {
-              this.addLog('C1队列空，无法发送B2');
+              this.addLog(
+                `B2队列数量增加${increaseCount}，但${sourceName}队列托盘不足，仅移动${availableTrays.length}个托盘`
+              );
+              // 移动所有可用的托盘
+              while (sourceQueue.trayInfo.length > 0) {
+                this.queues[7].trayInfo.push(sourceQueue.trayInfo[0]);
+                sourceQueue.trayInfo.shift();
+              }
             }
           }
         } else {
-          // 不是设置发往B2的，但是B2却减少了，说明有问题，直接报警
+          // 不是设置发往B2的，但是B2却增加了，说明有问题，直接报警
           this.addLog('未设置发送到B2，程序错误！报警！');
         }
       } else {
@@ -3152,41 +3291,55 @@ export default {
     },
     // 监视C2数量变化
     'cLineQuantity.c2'(newVal, oldVal) {
-      // 说明是增加了
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
         // 先判断当前选择发送的是C2么
         if (this.disinfectionRoomSelectedTo === 'C') {
+          let sourceQueueIndex;
+          let sourceName;
           // 看看C2是从disinfectionRoomSelectedFrom哪个口发过来
           if (this.disinfectionRoomSelectedFrom === 'A') {
-            // 把A1的第一个元素加到C2队列,同时删除A1的第一个元素
-            // 判断A1队列是否为空
-            if (this.queues[3].trayInfo.length > 0) {
-              this.queues[8].trayInfo.push(this.queues[3].trayInfo[0]);
-              this.queues[3].trayInfo.shift();
-            } else {
-              this.addLog('A1队列空，无法发送C2');
-            }
+            sourceQueueIndex = 3; // A1队列
+            sourceName = 'A1';
           } else if (this.disinfectionRoomSelectedFrom === 'B') {
-            // 把B1的第一个元素加到C2队列,同时删除B1的第一个元素
-            // 判断B1队列是否为空
-            if (this.queues[4].trayInfo.length > 0) {
-              this.queues[8].trayInfo.push(this.queues[4].trayInfo[0]);
-              this.queues[4].trayInfo.shift();
-            } else {
-              this.addLog('B1队列空，无法发送C2');
-            }
+            sourceQueueIndex = 4; // B1队列
+            sourceName = 'B1';
           } else if (this.disinfectionRoomSelectedFrom === 'C') {
-            // 把C1的第一个元素加到C2队列,同时删除C1的第一个元素
-            // 判断C1队列是否为空
-            if (this.queues[5].trayInfo.length > 0) {
-              this.queues[8].trayInfo.push(this.queues[5].trayInfo[0]);
-              this.queues[5].trayInfo.shift();
+            sourceQueueIndex = 5; // C1队列
+            sourceName = 'C1';
+          }
+
+          if (sourceQueueIndex !== undefined) {
+            const sourceQueue = this.queues[sourceQueueIndex];
+            const availableTrays = sourceQueue.trayInfo || [];
+
+            if (availableTrays.length >= increaseCount) {
+              // 批量移动托盘
+              for (let i = 0; i < increaseCount; i++) {
+                if (sourceQueue.trayInfo.length > 0) {
+                  this.queues[8].trayInfo.push(sourceQueue.trayInfo[0]);
+                  sourceQueue.trayInfo.shift();
+                }
+              }
+              this.addLog(
+                `从${sourceName}队列移动${increaseCount}个托盘到C2队列`
+              );
             } else {
-              this.addLog('C1队列空，无法发送C2');
+              this.addLog(
+                `C2队列数量增加${increaseCount}，但${sourceName}队列托盘不足，仅移动${availableTrays.length}个托盘`
+              );
+              // 移动所有可用的托盘
+              while (sourceQueue.trayInfo.length > 0) {
+                this.queues[8].trayInfo.push(sourceQueue.trayInfo[0]);
+                sourceQueue.trayInfo.shift();
+              }
             }
           }
         } else {
-          // 不是设置发往C2的，但是C2却减少了，说明有问题，直接报警
+          // 不是设置发往C2的，但是C2却增加了，说明有问题，直接报警
           this.addLog('未设置发送到C2，程序错误！报警！');
         }
       } else {
@@ -3198,59 +3351,77 @@ export default {
     },
     // 监听A3数量变化
     'aLineQuantity.a3'(newVal, oldVal) {
-      // 说明是增加了
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
         // 先判断当前选择发送的是A3么
         if (this.warehouseSelectedTo === 'A') {
-          // 看看A3是从disinfectionRoomSelectedFrom哪个口发过来
+          let sourceQueueIndex;
+          let sourceName;
+          // 看看A3是从warehouseSelectedFrom哪个口发过来
           if (this.warehouseSelectedFrom === 'A') {
-            // 把A2的第一个元素加到A3队列,同时删除A2的第一个元素
-            // 判断A2队列是否为空
-            if (this.queues[6].trayInfo.length > 0) {
-              this.queues[9].trayInfo.push(this.queues[6].trayInfo[0]);
-              this.queues[6].trayInfo.shift();
-            } else {
-              this.addLog('A2队列空，无法发送A3');
-            }
+            sourceQueueIndex = 6; // A2队列
+            sourceName = 'A2';
           } else if (this.warehouseSelectedFrom === 'B') {
-            // 把B2的第一个元素加到A3队列,同时删除B2的第一个元素
-            // 判断B2队列是否为空
-            if (this.queues[7].trayInfo.length > 0) {
-              this.queues[9].trayInfo.push(this.queues[7].trayInfo[0]);
-              this.queues[7].trayInfo.shift();
-            } else {
-              this.addLog('B2队列空，无法发送A3');
-            }
+            sourceQueueIndex = 7; // B2队列
+            sourceName = 'B2';
           } else if (this.warehouseSelectedFrom === 'C') {
-            // 把C2的第一个元素加到A3队列,同时删除C2的第一个元素
-            // 判断C2队列是否为空
-            if (this.queues[8].trayInfo.length > 0) {
-              this.queues[9].trayInfo.push(this.queues[8].trayInfo[0]);
-              this.queues[8].trayInfo.shift();
+            sourceQueueIndex = 8; // C2队列
+            sourceName = 'C2';
+          }
+
+          if (sourceQueueIndex !== undefined) {
+            const sourceQueue = this.queues[sourceQueueIndex];
+            const availableTrays = sourceQueue.trayInfo || [];
+
+            if (availableTrays.length >= increaseCount) {
+              // 批量移动托盘
+              for (let i = 0; i < increaseCount; i++) {
+                if (sourceQueue.trayInfo.length > 0) {
+                  this.queues[9].trayInfo.push(sourceQueue.trayInfo[0]);
+                  sourceQueue.trayInfo.shift();
+                }
+              }
+              this.addLog(
+                `从${sourceName}队列移动${increaseCount}个托盘到A3队列`
+              );
             } else {
-              this.addLog('C2队列空，无法发送A3');
+              this.addLog(
+                `A3队列数量增加${increaseCount}，但${sourceName}队列托盘不足，仅移动${availableTrays.length}个托盘`
+              );
+              // 移动所有可用的托盘
+              while (sourceQueue.trayInfo.length > 0) {
+                this.queues[9].trayInfo.push(sourceQueue.trayInfo[0]);
+                sourceQueue.trayInfo.shift();
+              }
             }
           }
         } else {
-          // 不是设置发往A3的，但是A3却减少了，说明有问题，直接报警
+          // 不是设置发往A3的，但是A3却增加了，说明有问题，直接报警
           this.addLog('未设置发送到A3，程序错误！报警！');
         }
       } else {
         // 说明是减少了,说明是出库了
+        const decreaseCount = oldVal - newVal;
         if (newVal < oldVal) {
-          // 先判断当前选择发送的是A3么
+          // 先判断当前选择出库的是A3么
           if (this.outWarehouseSelected === 'A') {
-            // 把A3第一个元素数据展示到下货 删除，同时把A3队列的第一个元素删除
-            if (this.queues[9].trayInfo.length > 0) {
-              // 把A3队列的第一个元素数据展示到下货
-              this.addLog(
-                `托盘信息：${this.queues[9].trayInfo[0].trayCode} 出库`
-              );
-              this.currentOutTrayInfo = this.queues[9].trayInfo[0];
-              // 删除A3队列的第一个元素
-              this.queues[9].trayInfo.shift();
-            } else {
-              this.addLog('A3队列空，无法出库');
+            // 批量处理出库托盘
+            for (let i = 0; i < decreaseCount; i++) {
+              if (this.queues[9].trayInfo.length > 0) {
+                // 把A3队列的第一个元素数据展示到下货
+                this.addLog(
+                  `托盘信息：${this.queues[9].trayInfo[0].trayCode} 出库`
+                );
+                this.currentOutTrayInfo = this.queues[9].trayInfo[0];
+                // 删除A3队列的第一个元素
+                this.queues[9].trayInfo.shift();
+              } else {
+                this.addLog('A3队列空，无法出库');
+                break;
+              }
             }
             if (newVal === 0) {
               this.outWarehouseTrayCode = '';
@@ -3264,57 +3435,77 @@ export default {
     },
     // 监听B3数量变化
     'bLineQuantity.b3'(newVal, oldVal) {
-      // 说明是增加了
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
         // 先判断当前选择发送的是B3么
         if (this.warehouseSelectedTo === 'B') {
-          // 看看B3是从disinfectionRoomSelectedFrom哪个口发过来
+          let sourceQueueIndex;
+          let sourceName;
+          // 看看B3是从warehouseSelectedFrom哪个口发过来
           if (this.warehouseSelectedFrom === 'A') {
-            // 把A2的第一个元素加到B3队列,同时删除A2的第一个元素
-            // 判断A2队列是否为空
-            if (this.queues[6].trayInfo.length > 0) {
-              this.queues[10].trayInfo.push(this.queues[6].trayInfo[0]);
-              this.queues[6].trayInfo.shift();
-            } else {
-              this.addLog('A2队列空，无法发送B3');
-            }
+            sourceQueueIndex = 6; // A2队列
+            sourceName = 'A2';
           } else if (this.warehouseSelectedFrom === 'B') {
-            // 把B2的第一个元素加到B3队列,同时删除B2的第一个元素
-            // 判断B2队列是否为空
-            if (this.queues[7].trayInfo.length > 0) {
-              this.queues[10].trayInfo.push(this.queues[7].trayInfo[0]);
-              this.queues[7].trayInfo.shift();
-            } else {
-              this.addLog('B2队列空，无法发送B3');
-            }
+            sourceQueueIndex = 7; // B2队列
+            sourceName = 'B2';
           } else if (this.warehouseSelectedFrom === 'C') {
-            // 把C2的第一个元素加到B3队列,同时删除C2的第一个元素
-            // 判断C2队列是否为空
-            if (this.queues[8].trayInfo.length > 0) {
-              this.queues[10].trayInfo.push(this.queues[8].trayInfo[0]);
-              this.queues[8].trayInfo.shift();
+            sourceQueueIndex = 8; // C2队列
+            sourceName = 'C2';
+          }
+
+          if (sourceQueueIndex !== undefined) {
+            const sourceQueue = this.queues[sourceQueueIndex];
+            const availableTrays = sourceQueue.trayInfo || [];
+
+            if (availableTrays.length >= increaseCount) {
+              // 批量移动托盘
+              for (let i = 0; i < increaseCount; i++) {
+                if (sourceQueue.trayInfo.length > 0) {
+                  this.queues[10].trayInfo.push(sourceQueue.trayInfo[0]);
+                  sourceQueue.trayInfo.shift();
+                }
+              }
+              this.addLog(
+                `从${sourceName}队列移动${increaseCount}个托盘到B3队列`
+              );
             } else {
-              this.addLog('C2队列空，无法发送B3');
+              this.addLog(
+                `B3队列数量增加${increaseCount}，但${sourceName}队列托盘不足，仅移动${availableTrays.length}个托盘`
+              );
+              // 移动所有可用的托盘
+              while (sourceQueue.trayInfo.length > 0) {
+                this.queues[10].trayInfo.push(sourceQueue.trayInfo[0]);
+                sourceQueue.trayInfo.shift();
+              }
             }
           }
         } else {
-          // 不是设置发往B3的，但是B3却减少了，说明有问题，直接报警
+          // 不是设置发往B3的，但是B3却增加了，说明有问题，直接报警
           this.addLog('未设置发送到B3，程序错误！报警！');
         }
       } else {
         // 说明是减少了,说明是出库了
+        const decreaseCount = oldVal - newVal;
         if (newVal < oldVal) {
-          // 先判断当前选择发送的是B3么
+          // 先判断当前选择出库的是B3么
           if (this.outWarehouseSelected === 'B') {
-            // 把B3第一个元素数据展示到下货 删除，同时把B3队列的第一个元素删除
-            if (this.queues[10].trayInfo.length > 0) {
-              // 把B3队列的第一个元素数据展示到下货
-              this.addLog(
-                `托盘信息：${this.queues[10].trayInfo[0].trayCode} 出库`
-              );
-              this.currentOutTrayInfo = this.queues[10].trayInfo[0];
-              // 删除B3队列的第一个元素
-              this.queues[10].trayInfo.shift();
+            // 批量处理出库托盘
+            for (let i = 0; i < decreaseCount; i++) {
+              if (this.queues[10].trayInfo.length > 0) {
+                // 把B3队列的第一个元素数据展示到下货
+                this.addLog(
+                  `托盘信息：${this.queues[10].trayInfo[0].trayCode} 出库`
+                );
+                this.currentOutTrayInfo = this.queues[10].trayInfo[0];
+                // 删除B3队列的第一个元素
+                this.queues[10].trayInfo.shift();
+              } else {
+                this.addLog('B3队列空，无法出库');
+                break;
+              }
             }
           } else {
             // 不是设置出库B3的，但是B3却减少了，说明有问题，直接报警
@@ -3328,59 +3519,77 @@ export default {
     },
     // 监听C3数量变化
     'cLineQuantity.c3'(newVal, oldVal) {
-      // 说明是增加了
+      // 只有在数据准备就绪后才执行监听逻辑
+      if (!this.isDataReady) return;
+      // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
         // 先判断当前选择发送的是C3么
         if (this.warehouseSelectedTo === 'C') {
-          // 看看C3是从disinfectionRoomSelectedFrom哪个口发过来
+          let sourceQueueIndex;
+          let sourceName;
+          // 看看C3是从warehouseSelectedFrom哪个口发过来
           if (this.warehouseSelectedFrom === 'A') {
-            // 把A2的第一个元素加到C3队列,同时删除A2的第一个元素
-            // 判断A2队列是否为空
-            if (this.queues[6].trayInfo.length > 0) {
-              this.queues[11].trayInfo.push(this.queues[6].trayInfo[0]);
-              this.queues[6].trayInfo.shift();
-            } else {
-              this.addLog('A2队列空，无法发送C3');
-            }
+            sourceQueueIndex = 6; // A2队列
+            sourceName = 'A2';
           } else if (this.warehouseSelectedFrom === 'B') {
-            // 把B2的第一个元素加到C3队列,同时删除B2的第一个元素
-            // 判断B2队列是否为空
-            if (this.queues[7].trayInfo.length > 0) {
-              this.queues[11].trayInfo.push(this.queues[7].trayInfo[0]);
-              this.queues[7].trayInfo.shift();
-            } else {
-              this.addLog('B2队列空，无法发送C3');
-            }
+            sourceQueueIndex = 7; // B2队列
+            sourceName = 'B2';
           } else if (this.warehouseSelectedFrom === 'C') {
-            // 把C2的第一个元素加到C3队列,同时删除C2的第一个元素
-            // 判断C2队列是否为空
-            if (this.queues[8].trayInfo.length > 0) {
-              this.queues[11].trayInfo.push(this.queues[8].trayInfo[0]);
-              this.queues[8].trayInfo.shift();
+            sourceQueueIndex = 8; // C2队列
+            sourceName = 'C2';
+          }
+
+          if (sourceQueueIndex !== undefined) {
+            const sourceQueue = this.queues[sourceQueueIndex];
+            const availableTrays = sourceQueue.trayInfo || [];
+
+            if (availableTrays.length >= increaseCount) {
+              // 批量移动托盘
+              for (let i = 0; i < increaseCount; i++) {
+                if (sourceQueue.trayInfo.length > 0) {
+                  this.queues[11].trayInfo.push(sourceQueue.trayInfo[0]);
+                  sourceQueue.trayInfo.shift();
+                }
+              }
+              this.addLog(
+                `从${sourceName}队列移动${increaseCount}个托盘到C3队列`
+              );
             } else {
-              this.addLog('C2队列空，无法发送C3');
+              this.addLog(
+                `C3队列数量增加${increaseCount}，但${sourceName}队列托盘不足，仅移动${availableTrays.length}个托盘`
+              );
+              // 移动所有可用的托盘
+              while (sourceQueue.trayInfo.length > 0) {
+                this.queues[11].trayInfo.push(sourceQueue.trayInfo[0]);
+                sourceQueue.trayInfo.shift();
+              }
             }
           }
         } else {
-          // 不是设置发往C3的，但是C3却减少了，说明有问题，直接报警
+          // 不是设置发往C3的，但是C3却增加了，说明有问题，直接报警
           this.addLog('未设置发送到C3，程序错误！报警！');
         }
       } else {
         // 说明是减少了,说明是出库了
+        const decreaseCount = oldVal - newVal;
         if (newVal < oldVal) {
-          // 先判断当前选择发送的是C3么
+          // 先判断当前选择出库的是C3么
           if (this.outWarehouseSelected === 'C') {
-            // 把C3第一个元素数据展示到下货 删除，同时把C3队列的第一个元素删除
-            if (this.queues[11].trayInfo.length > 0) {
-              // 把C3队列的第一个元素数据展示到下货
-              this.addLog(
-                `托盘信息：${this.queues[11].trayInfo[0].trayCode} 出库`
-              );
-              this.currentOutTrayInfo = this.queues[11].trayInfo[0];
-              // 删除C3队列的第一个元素
-              this.queues[11].trayInfo.shift();
-            } else {
-              this.addLog('C3队列空，无法出库');
+            // 批量处理出库托盘
+            for (let i = 0; i < decreaseCount; i++) {
+              if (this.queues[11].trayInfo.length > 0) {
+                // 把C3队列的第一个元素数据展示到下货
+                this.addLog(
+                  `托盘信息：${this.queues[11].trayInfo[0].trayCode} 出库`
+                );
+                this.currentOutTrayInfo = this.queues[11].trayInfo[0];
+                // 删除C3队列的第一个元素
+                this.queues[11].trayInfo.shift();
+              } else {
+                this.addLog('C3队列空，无法出库');
+                break;
+              }
             }
           } else {
             // 不是设置出库C3的，但是C3却减少了，说明有问题，直接报警
@@ -3394,21 +3603,25 @@ export default {
     },
     // 监听D数量变化,
     dLineQuantity(newVal, oldVal) {
-      // 说明是减少了,说明是出库了
+      // 使用增量计算来处理多个托盘
       if (newVal < oldVal) {
-        // 先判断当前选择发送的是D么
+        const decreaseCount = oldVal - newVal;
+        // 先判断当前选择出库的是D么
         if (this.outWarehouseSelected === 'D') {
-          // 把D第一个元素数据展示到下货 删除，同时把D队列的第一个元素删除
-          if (this.queues[12].trayInfo.length > 0) {
-            // 把D队列的第一个元素数据展示到下货
-            this.addLog(
-              `托盘信息：${this.queues[12].trayInfo[0].trayCode} 出库`
-            );
-            this.currentOutTrayInfo = this.queues[12].trayInfo[0];
-            // 删除D队列的第一个元素
-            this.queues[12].trayInfo.shift();
-          } else {
-            this.addLog('D队列空，无法出库');
+          // 批量处理出库托盘
+          for (let i = 0; i < decreaseCount; i++) {
+            if (this.queues[12].trayInfo.length > 0) {
+              // 把D队列的第一个元素数据展示到下货
+              this.addLog(
+                `托盘信息：${this.queues[12].trayInfo[0].trayCode} 出库`
+              );
+              this.currentOutTrayInfo = this.queues[12].trayInfo[0];
+              // 删除D队列的第一个元素
+              this.queues[12].trayInfo.shift();
+            } else {
+              this.addLog('D队列空，无法出库');
+              break;
+            }
           }
         } else {
           // 不是设置出库D的，但是D却减少了，说明有问题，直接报警
@@ -3418,21 +3631,25 @@ export default {
     },
     // 监听E数量变化,
     eLineQuantity(newVal, oldVal) {
-      // 说明是减少了,说明是出库了
+      // 使用增量计算来处理多个托盘
       if (newVal < oldVal) {
-        // 先判断当前选择发送的是E么
+        const decreaseCount = oldVal - newVal;
+        // 先判断当前选择出库的是E么
         if (this.outWarehouseSelected === 'E') {
-          // 把E第一个元素数据展示到下货 删除，同时把E队列的第一个元素删除
-          if (this.queues[13].trayInfo.length > 0) {
-            // 把E队列的第一个元素数据展示到下货
-            this.addLog(
-              `托盘信息：${this.queues[13].trayInfo[0].trayCode} 出库`
-            );
-            this.currentOutTrayInfo = this.queues[13].trayInfo[0];
-            // 删除E队列的第一个元素
-            this.queues[13].trayInfo.shift();
-          } else {
-            this.addLog('E队列空，无法出库');
+          // 批量处理出库托盘
+          for (let i = 0; i < decreaseCount; i++) {
+            if (this.queues[13].trayInfo.length > 0) {
+              // 把E队列的第一个元素数据展示到下货
+              this.addLog(
+                `托盘信息：${this.queues[13].trayInfo[0].trayCode} 出库`
+              );
+              this.currentOutTrayInfo = this.queues[13].trayInfo[0];
+              // 删除E队列的第一个元素
+              this.queues[13].trayInfo.shift();
+            } else {
+              this.addLog('E队列空，无法出库');
+              break;
+            }
           }
         } else {
           // 不是设置出库E的，但是E却减少了，说明有问题，直接报警
@@ -3649,8 +3866,13 @@ export default {
           const trayInfo = this.queues[0].trayInfo.shift();
           // 托盘信息进入下一队列
           this.queues[1].trayInfo.push(trayInfo);
+          // 给PLC发送通行信号
+          ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT14', true);
+          setTimeout(() => {
+            ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT14');
+          }, 2000);
           this.addLog(
-            `无码上货模式 - 托盘信息：${trayInfo.trayCode} 进入分发区`
+            `无码上货模式 - 托盘信息：${trayInfo.trayCode} 进入分发区，`
           );
         } else {
           if (
@@ -3659,8 +3881,7 @@ export default {
             trayCode.toLowerCase().includes('noread')
           ) {
             this.addLog(
-              '一楼缓存区扫码失败：条码信息为NoRead,给PLC发送缓存区判断扫码失败去异常口',
-              'alarm'
+              '一楼缓存区扫码失败：条码信息为NoRead,给PLC发送缓存区判断扫码失败去异常口'
             );
             // 给PLC发送缓存区判断扫码失败去异常口
             ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT13', true);
@@ -3671,19 +3892,38 @@ export default {
           }
           // 正常模式下检查第一个托盘的托盘号是否与入参匹配
           if (this.queues[0].trayInfo[0].trayCode === trayCode) {
+            // 给PLC发送通行信号
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT14', true);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT14');
+            }, 2000);
             // 取出队列中的第一个托盘信息
             const trayInfo = this.queues[0].trayInfo.shift();
             // 托盘信息进入下一队列
             this.queues[1].trayInfo.push(trayInfo);
-            this.addLog(`托盘信息：${trayInfo.trayCode} 进入分发区`);
+            this.addLog(
+              `托盘信息：${trayInfo.trayCode} 进入分发区，给PLC发送通行信号`
+            );
           } else {
             this.addLog(
-              `托盘号不匹配，读码：${trayCode}，队列第一个托盘：${this.queues[0].trayInfo[0].trayCode}`
+              `托盘号不匹配，读码：${trayCode}，队列第一个托盘：${this.queues[0].trayInfo[0].trayCode}，给PLC发送缓存区判断扫码失败去异常口`
             );
+            // 给PLC发送缓存区判断扫码失败去异常口
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT13', true);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT13');
+            }, 2000);
           }
         }
       } else {
-        this.addLog(`上货区队列为空，无法执行出库操作`);
+        this.addLog(
+          '一楼缓存区扫码失败：上货区队列为空，无法执行出库操作,给PLC发送缓存区判断扫码失败去异常口'
+        );
+        // 给PLC发送缓存区判断扫码失败去异常口
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT13', true);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT13');
+        }, 2000);
       }
     },
     // 添加货物到上货区队列
@@ -3698,8 +3938,7 @@ export default {
         trayCode.toLowerCase().includes('noread')
       ) {
         this.addLog(
-          trayFrom + `上货区扫码失败：条码信息为NoRead或无码，发送异常信号`,
-          'alarm'
+          trayFrom + `上货区扫码失败：条码信息为NoRead或无码，发送异常信号`
         );
         // 扫码不正常：置异常并不允许进货
         this.sendErrorForPort(portKey);
@@ -3799,8 +4038,7 @@ export default {
         trayCode.toLowerCase().includes('noread')
       ) {
         this.addLog(
-          trayFrom + `口扫码失败：条码信息为NoRead或无码，发送异常信号`,
-          'alarm'
+          trayFrom + `口扫码失败：条码信息为NoRead或无码，发送异常信号`
         );
         // 扫码不正常：置异常并不允许进货
         this.sendErrorForPort(portKey);
@@ -4086,11 +4324,6 @@ export default {
         second: '2-digit'
       });
     },
-    markAsRead(log) {
-      if (log.type === 'alarm') {
-        log.unread = false;
-      }
-    },
     initializeMarkers() {
       this.$nextTick(() => {
         this.updateMarkerPositions();
@@ -4369,7 +4602,8 @@ export default {
       this.addTrayDialogVisible = true;
       this.newTrayForm = {
         trayCode: '',
-        batchId: ''
+        batchId: '',
+        isSterile: true
       };
     },
     async submitAddTray() {
@@ -4384,7 +4618,8 @@ export default {
         const newTray = {
           trayCode: this.newTrayForm.trayCode,
           trayTime: currentTime,
-          batchId: this.newTrayForm.batchId
+          batchId: this.newTrayForm.batchId,
+          isTerile: this.newTrayForm.isSterile ? 1 : 0
         };
 
         // 确保trayInfo是数组
@@ -4406,7 +4641,11 @@ export default {
 
         // 添加新托盘日志
         this.addLog(
-          `新托盘 ${newTray.trayCode} 已添加到 ${this.selectedQueue.queueName}，批次号：${newTray.batchId}`
+          `新托盘 ${newTray.trayCode} 已添加到 ${
+            this.selectedQueue.queueName
+          }，批次号：${newTray.batchId}，${
+            newTray.isTerile === 1 ? '灭菌' : '不灭菌'
+          }`
         );
 
         this.$message.success('托盘添加成功');
@@ -4859,6 +5098,14 @@ export default {
           this.$message.error('加载队列信息失败: ' + err);
           this.addLog('队列信息加载失败');
         });
+    },
+    // 切换到报警日志时清除未读状态
+    switchToAlarmLog() {
+      this.activeLogType = 'alarm';
+      // 清除所有报警日志的未读状态
+      this.alarmLogs.forEach((log) => {
+        log.unread = false;
+      });
     }
   }
 };
