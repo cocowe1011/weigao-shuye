@@ -235,6 +235,7 @@
                         placeholder="选择"
                         size="mini"
                       >
+                        <el-option label="不执行" :value="null"></el-option>
                         <el-option label="A" value="A"></el-option>
                         <el-option label="B" value="B"></el-option>
                         <el-option label="C" value="C"></el-option>
@@ -268,6 +269,7 @@
                           placeholder="预热"
                           size="mini"
                         >
+                          <el-option label="不执行" :value="null"></el-option>
                           <el-option label="A" value="A"></el-option>
                           <el-option label="B" value="B"></el-option>
                           <el-option label="C" value="C"></el-option>
@@ -281,6 +283,7 @@
                           placeholder="灭菌"
                           size="mini"
                         >
+                          <el-option label="不执行" :value="null"></el-option>
                           <el-option label="A" value="A"></el-option>
                           <el-option label="B" value="B"></el-option>
                           <el-option label="C" value="C"></el-option>
@@ -322,6 +325,7 @@
                           placeholder="灭菌"
                           size="mini"
                         >
+                          <el-option label="不执行" :value="null"></el-option>
                           <el-option label="A" value="A"></el-option>
                           <el-option label="B" value="B"></el-option>
                           <el-option label="C" value="C"></el-option>
@@ -335,6 +339,7 @@
                           placeholder="解析"
                           size="mini"
                         >
+                          <el-option label="不执行" :value="null"></el-option>
                           <el-option label="A" value="A"></el-option>
                           <el-option label="B" value="B"></el-option>
                           <el-option label="C" value="C"></el-option>
@@ -370,6 +375,7 @@
                         placeholder="选择"
                         size="mini"
                       >
+                        <el-option label="不执行" :value="null"></el-option>
                         <el-option label="A" value="A"></el-option>
                         <el-option label="B" value="B"></el-option>
                         <el-option label="C" value="C"></el-option>
@@ -2806,17 +2812,20 @@ export default {
         // 光电复0，停止允许通行
         this.stopAllowForPort('D');
       }
-      if (newVal === '1' && this.noCodeUpload) {
-        this.addLog('D口光电触发，无码上货模式，强制允许通行');
-        this.sendAllowForPort('D');
-      }
-      if (newVal === '1' && this.elevatorDDisinfectionScanCode !== '') {
-        this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
-        this.addToUpLoadQueueDE(
-          this.elevatorDDisinfectionScanCode,
-          'D',
-          this.nonSterileD
-        );
+      if (newVal === '1') {
+        if (this.noCodeUpload) {
+          // 无码上货模式，直接添加托盘信息
+          this.addLog('D口光电触发，无码上货模式启用');
+          this.addNoCodeTrayToUpLoadQueueDE('D', this.nonSterileD);
+          this.sendAllowForPort('D');
+        } else if (this.elevatorDDisinfectionScanCode !== '') {
+          this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
+          this.addToUpLoadQueueDE(
+            this.elevatorDDisinfectionScanCode,
+            'D',
+            this.nonSterileD
+          );
+        }
       }
     },
     // 一楼E灭菌"有载信号"/光电占位,
@@ -2827,17 +2836,20 @@ export default {
         // 光电复0，停止允许通行
         this.stopAllowForPort('E');
       }
-      if (newVal === '1' && this.noCodeUpload) {
-        this.addLog('E口光电触发，无码上货模式，强制允许通行');
-        this.sendAllowForPort('E');
-      }
-      if (newVal === '1' && this.elevatorEDisinfectionScanCode !== '') {
-        this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
-        this.addToUpLoadQueueDE(
-          this.elevatorEDisinfectionScanCode,
-          'E',
-          this.nonSterileE
-        );
+      if (newVal === '1') {
+        if (this.noCodeUpload) {
+          // 无码上货模式，直接添加托盘信息
+          this.addLog('E口光电触发，无码上货模式启用');
+          this.addNoCodeTrayToUpLoadQueueDE('E', this.nonSterileE);
+          this.sendAllowForPort('E');
+        } else if (this.elevatorEDisinfectionScanCode !== '') {
+          this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
+          this.addToUpLoadQueueDE(
+            this.elevatorEDisinfectionScanCode,
+            'E',
+            this.nonSterileE
+          );
+        }
       }
     },
     // 一楼缓存区光电信号
@@ -2846,7 +2858,7 @@ export default {
         this.oneFloorElevatorScanCode = '';
         this.addLog('一楼缓存区光电信号无货，已清空一楼缓存区扫码数据');
       }
-      if (newVal === '1' && this.oneFloorElevatorScanCode !== '') {
+      if (newVal === '1') {
         this.addLog(`一楼缓存区扫码数据：${this.oneFloorElevatorScanCode}`);
         // 判断是否消毒，如果消毒则此托盘进入下一队列，如果不消毒直接发走
         this.addToCartLoadQueue(this.oneFloorElevatorScanCode);
@@ -3642,6 +3654,22 @@ export default {
             `无码上货模式 - 托盘信息：${trayInfo.trayCode} 进入分发区`
           );
         } else {
+          if (
+            !trayCode ||
+            trayCode === '' ||
+            trayCode.toLowerCase().includes('noread')
+          ) {
+            this.addLog(
+              '一楼缓存区扫码失败：条码信息为NoRead,给PLC发送缓存区判断扫码失败去异常口',
+              'alarm'
+            );
+            // 给PLC发送缓存区判断扫码失败去异常口
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT13', true);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT13');
+            }, 2000);
+            return;
+          }
           // 正常模式下检查第一个托盘的托盘号是否与入参匹配
           if (this.queues[0].trayInfo[0].trayCode === trayCode) {
             // 取出队列中的第一个托盘信息
@@ -3808,6 +3836,27 @@ export default {
       };
       this.queues[0].trayInfo.push(trayInfo);
       this.addLog(trayFrom + `无码上货区队列添加货物：no-tray-code`);
+      this.nowScanTrayInfo = {
+        trayCode: trayInfo.trayCode,
+        orderId: trayInfo.orderId,
+        productName: trayInfo.productName,
+        isTerile: trayInfo.isTerile === 1 ? '消毒' : '不消毒',
+        inPut: trayFrom
+      };
+    },
+    // DE无码上货直接添加托盘信息到对应队列
+    addNoCodeTrayToUpLoadQueueDE(trayFrom, nonSterile) {
+      const trayInfo = {
+        trayCode: 'no-tray-code',
+        trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+        orderId: 'NO-ORDER',
+        productCode: 'NO-PRODUCT',
+        productName: '无码产品',
+        isTerile: nonSterile ? 0 : 1
+      };
+      const queueIndex = trayFrom === 'D' ? 12 : 13;
+      this.queues[queueIndex].trayInfo.push(trayInfo);
+      this.addLog(trayFrom + `${trayFrom}队列无码上货添加货物：no-tray-code`);
       this.nowScanTrayInfo = {
         trayCode: trayInfo.trayCode,
         orderId: trayInfo.orderId,
@@ -4374,6 +4423,10 @@ export default {
           this.alarmLogs.pop();
         }
       }
+      // 同时写入本地文件
+      const logTypeText = type === 'running' ? '运行日志' : '报警日志';
+      const logMessage = `[${logTypeText}] ${message}`;
+      ipcRenderer.send('writeLogToLocal', logMessage);
     },
     toggleBitValue(obj, bit) {
       obj[bit] = obj[bit] === '1' ? '0' : '1';
