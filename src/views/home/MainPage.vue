@@ -2717,7 +2717,7 @@ export default {
           this.addLog('一楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('一楼接货站台', this.nonSterileOne);
           this.sendAllowForPort('1');
-        } else if (this.elevatorOneFloorScanCode !== '') {
+        } else {
           this.addLog(`一楼接货站台扫码数据：${this.elevatorOneFloorScanCode}`);
           this.addToUpLoadQueue(
             this.elevatorOneFloorScanCode,
@@ -2741,7 +2741,7 @@ export default {
           this.addLog('二楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('二楼接货站台', this.nonSterileTwo);
           this.sendAllowForPort('2');
-        } else if (this.elevatorTwoFloorScanCode !== '') {
+        } else {
           this.addLog(`二楼接货站台扫码数据：${this.elevatorTwoFloorScanCode}`);
           this.addToUpLoadQueue(
             this.elevatorTwoFloorScanCode,
@@ -2765,14 +2765,13 @@ export default {
           this.addLog('三楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('三楼接货站台', this.nonSterileThree);
           this.sendAllowForPort('3');
-        } else if (this.elevatorThreeFloorScanCode !== '') {
+        } else {
           this.addLog(
             `三楼接货站台扫码数据：${this.elevatorThreeFloorScanCode}`
           );
           this.addToUpLoadQueue(
             this.elevatorThreeFloorScanCode,
             '三楼接货站台',
-            this.allowUploadThree,
             this.nonSterileThree
           );
         }
@@ -2792,7 +2791,7 @@ export default {
           this.addLog('四楼接货站台触发光电信号，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueue('四楼接货站台', this.nonSterileFour);
           this.sendAllowForPort('4');
-        } else if (this.elevatorFourFloorScanCode !== '') {
+        } else {
           this.addLog(
             `四楼接货站台扫码数据：${this.elevatorFourFloorScanCode}`
           );
@@ -2818,7 +2817,7 @@ export default {
           this.addLog('D口光电触发，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueueDE('D', this.nonSterileD);
           this.sendAllowForPort('D');
-        } else if (this.elevatorDDisinfectionScanCode !== '') {
+        } else {
           this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
           this.addToUpLoadQueueDE(
             this.elevatorDDisinfectionScanCode,
@@ -2842,7 +2841,7 @@ export default {
           this.addLog('E口光电触发，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueueDE('E', this.nonSterileE);
           this.sendAllowForPort('E');
-        } else if (this.elevatorEDisinfectionScanCode !== '') {
+        } else {
           this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
           this.addToUpLoadQueueDE(
             this.elevatorEDisinfectionScanCode,
@@ -3691,6 +3690,22 @@ export default {
     addToUpLoadQueue(trayCode, trayFrom, nonSterile) {
       const portKey = this.getPortKeyByTrayFrom(trayFrom);
       trayCode = trayCode.trim();
+
+      // 判断条码是否为无码或noread
+      if (
+        !trayCode ||
+        trayCode === '' ||
+        trayCode.toLowerCase().includes('noread')
+      ) {
+        this.addLog(
+          trayFrom + `上货区扫码失败：条码信息为NoRead或无码，发送异常信号`,
+          'alarm'
+        );
+        // 扫码不正常：置异常并不允许进货
+        this.sendErrorForPort(portKey);
+        return;
+      }
+
       // 遍历上货区托盘号，先通过托盘号判断此托盘是不是已经在上货区上货了
       if (this.queues[0].trayInfo.length > 0) {
         for (const tray of this.queues[0].trayInfo) {
@@ -3776,6 +3791,22 @@ export default {
     // 添加扫码数据到D队列,
     addToUpLoadQueueDE(trayCode, trayFrom, nonSterile) {
       const portKey = trayFrom; // D 或 E
+
+      // 判断条码是否为无码或noread
+      if (
+        !trayCode ||
+        trayCode === '' ||
+        trayCode.toLowerCase().includes('noread')
+      ) {
+        this.addLog(
+          trayFrom + `口扫码失败：条码信息为NoRead或无码，发送异常信号`,
+          'alarm'
+        );
+        // 扫码不正常：置异常并不允许进货
+        this.sendErrorForPort(portKey);
+        return;
+      }
+
       // 通过trayCode 查询erp数据
       const params = {
         trayCode: trayCode,
