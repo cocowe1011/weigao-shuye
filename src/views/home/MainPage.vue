@@ -2716,6 +2716,10 @@ export default {
         this.isDataReady = true;
       }
     });
+    // 测试模式下，把上边注释，下面打开
+    // if (!this.isDataReady) {
+    //   this.isDataReady = true;
+    // }
   },
   watch: {
     // 一楼接货站台光电信号
@@ -2917,24 +2921,30 @@ export default {
               const targetTray = this.queues[1].trayInfo[targetIndex];
               if (targetTray.isTerile === 0) {
                 // 给PLC发送去立库的命令
+                this.addLog(
+                  `判断到非灭菌托盘：${targetTray.trayCode}，发送去立库命令`
+                );
                 ipcRenderer.send('writeSingleValueToPLC', 'DBW542', 1);
                 setTimeout(() => {
                   ipcRenderer.send('cancelWriteToPLC', 'DBW542');
                 }, 2000);
               } else {
+                this.addLog(
+                  `判断到灭菌托盘：${targetTray.trayCode}，发送去预热房命令`
+                );
                 // 给PLC发送去预热房的命令
                 ipcRenderer.send('writeSingleValueToPLC', 'DBW542', 2);
                 setTimeout(() => {
                   ipcRenderer.send('cancelWriteToPLC', 'DBW542');
                 }, 2000);
               }
-              this.queues[1].trayInfo[targetIndex] = {
+              this.$set(this.queues[1].trayInfo, targetIndex, {
                 ...targetTray,
                 state: '1'
-              };
+              });
             } else {
               // 报错
-              this.addLog('分发区中未处理过的第一个托盘数据不存在', 'error');
+              this.addLog('错误：分发区中未处理过的第一个托盘数据不存在');
             }
           }
         }
@@ -2983,6 +2993,10 @@ export default {
             if (newVal === 16) {
               this.showCar1SetPreheatingRoom = true;
             }
+          } else {
+            this.addLog(
+              '缓冲区数量增加，但是分发区没有找到符合条件的托盘(已执行且灭菌的托盘)'
+            );
           }
         } else {
           // 减少到0说明不再执行了。
@@ -3872,7 +3886,7 @@ export default {
             ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT14');
           }, 2000);
           this.addLog(
-            `无码上货模式 - 托盘信息：${trayInfo.trayCode} 进入分发区，`
+            `无码上货模式 - 托盘信息：${trayInfo.trayCode} 进入分发区，给PLC发送通行信号`
           );
         } else {
           if (
@@ -4619,7 +4633,9 @@ export default {
           trayCode: this.newTrayForm.trayCode,
           trayTime: currentTime,
           batchId: this.newTrayForm.batchId,
-          isTerile: this.newTrayForm.isSterile ? 1 : 0
+          isTerile: this.newTrayForm.isSterile ? 1 : 0,
+          state: '0',
+          sendTo: ''
         };
 
         // 确保trayInfo是数组
