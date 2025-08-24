@@ -233,6 +233,7 @@
                         v-model="preheatingRoomSelected"
                         placeholder="选择"
                         size="mini"
+                        style="width: 100%; margin-bottom: 2px"
                       >
                         <el-option label="不执行" :value="null"></el-option>
                         <el-option label="A" value="A"></el-option>
@@ -244,20 +245,26 @@
                         :min="0"
                         size="mini"
                         :disabled="preheatExecuting"
-                        controls-position="right"
+                        :controls="false"
                         placeholder="执行数量"
-                        style="margin-left: 6px; width: 120px"
+                        style="width: 100%; font-size: 10px; margin-bottom: 2px"
                       />
                       <el-button
                         type="primary"
                         size="mini"
                         @click="sendToPreheatingRoom"
+                        style="width: 100%"
                         >执行</el-button
                       >
                       <div
-                        style="margin-top: 4px; font-size: 12px; color: #9fe3d3"
+                        style="
+                          margin-top: 4px;
+                          font-size: 12px;
+                          color: #9fe3d3;
+                          text-align: center;
+                        "
                       >
-                        当前需要进货数量：<b>{{ preheatNeedQty }}</b>
+                        需进货：<b>{{ preheatNeedQty }}</b>
                       </div>
                       <span
                         style="font-size: 12px; color: greenyellow"
@@ -309,7 +316,10 @@
                         style="width: 100%"
                         >执行</el-button
                       >
-                      <div style="display: flex; align-items: center">
+                      <div
+                        style="display: flex; align-items: center"
+                        v-if="disinfectionTrayCode"
+                      >
                         <span
                           style="
                             font-size: 12px;
@@ -320,10 +330,8 @@
                           >执行中：{{ disinfectionTrayCode }}</span
                         >
                       </div>
-                      <div
-                        style="margin-top: 4px; font-size: 12px; color: #9fe3d3"
-                      >
-                        当前需要进货数量：<b>{{ disinfectionNeedQty }}</b>
+                      <div style="font-size: 12px; color: #9fe3d3">
+                        需进货：<b>{{ disinfectionNeedQty }}</b>
                       </div>
                     </div>
                   </div>
@@ -370,7 +378,10 @@
                         style="width: 100%"
                         >执行</el-button
                       >
-                      <div style="display: flex; align-items: center">
+                      <div
+                        style="display: flex; align-items: center"
+                        v-if="analysisTrayCode"
+                      >
                         <span
                           style="
                             font-size: 12px;
@@ -381,10 +392,8 @@
                           >执行中：{{ analysisTrayCode }}</span
                         >
                       </div>
-                      <div
-                        style="margin-top: 4px; font-size: 12px; color: #9fe3d3"
-                      >
-                        当前需要进货数量：<b>{{ analysisNeedQty }}</b>
+                      <div style="font-size: 12px; color: #9fe3d3">
+                        需进货：<b>{{ analysisNeedQty }}</b>
                       </div>
                     </div>
                   </div>
@@ -419,7 +428,7 @@
                       <div
                         style="margin-top: 4px; font-size: 12px; color: #9fe3d3"
                       >
-                        当前需要进货数量：<b>{{ outNeedQty }}</b>
+                        需进货：<b>{{ outNeedQty }}</b>
                       </div>
                     </div>
                   </div>
@@ -607,44 +616,46 @@
                         >
                         <el-checkbox v-model="nonSterileD">非灭菌</el-checkbox>
                       </div>
-                      <div class="data-panel-row" style="margin-top: 4px">
+                      <div
+                        class="data-panel-row exec-controls"
+                        style="margin-top: 4px"
+                      >
                         <el-input-number
                           v-model="dExecQty"
                           :min="0"
                           size="mini"
                           :disabled="dExecuting"
-                          controls-position="right"
+                          :controls="false"
                           placeholder="执行数量"
-                          style="width: 120px"
+                          style="width: 98px; font-size: 10px"
                         />
-                      </div>
-                      <div class="data-panel-row" style="margin-top: 4px">
                         <el-button
+                          v-if="!dExecuting"
                           type="primary"
                           size="mini"
                           :loading="dConfirmLoading"
-                          :disabled="dExecuting && dConfirmLoading"
                           @click="confirmDExecution"
+                          style="font-size: 10px; padding: 2px 6px"
                           >确定</el-button
                         >
                         <el-button
+                          v-if="dExecuting"
                           type="warning"
                           size="mini"
-                          style="margin-left: 6px"
-                          :disabled="!dExecuting"
+                          style="font-size: 10px; padding: 2px 6px"
                           @click="cancelDExecution"
-                          >取消执行</el-button
+                          >取消</el-button
                         >
                       </div>
                       <div
                         style="margin-top: 4px; font-size: 12px; color: #9fe3d3"
                       >
-                        当前需要进货数量：<b>{{ dNeedQty }}</b>
+                        需进货：<b>{{ dNeedQty }}</b>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="marker-with-panel" data-x="1560" data-y="450">
+                <div class="marker-with-panel" data-x="1560" data-y="350">
                   <div
                     class="data-panel"
                     :class="['position-top', { 'always-show': true }]"
@@ -663,39 +674,41 @@
                         >
                         <el-checkbox v-model="nonSterileE">非灭菌</el-checkbox>
                       </div>
-                      <div class="data-panel-row" style="margin-top: 4px">
+                      <div
+                        class="data-panel-row exec-controls"
+                        style="margin-top: 4px"
+                      >
                         <el-input-number
                           v-model="eExecQty"
                           :min="0"
                           size="mini"
                           :disabled="eExecuting"
-                          controls-position="right"
+                          :controls="false"
                           placeholder="执行数量"
-                          style="width: 120px"
+                          style="width: 98px; font-size: 10px"
                         />
-                      </div>
-                      <div class="data-panel-row" style="margin-top: 4px">
                         <el-button
+                          v-if="!eExecuting"
                           type="primary"
                           size="mini"
                           :loading="eConfirmLoading"
-                          :disabled="eExecuting && eConfirmLoading"
                           @click="confirmEExecution"
+                          style="font-size: 10px; padding: 2px 6px"
                           >确定</el-button
                         >
                         <el-button
+                          v-if="eExecuting"
                           type="warning"
                           size="mini"
-                          style="margin-left: 6px"
-                          :disabled="!eExecuting"
+                          style="font-size: 10px; padding: 2px 6px"
                           @click="cancelEExecution"
-                          >取消执行</el-button
+                          >取消</el-button
                         >
                       </div>
                       <div
                         style="margin-top: 4px; font-size: 12px; color: #9fe3d3"
                       >
-                        当前需要进货数量：<b>{{ eNeedQty }}</b>
+                        需进货：<b>{{ eNeedQty }}</b>
                       </div>
                     </div>
                   </div>
@@ -2616,7 +2629,7 @@ export default {
       // 无码上货模式开关
       noCodeUpload: false,
       // 预热执行与显示
-      preheatExecQty: 0,
+      preheatExecQty: undefined,
       preheatExecuting: false,
       preheatNeedQty: 0,
       // 灭菌、解析、出库显示
@@ -2624,11 +2637,11 @@ export default {
       analysisNeedQty: 0,
       outNeedQty: 0,
       // D/E 执行与显示
-      dExecQty: 0,
+      dExecQty: undefined,
       dExecuting: false,
       dConfirmLoading: false,
       dNeedQty: 0,
-      eExecQty: 0,
+      eExecQty: undefined,
       eExecuting: false,
       eConfirmLoading: false,
       eNeedQty: 0
@@ -2841,8 +2854,9 @@ export default {
       if (!this.isDataReady) return;
       if (!newVal) {
         this.preheatExecuting = false;
-        this.preheatExecQty = 0;
+        this.preheatExecQty = undefined;
         this.preheatNeedQty = 0;
+        this.addLog(`写入PLC DBW546（预热房需进货数量）: 0 - 不执行`);
         this.writeWordWithCancel('DBW546', 0);
       } else {
         this.updatePreheatNeedAndWrite();
@@ -2853,6 +2867,7 @@ export default {
       if (!this.isDataReady) return;
       if (!newVal) {
         this.disinfectionNeedQty = 0;
+        this.addLog(`写入PLC DBW548（灭菌柜需进货数量）: 0 - 不执行`);
         this.writeWordWithCancel('DBW548', 0);
       } else {
         this.updateDisinfectionNeedAndWrite();
@@ -2863,6 +2878,7 @@ export default {
       if (!this.isDataReady) return;
       if (!newVal) {
         this.analysisNeedQty = 0;
+        this.addLog(`写入PLC DBW550（解析柜需进货数量）: 0 - 不执行`);
         this.writeWordWithCancel('DBW550', 0);
       } else {
         this.updateAnalysisNeedAndWrite();
@@ -3955,6 +3971,10 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(10);
+        // 如果当前选择出库A，更新出库需进货
+        if (this.outWarehouseSelected === 'A') {
+          this.updateOutNeedAndWrite();
+        }
       }
     },
     'queues.10.trayInfo': {
@@ -3962,6 +3982,10 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(11);
+        // 如果当前选择出库B，更新出库需进货
+        if (this.outWarehouseSelected === 'B') {
+          this.updateOutNeedAndWrite();
+        }
       }
     },
     'queues.11.trayInfo': {
@@ -3969,6 +3993,10 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(12);
+        // 如果当前选择出库C，更新出库需进货
+        if (this.outWarehouseSelected === 'C') {
+          this.updateOutNeedAndWrite();
+        }
       }
     },
     'queues.12.trayInfo': {
@@ -3976,6 +4004,10 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(13);
+        // 如果当前选择出库D，更新出库需进货
+        if (this.outWarehouseSelected === 'D') {
+          this.updateOutNeedAndWrite();
+        }
       }
     },
     'queues.13.trayInfo': {
@@ -3983,6 +4015,10 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(14);
+        // 如果当前选择出库E，更新出库需进货
+        if (this.outWarehouseSelected === 'E') {
+          this.updateOutNeedAndWrite();
+        }
       }
     },
     'queues.14.trayInfo': {
@@ -4968,25 +5004,36 @@ export default {
       if (room === 'C') return Number(this.cLineQuantity.c3) || 0;
       return 0;
     },
-    // DBW546 预热柜当前需要进货数量
+    // DBW546 预热柜需进货
     updatePreheatNeedAndWrite() {
       if (!this.preheatingRoomSelected) {
         this.preheatNeedQty = 0;
+        this.addLog(`写入PLC DBW546（预热房需进货数量）: 0 - 未选择预热房`);
         this.writeWordWithCancel('DBW546', 0);
         return;
       }
       const arrived = this.getPreheatCountFor(this.preheatingRoomSelected);
-      const need =
-        this.preheatExecuting && this.preheatExecQty > 0
-          ? Math.max(0, Number(this.preheatExecQty) - arrived)
-          : 0;
-      this.preheatNeedQty = need;
+      // 如果正在执行且有设置执行数量，计算需进货数量；否则为0
+      let need = 0;
+      if (this.preheatExecuting && this.preheatExecQty > 0) {
+        need = Math.max(0, Number(this.preheatExecQty) - arrived);
+      }
+      // 设置显示的需进货数量和写入PLC的值
+      if (!this.preheatExecuting) {
+        // 未执行时，显示和PLC都写入0
+        this.preheatNeedQty = 0;
+        need = 0;
+      } else {
+        this.preheatNeedQty = need;
+      }
+      this.addLog(`写入PLC DBW546（预热房需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW546', need);
     },
-    // DBW548 灭菌柜当前需要进货数量
+    // DBW548 灭菌柜需进货
     updateDisinfectionNeedAndWrite() {
       if (!this.disinfectionRoomSelectedFrom) {
         this.disinfectionNeedQty = 0;
+        this.addLog(`写入PLC DBW548（灭菌柜需进货数量）: 0 - 未选择灭菌柜`);
         this.writeWordWithCancel('DBW548', 0);
         return;
       }
@@ -4994,12 +5041,14 @@ export default {
         this.disinfectionRoomSelectedFrom
       );
       this.disinfectionNeedQty = leftFromPreheat;
+      this.addLog(`写入PLC DBW548（灭菌柜需进货数量）: ${leftFromPreheat}`);
       this.writeWordWithCancel('DBW548', leftFromPreheat);
     },
-    // DBW550 解析柜当前需要进货数量
+    // DBW550 解析柜需进货
     updateAnalysisNeedAndWrite() {
       if (!this.warehouseSelectedFrom) {
         this.analysisNeedQty = 0;
+        this.addLog(`写入PLC DBW550（解析柜需进货数量）: 0 - 未选择解析柜`);
         this.writeWordWithCancel('DBW550', 0);
         return;
       }
@@ -5007,34 +5056,40 @@ export default {
         this.warehouseSelectedFrom
       );
       this.analysisNeedQty = leftFromSterilize;
+      this.addLog(`写入PLC DBW550（解析柜需进货数量）: ${leftFromSterilize}`);
       this.writeWordWithCancel('DBW550', leftFromSterilize);
     },
-    // DBW560 出库当前需要进货数量
+    // DBW560 出库需进货
     updateOutNeedAndWrite() {
       if (!this.outWarehouseSelected) {
         this.outNeedQty = 0;
+        this.addLog(`写入PLC DBW560（出库需进货数量）: 0 - 未选择出库`);
         this.writeWordWithCancel('DBW560', 0);
         return;
       }
-      // A/B/C 用解析房 A3/B3/C3；D/E 用各自数量。
+      // A/B/C 用解析房 A3/B3/C3；D/E 用队列中实际托盘数量。
       let need = 0;
       if (['A', 'B', 'C'].includes(this.outWarehouseSelected)) {
         need = this.getAnalysisCountFor(this.outWarehouseSelected);
       } else if (this.outWarehouseSelected === 'D') {
-        need = Number(this.dLineQuantity) || 0;
+        // D队列：使用队列12中实际托盘数量
+        need = this.queues[12]?.trayInfo?.length || 0;
       } else if (this.outWarehouseSelected === 'E') {
-        need = Number(this.eLineQuantity) || 0;
+        // E队列：使用队列13中实际托盘数量
+        need = this.queues[13]?.trayInfo?.length || 0;
       } else {
         need = 0;
       }
       this.outNeedQty = need;
+      this.addLog(`写入PLC DBW560（出库需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW560', need);
     },
-    // DBW552 D灭菌柜当前需要进货数量
+    // DBW552 D灭菌柜需进货
     confirmDExecution() {
       if (!this.dExecQty || this.dExecQty <= 0) {
         this.dNeedQty = 0;
         this.dExecuting = false;
+        this.addLog(`写入PLC DBW552（D灭菌柜需进货数量）: 0 - 未设置数量`);
         this.writeWordWithCancel('DBW552', 0);
         return;
       }
@@ -5043,6 +5098,7 @@ export default {
       const arrived = Number(this.dLineQuantity) || 0;
       const need = Math.max(0, Number(this.dExecQty) - arrived);
       this.dNeedQty = need;
+      this.addLog(`写入PLC DBW552（D灭菌柜需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW552', need);
       setTimeout(() => {
         this.dConfirmLoading = false;
@@ -5050,15 +5106,17 @@ export default {
     },
     cancelDExecution() {
       this.dExecuting = false;
-      this.dExecQty = 0;
+      this.dExecQty = undefined;
       this.dNeedQty = 0;
+      this.addLog(`写入PLC DBW552（D灭菌柜需进货数量）: 0 - 取消执行`);
       this.writeWordWithCancel('DBW552', 0);
     },
-    // DBW554 E灭菌柜当前需要进货数量
+    // DBW554 E灭菌柜需进货
     confirmEExecution() {
       if (!this.eExecQty || this.eExecQty <= 0) {
         this.eNeedQty = 0;
         this.eExecuting = false;
+        this.addLog(`写入PLC DBW554（E灭菌柜需进货数量）: 0 - 未设置数量`);
         this.writeWordWithCancel('DBW554', 0);
         return;
       }
@@ -5067,6 +5125,7 @@ export default {
       const arrived = Number(this.eLineQuantity) || 0;
       const need = Math.max(0, Number(this.eExecQty) - arrived);
       this.eNeedQty = need;
+      this.addLog(`写入PLC DBW554（E灭菌柜需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW554', need);
       setTimeout(() => {
         this.eConfirmLoading = false;
@@ -5074,8 +5133,9 @@ export default {
     },
     cancelEExecution() {
       this.eExecuting = false;
-      this.eExecQty = 0;
+      this.eExecQty = undefined;
       this.eNeedQty = 0;
+      this.addLog(`写入PLC DBW554（E灭菌柜需进货数量）: 0 - 取消执行`);
       this.writeWordWithCancel('DBW554', 0);
     },
     updateQuantity(quantityObj, key, change) {
@@ -5105,14 +5165,15 @@ export default {
         this.$message.warning('请先选择预热房');
         return;
       }
-      // 锁定预热执行数量并写入DBW546
+      // 锁定预热需进货量并写入DBW546
       if (this.preheatExecQty && this.preheatExecQty > 0) {
         this.preheatExecuting = true;
         this.updatePreheatNeedAndWrite();
       } else {
-        // 未设置执行数量直接执行，写0
+        // 未设置需进货量直接执行，写0
         this.preheatExecuting = false;
         this.preheatNeedQty = 0;
+        this.addLog(`写入PLC DBW546（预热房需进货数量）: 0 - 未设置数量`);
         this.writeWordWithCancel('DBW546', 0);
       }
       // 映射预热房选项到队列索引和子队列名称前缀
@@ -6082,6 +6143,13 @@ export default {
                     .checkbox-group :deep(.el-checkbox__label) {
                       color: rgba(255, 255, 255, 0.8); /* 调整标签颜色 */
                       font-size: 12px; /* 调整标签字体大小 */
+                    }
+
+                    /* 执行控制区域的特殊样式 */
+                    .exec-controls {
+                      display: flex;
+                      align-items: center;
+                      gap: 3px;
                     }
 
                     /* 调整选中状态下的颜色 */
