@@ -2447,9 +2447,9 @@ export default {
         bit8: '0' // 一楼E灭菌"有载信号"/光电占位
       },
       // 请求上位机下发任务(判断去灭菌还是非灭菌）
-      requestUploadTask: '0',
+      requestUploadTask: 0,
       // 请求上位机下发任务(预热小车前）
-      requestUploadTaskPreheatingCar: '0',
+      requestUploadTaskPreheatingCar: 0,
       // 提升机一楼接货站台扫码数据（托盘号）
       elevatorOneFloorScanCode: '',
       // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
@@ -2909,7 +2909,7 @@ export default {
         // 只有在数据准备就绪后才执行监听逻辑
         if (!this.isDataReady) return;
 
-        if (newVal === '1') {
+        if (newVal === 1) {
           this.addLog('请求上位机下发任务(判断去灭菌还是非灭菌）');
           // 先筛选出分发区中未处理过的第一个托盘数据，属性state等于'1'代表已经处理过。'0'代表没有处理过
           if (this.queues[1]?.trayInfo) {
@@ -2956,7 +2956,7 @@ export default {
         if (!this.isDataReady) return;
 
         // 请求上位机下发任务(预热小车前）
-        if (newVal === '1') {
+        if (newVal === 1) {
           this.sendToPreheatingRoom();
         }
       }
@@ -3885,6 +3885,11 @@ export default {
           setTimeout(() => {
             ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT14');
           }, 2000);
+          // 给PLC发送通行信号-使用备用地址-无码模式通行1
+          ipcRenderer.send('writeSingleValueToPLC', 'DBW556', 1);
+          setTimeout(() => {
+            ipcRenderer.send('cancelWriteToPLC', 'DBW556');
+          }, 2000);
           this.addLog(
             `无码上货模式 - 托盘信息：${trayInfo.trayCode} 进入分发区，给PLC发送通行信号`
           );
@@ -3902,6 +3907,11 @@ export default {
             setTimeout(() => {
               ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT13');
             }, 2000);
+            // 给PLC发送通行信号-使用备用地址-异常03
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW556', 3);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW556');
+            }, 2000);
             return;
           }
           // 正常模式下检查第一个托盘的托盘号是否与入参匹配
@@ -3910,6 +3920,11 @@ export default {
             ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT14', true);
             setTimeout(() => {
               ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT14');
+            }, 2000);
+            // 给PLC发送通行信号-使用备用地址-有码模式通行2
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW556', 2);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW556');
             }, 2000);
             // 取出队列中的第一个托盘信息
             const trayInfo = this.queues[0].trayInfo.shift();
@@ -3927,6 +3942,11 @@ export default {
             setTimeout(() => {
               ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT13');
             }, 2000);
+            // 给PLC发送通行信号-使用备用地址-异常03
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW556', 3);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW556');
+            }, 2000);
           }
         }
       } else {
@@ -3937,6 +3957,11 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', 'DBW544_BIT13', true);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', 'DBW544_BIT13');
+        }, 2000);
+        // 给PLC发送通行信号-使用备用地址-异常03
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW556', 3);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', 'DBW556');
         }, 2000);
       }
     },
@@ -4997,16 +5022,16 @@ export default {
     },
     // 触发请求上位机下发任务(判断去灭菌还是非灭菌)
     triggerRequestUploadTask() {
-      this.requestUploadTask = '1';
+      this.requestUploadTask = 1;
       setTimeout(() => {
-        this.requestUploadTask = '0';
+        this.requestUploadTask = 0;
       }, 1000);
     },
     // 触发请求上位机下发任务(预热小车前)
     triggerRequestUploadTaskPreheatingCar() {
-      this.requestUploadTaskPreheatingCar = '1';
+      this.requestUploadTaskPreheatingCar = 1;
       setTimeout(() => {
-        this.requestUploadTaskPreheatingCar = '0';
+        this.requestUploadTaskPreheatingCar = 0;
       }, 1000);
     },
     handleAllowUpload(type) {
