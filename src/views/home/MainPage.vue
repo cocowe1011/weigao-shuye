@@ -2907,12 +2907,20 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('一楼接货站台', this.nonSterileOne);
           this.sendAllowForPort('1');
         } else {
-          this.addLog(`一楼接货站台扫码数据：${this.elevatorOneFloorScanCode}`);
-          this.addToUpLoadQueue(
-            this.elevatorOneFloorScanCode,
-            '一楼接货站台',
-            this.nonSterileOne
-          );
+          this.addLog('有码模式下触发一楼接货站台请求读码信号');
+        }
+      }
+    },
+    // 一楼接货站台扫码数据
+    elevatorOneFloorScanCode: {
+      async handler(newVal) {
+        if (
+          newVal !== '' &&
+          this.scanPhotoelectricSignal.bit0 === '1' &&
+          !this.noCodeUpload
+        ) {
+          this.addLog(`一楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '一楼接货站台', this.nonSterileOne);
         }
       }
     },
@@ -2934,12 +2942,20 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('二楼接货站台', this.nonSterileTwo);
           this.sendAllowForPort('2');
         } else {
-          this.addLog(`二楼接货站台扫码数据：${this.elevatorTwoFloorScanCode}`);
-          this.addToUpLoadQueue(
-            this.elevatorTwoFloorScanCode,
-            '二楼接货站台',
-            this.nonSterileTwo
-          );
+          this.addLog('有码模式下触发二楼接货站台请求读码信号');
+        }
+      }
+    },
+    // 二楼接货站台扫码数据
+    elevatorTwoFloorScanCode: {
+      async handler(newVal) {
+        if (
+          newVal !== '' &&
+          this.scanPhotoelectricSignal.bit2 === '1' &&
+          !this.noCodeUpload
+        ) {
+          this.addLog(`二楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '二楼接货站台', this.nonSterileTwo);
         }
       }
     },
@@ -2961,14 +2977,20 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('三楼接货站台', this.nonSterileThree);
           this.sendAllowForPort('3');
         } else {
-          this.addLog(
-            `三楼接货站台扫码数据：${this.elevatorThreeFloorScanCode}`
-          );
-          this.addToUpLoadQueue(
-            this.elevatorThreeFloorScanCode,
-            '三楼接货站台',
-            this.nonSterileThree
-          );
+          this.addLog('有码模式下触发三楼接货站台请求读码信号');
+        }
+      }
+    },
+    // 三楼接货站台扫码数据
+    elevatorThreeFloorScanCode: {
+      async handler(newVal) {
+        if (
+          newVal !== '' &&
+          this.scanPhotoelectricSignal.bit4 === '1' &&
+          !this.noCodeUpload
+        ) {
+          this.addLog(`三楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '三楼接货站台', this.nonSterileThree);
         }
       }
     },
@@ -2990,14 +3012,20 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('四楼接货站台', this.nonSterileFour);
           this.sendAllowForPort('4');
         } else {
-          this.addLog(
-            `四楼接货站台扫码数据：${this.elevatorFourFloorScanCode}`
-          );
-          this.addToUpLoadQueue(
-            this.elevatorFourFloorScanCode,
-            '四楼接货站台',
-            this.nonSterileFour
-          );
+          this.addLog('有码模式下触发四楼接货站台请求读码信号');
+        }
+      }
+    },
+    // 四楼接货站台扫码数据
+    elevatorFourFloorScanCode: {
+      async handler(newVal) {
+        if (
+          newVal !== '' &&
+          this.scanPhotoelectricSignal.bit5 === '1' &&
+          !this.noCodeUpload
+        ) {
+          this.addLog(`四楼接货站台扫码数据：${newVal}`);
+          this.addToUpLoadQueue(newVal, '四楼接货站台', this.nonSterileFour);
         }
       }
     },
@@ -3019,12 +3047,20 @@ export default {
           this.addNoCodeTrayToUpLoadQueueDE('D', this.nonSterileD);
           this.sendAllowForPort('D');
         } else {
-          this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
-          this.addToUpLoadQueueDE(
-            this.elevatorDDisinfectionScanCode,
-            'D',
-            this.nonSterileD
-          );
+          this.addLog('有码模式下触发D灭菌请求读码信号');
+        }
+      }
+    },
+    // 一楼D灭菌"有载信号"/光电占位,扫码数据
+    elevatorDDisinfectionScanCode: {
+      async handler(newVal) {
+        if (
+          newVal !== '' &&
+          this.scanPhotoelectricSignal.bit7 === '1' &&
+          !this.noCodeUpload
+        ) {
+          this.addLog(`D扫码数据：${newVal}`);
+          this.addToUpLoadQueueDE(newVal, 'D', this.nonSterileD);
         }
       }
     },
@@ -3046,12 +3082,20 @@ export default {
           this.addNoCodeTrayToUpLoadQueueDE('E', this.nonSterileE);
           this.sendAllowForPort('E');
         } else {
-          this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
-          this.addToUpLoadQueueDE(
-            this.elevatorEDisinfectionScanCode,
-            'E',
-            this.nonSterileE
-          );
+          this.addLog('有码模式下触发E灭菌请求读码信号');
+        }
+      }
+    },
+    // 一楼E灭菌"有载信号"/光电占位,扫码数据
+    elevatorEDisinfectionScanCode: {
+      async handler(newVal) {
+        if (
+          newVal !== '' &&
+          this.scanPhotoelectricSignal.bit8 === '1' &&
+          !this.noCodeUpload
+        ) {
+          this.addLog(`E扫码数据：${newVal}`);
+          this.addToUpLoadQueueDE(newVal, 'E', this.nonSterileE);
         }
       }
     },
@@ -4133,7 +4177,7 @@ export default {
           if (
             !trayCode ||
             trayCode === '' ||
-            trayCode.toLowerCase().includes('noread')
+            trayCode.toLowerCase().includes('read')
           ) {
             this.addLog(
               '一楼缓存区扫码失败：条码信息为NoRead,给PLC发送缓存区判断扫码失败去异常口'
@@ -4210,7 +4254,7 @@ export default {
       if (
         !trayCode ||
         trayCode === '' ||
-        trayCode.toLowerCase().includes('noread')
+        trayCode.toLowerCase().includes('read')
       ) {
         this.addLog(
           trayFrom + `上货区扫码失败：条码信息为NoRead或无码，发送异常信号`
@@ -4305,12 +4349,13 @@ export default {
     // 添加扫码数据到D队列,
     addToUpLoadQueueDE(trayCode, trayFrom, nonSterile) {
       const portKey = trayFrom; // D 或 E
+      trayCode = trayCode.trim();
 
       // 判断条码是否为无码或noread
       if (
         !trayCode ||
         trayCode === '' ||
-        trayCode.toLowerCase().includes('noread')
+        trayCode.toLowerCase().includes('read')
       ) {
         this.addLog(
           trayFrom + `口扫码失败：条码信息为NoRead或无码，发送异常信号`
@@ -4320,47 +4365,82 @@ export default {
         return;
       }
 
+      // 遍历对应队列托盘号，先通过托盘号判断此托盘是不是已经在队列中
+      const queueIndex = trayFrom === 'D' ? 12 : 13;
+      if (this.queues[queueIndex].trayInfo.length > 0) {
+        for (const tray of this.queues[queueIndex].trayInfo) {
+          if (tray.trayCode === trayCode) {
+            this.addLog(`托盘号：${trayCode} 已在${trayFrom}队列中`);
+            this.$message.warning(`托盘号：${trayCode} 已在${trayFrom}队列中`);
+            this.sendErrorForPort(portKey);
+            return;
+          }
+        }
+      }
+
       // 通过trayCode 查询erp数据
       const params = {
-        trayCode: trayCode,
-        invalidFlag: 0,
-        orderStatus: 0
+        trayCode: trayCode.trim()
       };
-      HttpUtil.post('/order/selectList', params)
+      HttpUtilwms.post('/api/app/query_received_record', params)
         .then((res) => {
-          // this.queues[0]： 上货区
-          if (res.data && res.data.length > 0) {
-            // 扫码正常：允许通行并异常复位
-            this.sendAllowForPort(portKey);
-            const trayInfo = {
-              trayCode: res.data[0].trayCode,
-              trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
-              orderId: res.data[0].orderId,
-              productCode: res.data[0].productCode,
-              productName: res.data[0].productName,
-              isTerile: nonSterile ? 0 : res.data[0].isTerile
+          if (res.data && res.data.items && res.data.items.length > 0) {
+            const paramInsert = {
+              orderId: res.data.items[0].orderId,
+              productCode: res.data.items
+                .map((item) => item.materialCode)
+                .join('/'),
+              productName: res.data.items
+                .map((item) => item.materialName)
+                .join('/'),
+              trayCode: trayCode,
+              receiptOrderCode: res.data.receiptOrderCode,
+              inPut: res.data.items[0].inPut,
+              isTerile: nonSterile ? 0 : res.data.items[0].isTerile,
+              detailList: JSON.stringify(res.data.items),
+              orderStatus: '0'
             };
-            const queueIndex = trayFrom === 'D' ? 12 : 13;
-            this.queues[queueIndex].trayInfo.push(trayInfo);
-            this.addLog(trayFrom + `${trayFrom}队列添加货物：${trayCode}`);
-            this.nowScanTrayInfo = {
-              trayCode: trayInfo.trayCode,
-              orderId: trayInfo.orderId,
-              productName: trayInfo.productName,
-              isTerile: trayInfo.isTerile === 1 ? '消毒' : '不消毒',
-              inPut: trayFrom
-            };
+            HttpUtil.post('/order/insert', paramInsert).then((resInsert) => {
+              if (resInsert.data == 1) {
+                this.addLog(`${trayFrom}队列添加货物：${trayCode}，插入成功`);
+                const trayInfo = {
+                  trayCode: trayCode,
+                  trayTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+                  orderId: paramInsert.orderId,
+                  productCode: paramInsert.productCode,
+                  productName: paramInsert.productName,
+                  isTerile: paramInsert.isTerile,
+                  receiptOrderCode: paramInsert.receiptOrderCode,
+                  state: '0',
+                  sendTo: '' // 发到哪个预热房，发送的时候更新
+                };
+                this.queues[queueIndex].trayInfo.push(trayInfo);
+                this.addLog(`${trayFrom}队列添加货物：${trayCode}`);
+                // 扫码正常：允许通行并异常复位
+                this.sendAllowForPort(portKey);
+                this.nowScanTrayInfo = {
+                  trayCode: trayInfo.trayCode,
+                  orderId: trayInfo.orderId,
+                  productName: trayInfo.productName,
+                  isTerile: trayInfo.isTerile === 1 ? '消毒' : '不消毒',
+                  inPut: trayFrom
+                };
+              }
+            });
           } else {
             // 扫码不正常：置异常并不允许进货
             this.sendErrorForPort(portKey);
-            this.addLog(trayFrom + `${trayFrom}队列添加货物失败：${trayCode}`);
+            this.addLog(
+              trayFrom +
+                `托盘信息接口查询失败！：${trayCode}，远程托盘接口返回信息${res.data}`
+            );
             this.nowScanTrayInfo = {};
           }
         })
         .catch((err) => {
           this.$message.error('查询队列失败，请重试' + err);
           // 没查询到货物信息，直接报警
-          this.addLog(trayFrom + `${trayFrom}队列添加货物失败：${trayCode}`);
+          this.addLog(`${trayFrom}队列添加货物失败：${trayCode}`);
           // 扫码不正常：置异常并不允许进货
           this.sendErrorForPort(portKey);
           this.nowScanTrayInfo = {};
