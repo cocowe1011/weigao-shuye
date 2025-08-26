@@ -469,7 +469,11 @@
                           @change="handleAllowUpload('1')"
                           >允许上货</el-checkbox
                         >
-                        <el-checkbox v-model="nonSterileOne"
+                        <el-checkbox
+                          v-model="nonSterileOne"
+                          @change="
+                            handleNonSterileChange('nonSterileOne', '一楼')
+                          "
                           >非灭菌</el-checkbox
                         >
                       </div>
@@ -544,7 +548,11 @@
                           @change="handleAllowUpload('2')"
                           >允许上货</el-checkbox
                         >
-                        <el-checkbox v-model="nonSterileTwo"
+                        <el-checkbox
+                          v-model="nonSterileTwo"
+                          @change="
+                            handleNonSterileChange('nonSterileTwo', '二楼')
+                          "
                           >非灭菌</el-checkbox
                         >
                       </div>
@@ -567,7 +575,11 @@
                           @change="handleAllowUpload('3')"
                           >允许上货</el-checkbox
                         >
-                        <el-checkbox v-model="nonSterileThree"
+                        <el-checkbox
+                          v-model="nonSterileThree"
+                          @change="
+                            handleNonSterileChange('nonSterileThree', '三楼')
+                          "
                           >非灭菌</el-checkbox
                         >
                       </div>
@@ -590,7 +602,11 @@
                           @change="handleAllowUpload('4')"
                           >允许上货</el-checkbox
                         >
-                        <el-checkbox v-model="nonSterileFour"
+                        <el-checkbox
+                          v-model="nonSterileFour"
+                          @change="
+                            handleNonSterileChange('nonSterileFour', '四楼')
+                          "
                           >非灭菌</el-checkbox
                         >
                       </div>
@@ -614,7 +630,13 @@
                           @change="handleAllowUpload('D')"
                           >允许上货</el-checkbox
                         >
-                        <el-checkbox v-model="nonSterileD">非灭菌</el-checkbox>
+                        <el-checkbox
+                          v-model="nonSterileD"
+                          @change="
+                            handleNonSterileChange('nonSterileD', 'D灭菌柜')
+                          "
+                          >非灭菌</el-checkbox
+                        >
                       </div>
                       <div
                         class="data-panel-row exec-controls"
@@ -672,7 +694,13 @@
                           @change="handleAllowUpload('E')"
                           >允许上货</el-checkbox
                         >
-                        <el-checkbox v-model="nonSterileE">非灭菌</el-checkbox>
+                        <el-checkbox
+                          v-model="nonSterileE"
+                          @change="
+                            handleNonSterileChange('nonSterileE', 'E灭菌柜')
+                          "
+                          >非灭菌</el-checkbox
+                        >
                       </div>
                       <div
                         class="data-panel-row exec-controls"
@@ -2120,6 +2148,45 @@
     <!-- 订单查询对话框 -->
     <OrderQueryDialog :visible.sync="orderQueryDialogVisible" />
 
+    <!-- 管理员密码验证对话框 -->
+    <el-dialog
+      title="管理员权限验证"
+      :visible.sync="adminPasswordDialogVisible"
+      width="400px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      append-to-body
+    >
+      <div class="admin-password-content">
+        <el-form
+          :model="adminPasswordForm"
+          :rules="adminPasswordRules"
+          ref="adminPasswordForm"
+        >
+          <el-form-item label="管理员密码" prop="password" label-width="100px">
+            <el-input
+              v-model="adminPasswordForm.password"
+              type="password"
+              placeholder="请输入管理员密码"
+              show-password
+              @keyup.enter.native="verifyAdminPassword"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelAdminPassword">取消</el-button>
+        <el-button
+          type="primary"
+          @click="verifyAdminPassword"
+          :loading="adminPasswordLoading"
+        >
+          验证
+        </el-button>
+      </div>
+    </el-dialog>
+
     <!-- 添加托盘对话框 -->
     <el-dialog
       title="添加托盘"
@@ -2644,7 +2711,20 @@ export default {
       eExecQty: undefined,
       eExecuting: false,
       eConfirmLoading: false,
-      eNeedQty: 0
+      eNeedQty: 0,
+      // 管理员密码验证相关
+      adminPasswordDialogVisible: false,
+      adminPasswordLoading: false,
+      adminPasswordForm: {
+        password: ''
+      },
+      adminPasswordRules: {
+        password: [
+          { required: true, message: '请输入管理员密码', trigger: 'blur' }
+        ]
+      },
+      // 当前要修改的非灭菌复选框信息
+      currentNonSterileCheckbox: null
     };
   },
   computed: {
@@ -4478,6 +4558,94 @@ export default {
         inPut: trayFrom
       };
     },
+    // 处理非灭菌复选框权限控制
+    handleNonSterileChange(checkboxName, locationName) {
+      // 阻止默认的change事件，先进行权限验证
+      this.$nextTick(() => {
+        // 恢复原来的状态
+        this[checkboxName] = !this[checkboxName];
+      });
+
+      // 记录当前要修改的复选框信息
+      this.currentNonSterileCheckbox = {
+        name: checkboxName,
+        location: locationName
+      };
+
+      // 显示密码输入对话框
+      this.adminPasswordDialogVisible = true;
+      this.adminPasswordForm.password = '';
+
+      // 聚焦到密码输入框
+      this.$nextTick(() => {
+        this.$refs.adminPasswordForm.$el
+          .querySelector('input[type="password"]')
+          .focus();
+      });
+    },
+
+    // 验证管理员密码
+    verifyAdminPassword() {
+      this.$refs.adminPasswordForm.validate((valid) => {
+        if (valid) {
+          this.adminPasswordLoading = true;
+
+          // 使用登录接口验证管理员账号密码
+          const param = {
+            userCode: 'admin',
+            userPassword: this.adminPasswordForm.password
+          };
+
+          // 调用登录接口进行验证
+          HttpUtil.post('/login/login', param)
+            .then((res) => {
+              if (res.data) {
+                // 登录成功，允许修改
+                if (this.currentNonSterileCheckbox) {
+                  const { name, location } = this.currentNonSterileCheckbox;
+                  this[name] = !this[name];
+
+                  this.addLog(
+                    `管理员权限验证通过，${location}非灭菌状态已修改为：${
+                      this[name] ? '非灭菌' : '灭菌'
+                    }`
+                  );
+                  this.$message.success(`${location}非灭菌状态修改成功`);
+                }
+
+                // 关闭对话框
+                this.adminPasswordDialogVisible = false;
+                this.currentNonSterileCheckbox = null;
+              } else {
+                // 登录失败
+                this.$message.error('管理员账号或密码错误，无法修改非灭菌状态');
+                this.addLog(
+                  `管理员权限验证失败，${this.currentNonSterileCheckbox?.location}非灭菌状态修改被拒绝`
+                );
+              }
+            })
+            .catch((err) => {
+              // 接口调用失败
+              this.$message.error('验证失败，请检查网络连接');
+              this.addLog(
+                `管理员权限验证接口调用失败，${this.currentNonSterileCheckbox?.location}非灭菌状态修改被拒绝`
+              );
+            })
+            .finally(() => {
+              this.adminPasswordLoading = false;
+            });
+        }
+      });
+    },
+
+    // 取消管理员密码验证
+    cancelAdminPassword() {
+      this.adminPasswordDialogVisible = false;
+      this.currentNonSterileCheckbox = null;
+      this.adminPasswordForm.password = '';
+      this.$message.info('已取消非灭菌状态修改');
+    },
+
     // 切换无码上货状态
     toggleNoCodeUpload() {
       this.noCodeUpload = !this.noCodeUpload;
@@ -5305,6 +5473,29 @@ export default {
       }
     },
     sendPreheatingToPLC(targetSendTo) {
+      // 预热前小车信号请求时，判断本次发送请求的托盘是不是尾托盘
+      // 判断方式：预热房选择卡片的需进货数量为1，本次托盘就是尾托盘
+      const isLastTray = this.preheatNeedQty === 1;
+
+      // 根据是否为尾托盘，向PLC的DBW558发送相应的值
+      // 不是尾托盘发1，如果是尾托盘发2
+      const dbw558Value = isLastTray ? 2 : 1;
+
+      this.addLog(
+        `预热前小车信号请求：托盘${this.preWarmTrayCode}${
+          isLastTray ? '是' : '不是'
+        }尾托盘，向PLC DBW558发送: ${dbw558Value}`
+      );
+
+      // 向PLC发送DBW558值
+      ipcRenderer.send('writeSingleValueToPLC', 'DBW558', dbw558Value);
+
+      // 2秒后取消DBW558的写入
+      setTimeout(() => {
+        ipcRenderer.send('cancelWriteToPLC', 'DBW558');
+      }, 2000);
+
+      // 原有的预热房命令发送逻辑
       if (targetSendTo === 'A1-1') {
         // 使用nodeS7协议，给PLC发送 011预热房A1-1启用进货、012预热房A1-2启用进货
         ipcRenderer.send('writeSingleValueToPLC', 'DBW524', 11);
@@ -6237,6 +6428,24 @@ export default {
                       border-color: #0ac5a8; /* 选中时边框色 */
                     }
                   }
+                }
+
+                /* 管理员密码对话框样式 */
+                .admin-password-content {
+                  padding: 20px 0;
+                }
+
+                .admin-password-content .el-form-item {
+                  margin-bottom: 20px;
+                }
+
+                .admin-password-content .el-input {
+                  width: 100%;
+                }
+
+                .dialog-footer {
+                  text-align: right;
+                  padding-top: 20px;
                 }
                 /* 面板位置样式 */
                 .data-panel.position-right {
