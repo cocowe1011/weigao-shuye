@@ -4140,6 +4140,7 @@ export default {
     },
     // 判断是否消毒，如果消毒则此托盘进入分发区队列，如果不消毒直接发走
     addToCartLoadQueue(trayCode) {
+      trayCode = trayCode.trim();
       // 判断上货区队列是否有托盘信息
       if (this.queues[0].trayInfo.length > 0) {
         // 如果启用无码上货模式，直接处理第一个托盘，不检查托盘号匹配
