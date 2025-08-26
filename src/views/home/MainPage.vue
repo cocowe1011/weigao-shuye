@@ -3109,9 +3109,16 @@ export default {
         this.addLog('一楼缓存区光电信号无货，已清空一楼缓存区扫码数据');
       }
       if (newVal === '1') {
-        this.addLog(`一楼缓存区扫码数据：${this.oneFloorElevatorScanCode}`);
-        // 判断是否消毒，如果消毒则此托盘进入下一队列，如果不消毒直接发走
-        this.addToCartLoadQueue(this.oneFloorElevatorScanCode);
+        this.addLog('触发一楼缓存区请求读码信号');
+      }
+    },
+    // 一楼缓存区扫码数据
+    oneFloorElevatorScanCode: {
+      async handler(newVal) {
+        if (newVal !== '' && this.scanPhotoelectricSignal.bit1 === '1') {
+          this.addLog(`一楼缓存区扫码数据：${newVal}`);
+          this.addToCartLoadQueue(newVal);
+        }
       }
     },
     // 请求上位机下发任务(判断去灭菌还是非灭菌）
