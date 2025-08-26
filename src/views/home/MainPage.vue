@@ -4155,7 +4155,8 @@ export default {
       const addrs = this.getPortAddresses(portKey);
       if (!addrs) return;
       ipcRenderer.send('cancelWriteToPLC', addrs.allowBit);
-      this.addLog(`${portKey}口：光电复0，停止发送允许通行命令`);
+      ipcRenderer.send('cancelWriteToPLC', addrs.errorBit);
+      this.addLog(`${portKey}口：光电复0，停止发送允许通行与异常命令`);
     },
     // 判断是否消毒，如果消毒则此托盘进入分发区队列，如果不消毒直接发走
     addToCartLoadQueue(trayCode) {
