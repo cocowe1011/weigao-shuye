@@ -2907,20 +2907,12 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('一楼接货站台', this.nonSterileOne);
           this.sendAllowForPort('1');
         } else {
-          this.addLog('有码模式下触发一楼接货站台请求读码信号');
-        }
-      }
-    },
-    // 一楼接货站台扫码数据
-    elevatorOneFloorScanCode: {
-      async handler(newVal) {
-        if (
-          newVal !== '' &&
-          this.scanPhotoelectricSignal.bit0 === '1' &&
-          !this.noCodeUpload
-        ) {
-          this.addLog(`一楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '一楼接货站台', this.nonSterileOne);
+          this.addLog(`一楼接货站台扫码数据：${this.elevatorOneFloorScanCode}`);
+          this.addToUpLoadQueue(
+            this.elevatorOneFloorScanCode,
+            '一楼接货站台',
+            this.nonSterileOne
+          );
         }
       }
     },
@@ -2942,20 +2934,12 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('二楼接货站台', this.nonSterileTwo);
           this.sendAllowForPort('2');
         } else {
-          this.addLog('有码模式下触发二楼接货站台请求读码信号');
-        }
-      }
-    },
-    // 二楼接货站台扫码数据
-    elevatorTwoFloorScanCode: {
-      async handler(newVal) {
-        if (
-          newVal !== '' &&
-          this.scanPhotoelectricSignal.bit2 === '1' &&
-          !this.noCodeUpload
-        ) {
-          this.addLog(`二楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '二楼接货站台', this.nonSterileTwo);
+          this.addLog(`二楼接货站台扫码数据：${this.elevatorTwoFloorScanCode}`);
+          this.addToUpLoadQueue(
+            this.elevatorTwoFloorScanCode,
+            '二楼接货站台',
+            this.nonSterileTwo
+          );
         }
       }
     },
@@ -2977,20 +2961,14 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('三楼接货站台', this.nonSterileThree);
           this.sendAllowForPort('3');
         } else {
-          this.addLog('有码模式下触发三楼接货站台请求读码信号');
-        }
-      }
-    },
-    // 三楼接货站台扫码数据
-    elevatorThreeFloorScanCode: {
-      async handler(newVal) {
-        if (
-          newVal !== '' &&
-          this.scanPhotoelectricSignal.bit4 === '1' &&
-          !this.noCodeUpload
-        ) {
-          this.addLog(`三楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '三楼接货站台', this.nonSterileThree);
+          this.addLog(
+            `三楼接货站台扫码数据：${this.elevatorThreeFloorScanCode}`
+          );
+          this.addToUpLoadQueue(
+            this.elevatorThreeFloorScanCode,
+            '三楼接货站台',
+            this.nonSterileThree
+          );
         }
       }
     },
@@ -3012,20 +2990,14 @@ export default {
           this.addNoCodeTrayToUpLoadQueue('四楼接货站台', this.nonSterileFour);
           this.sendAllowForPort('4');
         } else {
-          this.addLog('有码模式下触发四楼接货站台请求读码信号');
-        }
-      }
-    },
-    // 四楼接货站台扫码数据
-    elevatorFourFloorScanCode: {
-      async handler(newVal) {
-        if (
-          newVal !== '' &&
-          this.scanPhotoelectricSignal.bit5 === '1' &&
-          !this.noCodeUpload
-        ) {
-          this.addLog(`四楼接货站台扫码数据：${newVal}`);
-          this.addToUpLoadQueue(newVal, '四楼接货站台', this.nonSterileFour);
+          this.addLog(
+            `四楼接货站台扫码数据：${this.elevatorFourFloorScanCode}`
+          );
+          this.addToUpLoadQueue(
+            this.elevatorFourFloorScanCode,
+            '四楼接货站台',
+            this.nonSterileFour
+          );
         }
       }
     },
@@ -3047,20 +3019,12 @@ export default {
           this.addNoCodeTrayToUpLoadQueueDE('D', this.nonSterileD);
           this.sendAllowForPort('D');
         } else {
-          this.addLog('有码模式下触发D灭菌请求读码信号');
-        }
-      }
-    },
-    // 一楼D灭菌"有载信号"/光电占位,扫码数据
-    elevatorDDisinfectionScanCode: {
-      async handler(newVal) {
-        if (
-          newVal !== '' &&
-          this.scanPhotoelectricSignal.bit7 === '1' &&
-          !this.noCodeUpload
-        ) {
-          this.addLog(`D扫码数据：${newVal}`);
-          this.addToUpLoadQueueDE(newVal, 'D', this.nonSterileD);
+          this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
+          this.addToUpLoadQueueDE(
+            this.elevatorDDisinfectionScanCode,
+            'D',
+            this.nonSterileD
+          );
         }
       }
     },
@@ -3082,20 +3046,12 @@ export default {
           this.addNoCodeTrayToUpLoadQueueDE('E', this.nonSterileE);
           this.sendAllowForPort('E');
         } else {
-          this.addLog('有码模式下触发E灭菌请求读码信号');
-        }
-      }
-    },
-    // 一楼E灭菌"有载信号"/光电占位,扫码数据
-    elevatorEDisinfectionScanCode: {
-      async handler(newVal) {
-        if (
-          newVal !== '' &&
-          this.scanPhotoelectricSignal.bit8 === '1' &&
-          !this.noCodeUpload
-        ) {
-          this.addLog(`E扫码数据：${newVal}`);
-          this.addToUpLoadQueueDE(newVal, 'E', this.nonSterileE);
+          this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
+          this.addToUpLoadQueueDE(
+            this.elevatorEDisinfectionScanCode,
+            'E',
+            this.nonSterileE
+          );
         }
       }
     },
