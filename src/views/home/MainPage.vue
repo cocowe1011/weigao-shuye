@@ -4137,6 +4137,10 @@ export default {
       ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 1);
       ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, true);
       ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, false);
+
+      // 同步更新前端勾选框状态，保持与PLC状态一致
+      this.updateFrontendUploadStatus(portKey, true);
+
       this.addLog(`${portKey}口：允许通行，异常复位`);
     },
     // 扫码异常：置异常 + 不允许
@@ -4147,7 +4151,34 @@ export default {
       ipcRenderer.send('writeValuesToPLC', addrs.enableWord, 0);
       ipcRenderer.send('writeSingleValueToPLC', addrs.allowBit, false);
       ipcRenderer.send('writeSingleValueToPLC', addrs.errorBit, true);
+
+      // 同步更新前端勾选框状态，保持与PLC状态一致
+      this.updateFrontendUploadStatus(portKey, false);
+
       this.addLog(`${portKey}口：扫码异常，禁行并置异常`);
+    },
+    // 更新前端上货权限状态，保持与PLC状态一致
+    updateFrontendUploadStatus(portKey, allowStatus) {
+      switch (portKey) {
+        case '1':
+          this.allowUploadOne = allowStatus;
+          break;
+        case '2':
+          this.allowUploadTwo = allowStatus;
+          break;
+        case '3':
+          this.allowUploadThree = allowStatus;
+          break;
+        case '4':
+          this.allowUploadFour = allowStatus;
+          break;
+        case 'D':
+          this.allowUploadD = allowStatus;
+          break;
+        case 'E':
+          this.allowUploadE = allowStatus;
+          break;
+      }
     },
     // 光电复0：停止发送允许通行命令
     stopAllowForPort(portKey) {
@@ -4628,29 +4659,29 @@ export default {
             this.alarmLogs = []; // 修改为空数组
             this.nowTrays = [];
             // 添加复选框状态-一楼允许上货
-            this.allowUploadOne = false;
-            // 添加复选框状态-一楼是否非灭菌（默认灭菌）
-            this.nonSterileOne = false;
-            // 添加复选框状态-二楼允许上货
-            this.allowUploadTwo = false;
-            // 添加复选框状态-二楼是否非灭菌（默认灭菌）
-            this.nonSterileTwo = false;
-            // 添加复选框状态-三楼允许上货
-            this.allowUploadThree = false;
-            // 添加复选框状态-三楼是否非灭菌（默认灭菌）
-            this.nonSterileThree = false;
-            // 添加复选框状态-四楼允许上货
-            this.allowUploadFour = false;
-            // 添加复选框状态-四楼是否非灭菌（默认灭菌）
-            this.nonSterileFour = false;
-            // 添加复选框状态-D灭菌柜允许上货
-            this.allowUploadD = false;
-            // 添加复选框状态-D灭菌柜是否非灭菌（默认灭菌）
-            this.nonSterileD = false;
-            // 添加复选框状态-E灭菌柜允许上货
-            this.allowUploadE = false;
-            // 添加复选框状态-E灭菌柜是否非灭菌（默认灭菌）
-            this.nonSterileE = false;
+            // this.allowUploadOne = false;
+            // // 添加复选框状态-一楼是否非灭菌（默认灭菌）
+            // this.nonSterileOne = false;
+            // // 添加复选框状态-二楼允许上货
+            // this.allowUploadTwo = false;
+            // // 添加复选框状态-二楼是否非灭菌（默认灭菌）
+            // this.nonSterileTwo = false;
+            // // 添加复选框状态-三楼允许上货
+            // this.allowUploadThree = false;
+            // // 添加复选框状态-三楼是否非灭菌（默认灭菌）
+            // this.nonSterileThree = false;
+            // // 添加复选框状态-四楼允许上货
+            // this.allowUploadFour = false;
+            // // 添加复选框状态-四楼是否非灭菌（默认灭菌）
+            // this.nonSterileFour = false;
+            // // 添加复选框状态-D灭菌柜允许上货
+            // this.allowUploadD = false;
+            // // 添加复选框状态-D灭菌柜是否非灭菌（默认灭菌）
+            // this.nonSterileD = false;
+            // // 添加复选框状态-E灭菌柜允许上货
+            // this.allowUploadE = false;
+            // // 添加复选框状态-E灭菌柜是否非灭菌（默认灭菌）
+            // this.nonSterileE = false;
             // 显示小车1设置去哪个预热房的按钮
             this.showCar1SetPreheatingRoom = false;
             // 显示小车设置去哪个预热房的按钮
