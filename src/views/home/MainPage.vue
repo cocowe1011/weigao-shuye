@@ -2936,10 +2936,25 @@ export default {
         this.preheatExecuting = false;
         this.preheatExecQty = undefined;
         this.preheatNeedQty = 0;
+        this.preWarmTrayCode = '';
         this.addLog(`写入PLC DBW546（预热房需进货数量）: 0 - 不执行`);
         this.writeWordWithCancel('DBW546', 0);
       } else {
         this.updatePreheatNeedAndWrite();
+      }
+
+      // 检查预热房选择冲突：预热选择A，预热到灭菌的预热就不能选择A
+      if (newVal && this.disinfectionRoomSelectedFrom === newVal) {
+        this.preheatingRoomSelected = null;
+        this.addLog(
+          `预热房${newVal}已被选择为预热到灭菌的来源，不能同时设置为预热房进货，已自动取消预热房进货设置`
+        );
+        this.$message({
+          message: `⚠️ 预热房${newVal}已被选择为预热到灭菌的来源，不能同时设置为预热房进货，已自动取消预热房进货设置`,
+          type: 'warning',
+          duration: 5000,
+          showClose: true
+        });
       }
     },
     // 切换预热->灭菌来源预热房，更新DBW548
@@ -2952,6 +2967,20 @@ export default {
       } else {
         this.updateDisinfectionNeedAndWrite();
       }
+
+      // 检查预热到灭菌来源冲突：预热到灭菌的预热选择A，预热就不能选择A
+      if (newVal && this.preheatingRoomSelected === newVal) {
+        this.disinfectionRoomSelectedFrom = null;
+        this.addLog(
+          `预热房${newVal}已被选择为预热房进货，不能同时设置为预热到灭菌的来源，已自动取消预热到灭菌来源设置`
+        );
+        this.$message({
+          message: `⚠️ 预热房${newVal}已被选择为预热房进货，不能同时设置为预热到灭菌的来源，已自动取消预热到灭菌来源设置`,
+          type: 'warning',
+          duration: 5000,
+          showClose: true
+        });
+      }
     },
     // 切换灭菌->解析来源灭菌柜，更新DBW550
     warehouseSelectedFrom(newVal) {
@@ -2963,11 +2992,75 @@ export default {
       } else {
         this.updateAnalysisNeedAndWrite();
       }
+
+      // 检查灭菌到解析来源冲突：灭菌到解析的灭菌选择A，预热到灭菌的灭菌就不能选择A
+      if (newVal && this.disinfectionRoomSelectedTo === newVal) {
+        this.warehouseSelectedFrom = null;
+        this.addLog(
+          `灭菌房${newVal}已被选择为预热到灭菌的目的地，不能同时设置为灭菌到解析的来源，已自动取消灭菌到解析来源设置`
+        );
+        this.$message({
+          message: `⚠️ 灭菌房${newVal}已被选择为预热到灭菌的目的地，不能同时设置为灭菌到解析的来源，已自动取消灭菌到解析来源设置`,
+          type: 'warning',
+          duration: 5000,
+          showClose: true
+        });
+      }
     },
     // 切换出库选择，更新DBW560
     outWarehouseSelected(newVal) {
       if (!this.isDataReady) return;
       this.updateOutNeedAndWrite();
+
+      // 检查出库选择冲突：出库选择A，灭菌到解析的解析就不能选择A
+      if (newVal && this.warehouseSelectedTo === newVal) {
+        this.outWarehouseSelected = null;
+        this.addLog(
+          `解析库${newVal}已被选择为灭菌到解析的目的地，不能同时设置为出库来源，已自动取消出库设置`
+        );
+        this.$message({
+          message: `⚠️ 解析库${newVal}已被选择为灭菌到解析的目的地，不能同时设置为出库来源，已自动取消出库设置`,
+          type: 'warning',
+          duration: 5000,
+          showClose: true
+        });
+      }
+    },
+    // 切换灭菌房目的地选择
+    disinfectionRoomSelectedTo(newVal) {
+      if (!this.isDataReady) return;
+
+      // 检查预热到灭菌目的地冲突：预热到灭菌的灭菌选择A，灭菌到解析的灭菌就不能选择A
+      if (newVal && this.warehouseSelectedFrom === newVal) {
+        this.disinfectionRoomSelectedTo = null;
+        this.addLog(
+          `灭菌房${newVal}已被选择为灭菌到解析的来源，不能同时设置为预热到灭菌的目的地，已自动取消预热到灭菌目的地设置`
+        );
+        this.$message({
+          message: `⚠️ 灭菌房${newVal}已被选择为灭菌到解析的来源，不能同时设置为预热到灭菌的目的地，已自动取消预热到灭菌目的地设置`,
+          type: 'warning',
+          duration: 5000,
+          showClose: true
+        });
+      }
+    },
+    // 切换解析库目的地选择
+    warehouseSelectedTo(newVal) {
+      if (!this.isDataReady) return;
+
+      // 检查灭菌到解析目的地冲突：灭菌到解析的解析选择A，出库就不能选择A
+      if (newVal && this.outWarehouseSelected === newVal) {
+        this.warehouseSelectedTo = null;
+        this.addLog(
+          `解析库${newVal}已被选择为出库来源，不能同时设置为灭菌到解析的目的地，已自动取消灭菌到解析目的地设置`
+        );
+        this.$message({
+          message: `⚠️ 解析库${newVal}已被选择为出库来源，不能同时设置为灭菌到解析的目的地，已自动取消灭菌到解析目的地设置`,
+          type: 'warning',
+          duration: 5000,
+          showClose: true
+        });
+      }
     },
     // 一楼接货站台光电信号
     'scanPhotoelectricSignal.bit0'(newVal) {
@@ -3289,13 +3382,17 @@ export default {
           // 说明是减少了,说明是出库了
           if (newVal < oldVal) {
             if (this.queues[14].trayInfo.length > 0) {
-              // 把B3队列的第一个元素数据展示到下货
+              // 把非灭菌缓存区的第一个元素数据展示到下货
               this.addLog(
                 `托盘信息：${this.queues[14].trayInfo[0].trayCode} 出库`
               );
               this.currentOutTrayInfo = this.queues[14].trayInfo[0];
               console.log(this.currentOutTrayInfo);
-              // 删除B3队列的第一个元素
+
+              // 调用WMS出货接口（非灭菌出货，state: 0）
+              this.callWmsUnloadGoods(this.queues[14].trayInfo[0].trayCode, 0);
+
+              // 删除非灭菌缓存区的第一个元素
               this.queues[14].trayInfo.shift();
             }
           }
@@ -3308,6 +3405,16 @@ export default {
       if (!this.isDataReady) return;
       // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        // 先判断当前选择执行的预热房是否是A1
+        if (this.preheatingRoomSelected !== 'A') {
+          this.addLog(
+            `A1队列数量增加${
+              newVal - oldVal
+            }，但当前选择执行的预热房不是A1，跳过托盘移动`
+          );
+          return;
+        }
+
         const increaseCount = newVal - oldVal;
         const availableTrays = this.queues[2].trayInfo || [];
 
@@ -3337,13 +3444,6 @@ export default {
           }
           this.showCar1SetPreheatingRoom = false;
         }
-      } else {
-        // 说明是减少了,说明是出库了
-        console.log('a1减少', newVal);
-        if (newVal === 0) {
-          console.log('a1减少为0');
-          this.disinfectionTrayCode = '';
-        }
       }
       // 动态更新与写入：预热/灭菌需求
       if (this.preheatExecuting && this.preheatingRoomSelected === 'A') {
@@ -3352,6 +3452,10 @@ export default {
       if (this.disinfectionRoomSelectedFrom === 'A') {
         this.updateDisinfectionNeedAndWrite();
       }
+      // 检查目的地限制 - 只有当当前选择的预热房是A时才检查
+      if (this.preheatingRoomSelected === 'A') {
+        this.checkDestinationLimit();
+      }
     },
     // 监听B1数量变化
     'bLineQuantity.b1'(newVal, oldVal) {
@@ -3359,6 +3463,16 @@ export default {
       if (!this.isDataReady) return;
       // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        // 先判断当前选择执行的预热房是否是B1
+        if (this.preheatingRoomSelected !== 'B') {
+          this.addLog(
+            `B1队列数量增加${
+              newVal - oldVal
+            }，但当前选择执行的预热房不是B1，跳过托盘移动`
+          );
+          return;
+        }
+
         const increaseCount = newVal - oldVal;
         const availableTrays = this.queues[2].trayInfo || [];
 
@@ -3388,11 +3502,6 @@ export default {
           }
           this.showCar1SetPreheatingRoom = false;
         }
-      } else {
-        // 说明是减少了,说明是出库了
-        if (newVal === 0) {
-          this.disinfectionTrayCode = '';
-        }
       }
       // 动态更新与写入：预热/灭菌需求
       if (this.preheatExecuting && this.preheatingRoomSelected === 'B') {
@@ -3401,6 +3510,10 @@ export default {
       if (this.disinfectionRoomSelectedFrom === 'B') {
         this.updateDisinfectionNeedAndWrite();
       }
+      // 检查目的地限制 - 只有当当前选择的预热房是B时才检查
+      if (this.preheatingRoomSelected === 'B') {
+        this.checkDestinationLimit();
+      }
     },
     // 监听C1数量变化
     'cLineQuantity.c1'(newVal, oldVal) {
@@ -3408,6 +3521,16 @@ export default {
       if (!this.isDataReady) return;
       // 使用增量计算来处理多个托盘
       if (newVal > oldVal) {
+        // 先判断当前选择执行的预热房是否是C1
+        if (this.preheatingRoomSelected !== 'C') {
+          this.addLog(
+            `C1队列数量增加${
+              newVal - oldVal
+            }，但当前选择执行的预热房不是C1，跳过托盘移动`
+          );
+          return;
+        }
+
         const increaseCount = newVal - oldVal;
         const availableTrays = this.queues[2].trayInfo || [];
 
@@ -3437,11 +3560,6 @@ export default {
           }
           this.showCar1SetPreheatingRoom = false;
         }
-      } else {
-        // 说明是减少了,说明是出库了
-        if (newVal === 0) {
-          this.disinfectionTrayCode = '';
-        }
       }
       // 动态更新与写入：预热/灭菌需求
       if (this.preheatExecuting && this.preheatingRoomSelected === 'C') {
@@ -3449,6 +3567,10 @@ export default {
       }
       if (this.disinfectionRoomSelectedFrom === 'C') {
         this.updateDisinfectionNeedAndWrite();
+      }
+      // 检查目的地限制 - 只有当当前选择的预热房是C时才检查
+      if (this.preheatingRoomSelected === 'C') {
+        this.checkDestinationLimit();
       }
     },
     // 监听A2数量变化
@@ -3504,18 +3626,14 @@ export default {
           // 不是设置发往A2的，但是A2却增加了，说明有问题，直接报警
           this.addLog('未设置发送到A2，程序错误！报警！');
         }
-      } else {
-        // 说明是减少了,说明是出库了
-        if (newVal === 0) {
-          this.analysisTrayCode = '';
-        }
       }
-      // 动态更新与写入：解析/出库需求
+      // 动态更新与写入：解析需求
       if (this.warehouseSelectedFrom === 'A') {
         this.updateAnalysisNeedAndWrite();
       }
-      if (['A', 'B', 'C'].includes(this.outWarehouseSelected)) {
-        this.updateOutNeedAndWrite();
+      // 检查目的地限制 - 只有当当前选择的灭菌房目的地是A时才检查
+      if (this.disinfectionRoomSelectedTo === 'A') {
+        this.checkDestinationLimit();
       }
     },
     // 监视B2数量变化
@@ -3571,18 +3689,14 @@ export default {
           // 不是设置发往B2的，但是B2却增加了，说明有问题，直接报警
           this.addLog('未设置发送到B2，程序错误！报警！');
         }
-      } else {
-        // 说明是减少了,说明是出库了
-        if (newVal === 0) {
-          this.analysisTrayCode = '';
-        }
       }
-      // 动态更新与写入：解析/出库需求
+      // 动态更新与写入：解析需求
       if (this.warehouseSelectedFrom === 'B') {
         this.updateAnalysisNeedAndWrite();
       }
-      if (['A', 'B', 'C'].includes(this.outWarehouseSelected)) {
-        this.updateOutNeedAndWrite();
+      // 检查目的地限制 - 只有当当前选择的灭菌房目的地是B时才检查
+      if (this.disinfectionRoomSelectedTo === 'B') {
+        this.checkDestinationLimit();
       }
     },
     // 监视C2数量变化
@@ -3638,18 +3752,14 @@ export default {
           // 不是设置发往C2的，但是C2却增加了，说明有问题，直接报警
           this.addLog('未设置发送到C2，程序错误！报警！');
         }
-      } else {
-        // 说明是减少了,说明是出库了
-        if (newVal === 0) {
-          this.analysisTrayCode = '';
-        }
       }
-      // 动态更新与写入：解析/出库需求
+      // 动态更新与写入：解析需求
       if (this.warehouseSelectedFrom === 'C') {
         this.updateAnalysisNeedAndWrite();
       }
-      if (['A', 'B', 'C'].includes(this.outWarehouseSelected)) {
-        this.updateOutNeedAndWrite();
+      // 检查目的地限制 - 只有当当前选择的灭菌房目的地是C时才检查
+      if (this.disinfectionRoomSelectedTo === 'C') {
+        this.checkDestinationLimit();
       }
     },
     // 监听A3数量变化
@@ -3726,14 +3836,19 @@ export default {
                 break;
               }
             }
-            if (newVal === 0) {
-              this.outWarehouseTrayCode = '';
-            }
           } else {
             // 不是设置出库A3的，但是A3却减少了，说明有问题，直接报警
             this.addLog('未设置出库A3，程序错误！报警！');
           }
         }
+      }
+      // 检查目的地限制 - 只有当当前选择的解析库目的地是A时才检查
+      if (this.warehouseSelectedTo === 'A') {
+        this.checkDestinationLimit();
+      }
+      // 如果当前选择出库A，更新出库需进货
+      if (this.outWarehouseSelected === 'A') {
+        this.updateOutNeedAndWrite();
       }
     },
     // 监听B3数量变化
@@ -3814,10 +3929,15 @@ export default {
             // 不是设置出库B3的，但是B3却减少了，说明有问题，直接报警
             this.addLog('未设置出库B3，程序错误！报警！');
           }
-          if (newVal === 0) {
-            this.outWarehouseTrayCode = '';
-          }
         }
+      }
+      // 检查目的地限制 - 只有当当前选择的解析库目的地是B时才检查
+      if (this.warehouseSelectedTo === 'B') {
+        this.checkDestinationLimit();
+      }
+      // 如果当前选择出库B，更新出库需进货
+      if (this.outWarehouseSelected === 'B') {
+        this.updateOutNeedAndWrite();
       }
     },
     // 监听C3数量变化
@@ -3898,10 +4018,15 @@ export default {
             // 不是设置出库C3的，但是C3却减少了，说明有问题，直接报警
             this.addLog('未设置出库C3，程序错误！报警！');
           }
-          if (newVal === 0) {
-            this.outWarehouseTrayCode = '';
-          }
         }
+      }
+      // 检查目的地限制 - 只有当当前选择的解析库目的地是C时才检查
+      if (this.warehouseSelectedTo === 'C') {
+        this.checkDestinationLimit();
+      }
+      // 如果当前选择出库C，更新出库需进货
+      if (this.outWarehouseSelected === 'C') {
+        this.updateOutNeedAndWrite();
       }
     },
     // 监听D数量变化,
@@ -3919,6 +4044,14 @@ export default {
                 `托盘信息：${this.queues[12].trayInfo[0].trayCode} 出库`
               );
               this.currentOutTrayInfo = this.queues[12].trayInfo[0];
+
+              // 调用WMS出货接口（D出货，state: 1）
+              this.callWmsUnloadGoods(
+                this.queues[12].trayInfo[0].trayCode,
+                1,
+                'D'
+              );
+
               // 删除D队列的第一个元素
               this.queues[12].trayInfo.shift();
             } else {
@@ -3934,6 +4067,10 @@ export default {
       // 动态更新与写入：D/E执行需求
       if (this.dExecuting) {
         this.confirmDExecution();
+      }
+      // 如果当前选择出库D，更新出库需进货
+      if (this.outWarehouseSelected === 'D') {
+        this.updateOutNeedAndWrite();
       }
     },
     // 监听E数量变化,
@@ -3951,6 +4088,14 @@ export default {
                 `托盘信息：${this.queues[13].trayInfo[0].trayCode} 出库`
               );
               this.currentOutTrayInfo = this.queues[13].trayInfo[0];
+
+              // 调用WMS出货接口（E出货，state: 1）
+              this.callWmsUnloadGoods(
+                this.queues[13].trayInfo[0].trayCode,
+                1,
+                'E'
+              );
+
               // 删除E队列的第一个元素
               this.queues[13].trayInfo.shift();
             } else {
@@ -3965,6 +4110,10 @@ export default {
       }
       if (this.eExecuting) {
         this.confirmEExecution();
+      }
+      // 如果当前选择出库E，更新出库需进货
+      if (this.outWarehouseSelected === 'E') {
+        this.updateOutNeedAndWrite();
       }
     },
     // ---- 新增：监听小车位置数值变化 ----
@@ -4051,10 +4200,6 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(10);
-        // 如果当前选择出库A，更新出库需进货
-        if (this.outWarehouseSelected === 'A') {
-          this.updateOutNeedAndWrite();
-        }
       }
     },
     'queues.10.trayInfo': {
@@ -4062,10 +4207,6 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(11);
-        // 如果当前选择出库B，更新出库需进货
-        if (this.outWarehouseSelected === 'B') {
-          this.updateOutNeedAndWrite();
-        }
       }
     },
     'queues.11.trayInfo': {
@@ -4073,10 +4214,6 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(12);
-        // 如果当前选择出库C，更新出库需进货
-        if (this.outWarehouseSelected === 'C') {
-          this.updateOutNeedAndWrite();
-        }
       }
     },
     'queues.12.trayInfo': {
@@ -4084,10 +4221,6 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(13);
-        // 如果当前选择出库D，更新出库需进货
-        if (this.outWarehouseSelected === 'D') {
-          this.updateOutNeedAndWrite();
-        }
       }
     },
     'queues.13.trayInfo': {
@@ -4095,10 +4228,6 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(14);
-        // 如果当前选择出库E，更新出库需进货
-        if (this.outWarehouseSelected === 'E') {
-          this.updateOutNeedAndWrite();
-        }
       }
     },
     'queues.14.trayInfo': {
@@ -4645,7 +4774,45 @@ export default {
       this.adminPasswordForm.password = '';
       this.$message.info('已取消非灭菌状态修改');
     },
+    // 调用WMS出货接口
+    callWmsUnloadGoods(trayCode, state, queueType = '') {
+      const params = {
+        trayCode: trayCode,
+        state: state
+      };
 
+      let statusText = '';
+      if (queueType === 'D') {
+        statusText = 'D出货';
+      } else if (queueType === 'E') {
+        statusText = 'E出货';
+      } else {
+        statusText = '非灭菌出货';
+      }
+
+      this.addLog(`调用WMS出货接口，托盘号：${trayCode}，状态：${statusText}`);
+
+      HttpUtilwms.post('/api/app/unload_goods', params)
+        .then((res) => {
+          if (res.data && res.data.code === 200) {
+            this.addLog(
+              `WMS出货接口调用成功，托盘号：${trayCode}，状态：${statusText}`
+            );
+          } else {
+            this.addLog(
+              `WMS出货接口调用失败，托盘号：${trayCode}，状态：${statusText}，错误信息：${
+                res.data?.msg || '未知错误'
+              }`
+            );
+          }
+        })
+        .catch((err) => {
+          this.addLog(
+            `WMS出货接口调用异常，托盘号：${trayCode}，状态：${statusText}，错误：${err.message}`
+          );
+          console.error('WMS出货接口调用异常:', err);
+        });
+    },
     // 切换无码上货状态
     toggleNoCodeUpload() {
       this.noCodeUpload = !this.noCodeUpload;
@@ -5241,6 +5408,49 @@ export default {
       if (room === 'C') return Number(this.cLineQuantity.c3) || 0;
       return 0;
     },
+    // 检查目的地是否已满16个托盘，满了则自动设置为不执行
+    checkDestinationLimit() {
+      // 检查预热房（A1, B1, C1）是否满16个
+      if (this.preheatingRoomSelected) {
+        const preheatCount = this.getPreheatCountFor(
+          this.preheatingRoomSelected
+        );
+        if (preheatCount >= 16) {
+          const oldSelection = this.preheatingRoomSelected;
+          this.preheatingRoomSelected = null;
+          this.addLog(`预热房${oldSelection}已满16个托盘，自动切换为不执行`);
+        }
+      }
+
+      // 检查灭菌房目的地（A2, B2, C2）是否满16个
+      if (this.disinfectionRoomSelectedTo) {
+        const sterilizeCount = this.getSterilizeCountFor(
+          this.disinfectionRoomSelectedTo
+        );
+        if (sterilizeCount >= 16) {
+          const oldSelection = this.disinfectionRoomSelectedTo;
+          this.disinfectionRoomSelectedTo = null;
+          this.addLog(
+            `灭菌房目的地${oldSelection}已满16个托盘，自动切换为不执行`
+          );
+        }
+      }
+
+      // 检查解析库目的地（A3, B3, C3）是否满16个
+      if (this.warehouseSelectedTo) {
+        const analysisCount = this.getAnalysisCountFor(
+          this.warehouseSelectedTo
+        );
+        if (analysisCount >= 16) {
+          const oldSelection = this.warehouseSelectedTo;
+          this.warehouseSelectedTo = null;
+          this.addLog(
+            `解析库目的地${oldSelection}已满16个托盘，自动切换为不执行`
+          );
+        }
+      }
+    },
+
     // DBW546 预热柜需进货
     updatePreheatNeedAndWrite() {
       if (!this.preheatingRoomSelected) {
@@ -5263,6 +5473,24 @@ export default {
       } else {
         this.preheatNeedQty = need;
       }
+
+      // 当正在执行且需进货数量为0时，自动切换为不执行
+      if (
+        this.preheatNeedQty === 0 &&
+        this.preheatingRoomSelected &&
+        this.preheatExecuting
+      ) {
+        const oldSelection = this.preheatingRoomSelected;
+        this.preheatingRoomSelected = null;
+        this.preWarmTrayCode = '';
+        this.$message.warning(
+          `预热房${oldSelection}执行中需进货数量为0，已自动切换为不执行`
+        );
+        this.addLog(
+          `预热房${oldSelection}执行中需进货数量为0，已自动切换为不执行`
+        );
+      }
+
       this.addLog(`写入PLC DBW546（预热房需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW546', need);
     },
@@ -5278,6 +5506,27 @@ export default {
         this.disinfectionRoomSelectedFrom
       );
       this.disinfectionNeedQty = leftFromPreheat;
+
+      // 当正在执行且需进货数量为0时，自动切换为不执行
+      if (
+        leftFromPreheat === 0 &&
+        (this.disinfectionRoomSelectedFrom ||
+          this.disinfectionRoomSelectedTo) &&
+        this.disinfectionTrayCode
+      ) {
+        const oldFrom = this.disinfectionRoomSelectedFrom;
+        const oldTo = this.disinfectionRoomSelectedTo;
+        this.disinfectionRoomSelectedFrom = null;
+        this.disinfectionRoomSelectedTo = null;
+        this.disinfectionTrayCode = '';
+        this.$message.warning(
+          `预热房到灭菌柜执行中需进货数量为0，已自动切换为不执行`
+        );
+        this.addLog(
+          `预热房${oldFrom}到灭菌柜${oldTo}执行中需进货数量为0，已自动切换为不执行`
+        );
+      }
+
       this.addLog(`写入PLC DBW548（灭菌柜需进货数量）: ${leftFromPreheat}`);
       this.writeWordWithCancel('DBW548', leftFromPreheat);
     },
@@ -5293,6 +5542,26 @@ export default {
         this.warehouseSelectedFrom
       );
       this.analysisNeedQty = leftFromSterilize;
+
+      // 当正在执行且需进货数量为0时，自动切换为不执行
+      if (
+        leftFromSterilize === 0 &&
+        (this.warehouseSelectedFrom || this.warehouseSelectedTo) &&
+        this.analysisTrayCode
+      ) {
+        const oldFrom = this.warehouseSelectedFrom;
+        const oldTo = this.warehouseSelectedTo;
+        this.warehouseSelectedFrom = null;
+        this.warehouseSelectedTo = null;
+        this.analysisTrayCode = '';
+        this.$message.warning(
+          `灭菌柜到解析房执行中需进货数量为0，已自动切换为不执行`
+        );
+        this.addLog(
+          `灭菌柜${oldFrom}到解析库${oldTo}执行中需进货数量为0，已自动切换为不执行`
+        );
+      }
+
       this.addLog(`写入PLC DBW550（解析柜需进货数量）: ${leftFromSterilize}`);
       this.writeWordWithCancel('DBW550', leftFromSterilize);
     },
@@ -5318,6 +5587,24 @@ export default {
         need = 0;
       }
       this.outNeedQty = need;
+
+      // 当正在执行且需进货数量为0时，自动切换为不执行
+      if (
+        need === 0 &&
+        this.outWarehouseSelected &&
+        this.outWarehouseTrayCode
+      ) {
+        const oldSelection = this.outWarehouseSelected;
+        this.outWarehouseSelected = null;
+        this.outWarehouseTrayCode = '';
+        this.$message.warning(
+          `出库${oldSelection}执行中需进货数量为0，已自动切换为不执行`
+        );
+        this.addLog(
+          `出库${oldSelection}执行中需进货数量为0，已自动切换为不执行`
+        );
+      }
+
       this.addLog(`写入PLC DBW560（出库需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW560', need);
     },
@@ -5573,6 +5860,7 @@ export default {
           ipcRenderer.send('cancelWriteToPLC', 'DBW528');
         }, 2000);
       }
+      this.updateDisinfectionNeedAndWrite();
       this.addLog(
         `执行发送从${this.disinfectionRoomSelectedFrom}预热房到${this.disinfectionRoomSelectedTo}灭菌房操作`
       );
