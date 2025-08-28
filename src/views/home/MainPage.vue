@@ -209,13 +209,19 @@
                       cLineQuantity.c3
                     }}</span>
                     <span class="queue-marker-count" v-if="marker.id === 13">{{
-                      dLineQuantity
+                      dDisinfectionInQuantity
                     }}</span>
                     <span class="queue-marker-count" v-if="marker.id === 14">{{
-                      eLineQuantity
+                      eDisinfectionInQuantity
                     }}</span>
                     <span class="queue-marker-count" v-if="marker.id === 15">{{
                       nonSterileunload
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 16">{{
+                      dDisinfectionOutQuantity
+                    }}</span>
+                    <span class="queue-marker-count" v-if="marker.id === 17">{{
+                      eDisinfectionOutQuantity
                     }}</span>
                     <span class="queue-marker-name">{{ marker.name }}</span>
                   </div>
@@ -2047,21 +2053,23 @@
                   </div>
                 </div>
               </div>
-              <!-- D数量控制 -->
+              <!-- D进货数量（测试面板可调） -->
               <div class="quantity-group">
-                <div class="quantity-title">D灭菌柜数量:</div>
+                <div class="quantity-title">D进货数量:</div>
                 <div class="quantity-controls">
                   <div class="quantity-item">
-                    <span class="quantity-value">{{ dLineQuantity }}</span>
+                    <span class="quantity-value">
+                      {{ dDisinfectionInQuantity }}
+                    </span>
                     <div class="quantity-buttons">
                       <button
-                        @click="updateDLineQuantity(1)"
+                        @click="updateDInQuantity(1)"
                         class="quantity-btn plus"
                       >
                         +
                       </button>
                       <button
-                        @click="updateDLineQuantity(-1)"
+                        @click="updateDInQuantity(-1)"
                         class="quantity-btn minus"
                       >
                         -
@@ -2070,21 +2078,73 @@
                   </div>
                 </div>
               </div>
-              <!-- E数量控制 -->
+              <!-- D出货数量（测试面板可调） -->
               <div class="quantity-group">
-                <div class="quantity-title">E灭菌柜数量:</div>
+                <div class="quantity-title">D出货数量:</div>
                 <div class="quantity-controls">
                   <div class="quantity-item">
-                    <span class="quantity-value">{{ eLineQuantity }}</span>
+                    <span class="quantity-value">
+                      {{ dDisinfectionOutQuantity }}
+                    </span>
                     <div class="quantity-buttons">
                       <button
-                        @click="updateELineQuantity(1)"
+                        @click="updateDOutQuantity(1)"
                         class="quantity-btn plus"
                       >
                         +
                       </button>
                       <button
-                        @click="updateELineQuantity(-1)"
+                        @click="updateDOutQuantity(-1)"
+                        class="quantity-btn minus"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- E进货数量（测试面板可调） -->
+              <div class="quantity-group">
+                <div class="quantity-title">E进货数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-value">
+                      {{ eDisinfectionInQuantity }}
+                    </span>
+                    <div class="quantity-buttons">
+                      <button
+                        @click="updateEInQuantity(1)"
+                        class="quantity-btn plus"
+                      >
+                        +
+                      </button>
+                      <button
+                        @click="updateEInQuantity(-1)"
+                        class="quantity-btn minus"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- E出货数量（测试面板可调） -->
+              <div class="quantity-group">
+                <div class="quantity-title">E出货数量:</div>
+                <div class="quantity-controls">
+                  <div class="quantity-item">
+                    <span class="quantity-value">
+                      {{ eDisinfectionOutQuantity }}
+                    </span>
+                    <div class="quantity-buttons">
+                      <button
+                        @click="updateEOutQuantity(1)"
+                        class="quantity-btn plus"
+                      >
+                        +
+                      </button>
+                      <button
+                        @click="updateEOutQuantity(-1)"
                         class="quantity-btn minus"
                       >
                         -
@@ -2391,17 +2451,27 @@ export default {
         },
         {
           id: 13,
-          queueName: 'D',
+          queueName: 'D进货',
           trayInfo: []
         },
         {
           id: 14,
-          queueName: 'E',
+          queueName: 'E进货',
           trayInfo: []
         },
         {
           id: 15,
           queueName: '非灭菌缓存区',
+          trayInfo: []
+        },
+        {
+          id: 16,
+          queueName: 'D出货',
+          trayInfo: []
+        },
+        {
+          id: 17,
+          queueName: 'E出货',
           trayInfo: []
         }
       ],
@@ -2419,9 +2489,11 @@ export default {
         { id: 10, name: 'A3', queueId: 10, x: 2190, y: 1065 },
         { id: 11, name: 'B3', queueId: 11, x: 2190, y: 845 },
         { id: 12, name: 'C3', queueId: 12, x: 2190, y: 645 },
-        { id: 13, name: 'D', queueId: 13, x: 2165, y: 490 },
-        { id: 14, name: 'E', queueId: 14, x: 2165, y: 340 },
-        { id: 15, name: '非灭菌缓存区', queueId: 15, x: 2630, y: 1280 }
+        { id: 13, name: 'D进货', queueId: 13, x: 2070, y: 480 },
+        { id: 14, name: 'E进货', queueId: 14, x: 2070, y: 320 },
+        { id: 15, name: '非灭菌缓存区', queueId: 15, x: 2630, y: 1280 },
+        { id: 16, name: 'D出货', queueId: 16, x: 2210, y: 480 },
+        { id: 17, name: 'E出货', queueId: 17, x: 2210, y: 320 }
       ],
       logId: 1000, // 添加一个日志ID计数器
       // 输送线当前运行状态-读取PLC
@@ -2566,10 +2638,12 @@ export default {
       },
       // 缓冲区数量
       bufferQuantity: 0,
-      // D线数量-读取PLC
-      dLineQuantity: 0,
-      // E线数量-读取PLC
-      eLineQuantity: 0,
+      dDisinfectionInQuantity: 0,
+      eDisinfectionInQuantity: 0,
+      dDisinfectionOutQuantity: 0,
+      eDisinfectionOutQuantity: 0,
+      dDisinfectionOutSignal: 0,
+      eDisinfectionOutSignal: 0,
       // 非灭菌下货区数量-读取PLC
       nonSterileunload: 0,
       //上货区电机运行信号（扫码后入队）-读取PLC
@@ -2743,190 +2817,198 @@ export default {
   mounted() {
     this.initializeMarkers();
     this.loadQueueInfoFromDatabase();
-    ipcRenderer.on('receivedMsg', (event, values, values2) => {
-      // 使用位运算优化赋值
-      const getBit = (word, bitIndex) => ((word >> bitIndex) & 1).toString();
+    // ipcRenderer.on('receivedMsg', (event, values, values2) => {
+    //   // 使用位运算优化赋值
+    //   const getBit = (word, bitIndex) => ((word >> bitIndex) & 1).toString();
 
-      // 允许进料反馈
-      let word4 = this.convertToWord(values.DBW4);
-      this.allowFeedBack.bit0 = getBit(word4, 8);
-      this.allowFeedBack.bit1 = getBit(word4, 9);
-      this.allowFeedBack.bit2 = getBit(word4, 10);
-      this.allowFeedBack.bit3 = getBit(word4, 11);
-      this.allowFeedBack.bit4 = getBit(word4, 12);
-      this.allowFeedBack.bit5 = getBit(word4, 13);
+    //   // 允许进料反馈
+    //   let word4 = this.convertToWord(values.DBW4);
+    //   this.allowFeedBack.bit0 = getBit(word4, 8);
+    //   this.allowFeedBack.bit1 = getBit(word4, 9);
+    //   this.allowFeedBack.bit2 = getBit(word4, 10);
+    //   this.allowFeedBack.bit3 = getBit(word4, 11);
+    //   this.allowFeedBack.bit4 = getBit(word4, 12);
+    //   this.allowFeedBack.bit5 = getBit(word4, 13);
 
-      // A线电机运行信号 (DBW6)
-      let word6 = this.convertToWord(values.DBW6);
-      this.aLineMotorRunning.bit0 = getBit(word6, 8);
-      this.aLineMotorRunning.bit1 = getBit(word6, 9);
-      this.aLineMotorRunning.bit2 = getBit(word6, 10);
-      this.aLineMotorRunning.bit3 = getBit(word6, 11);
-      this.aLineMotorRunning.bit4 = getBit(word6, 12);
-      this.aLineMotorRunning.bit5 = getBit(word6, 13);
+    //   // A线电机运行信号 (DBW6)
+    //   let word6 = this.convertToWord(values.DBW6);
+    //   this.aLineMotorRunning.bit0 = getBit(word6, 8);
+    //   this.aLineMotorRunning.bit1 = getBit(word6, 9);
+    //   this.aLineMotorRunning.bit2 = getBit(word6, 10);
+    //   this.aLineMotorRunning.bit3 = getBit(word6, 11);
+    //   this.aLineMotorRunning.bit4 = getBit(word6, 12);
+    //   this.aLineMotorRunning.bit5 = getBit(word6, 13);
 
-      // A线光电检测信号 (DBW8)
-      let word8 = this.convertToWord(values.DBW8);
-      this.aLinePhotoelectricSignal.bit0 = getBit(word8, 8);
-      this.aLinePhotoelectricSignal.bit1 = getBit(word8, 9);
-      this.aLinePhotoelectricSignal.bit2 = getBit(word8, 10);
-      this.aLinePhotoelectricSignal.bit3 = getBit(word8, 11);
-      this.aLinePhotoelectricSignal.bit4 = getBit(word8, 12);
-      this.aLinePhotoelectricSignal.bit5 = getBit(word8, 13);
-      this.aLinePhotoelectricSignal.bit6 = getBit(word8, 14);
-      this.aLinePhotoelectricSignal.bit7 = getBit(word8, 15);
-      this.aLinePhotoelectricSignal.bit8 = getBit(word8, 0);
-      this.aLinePhotoelectricSignal.bit9 = getBit(word8, 1);
+    //   // A线光电检测信号 (DBW8)
+    //   let word8 = this.convertToWord(values.DBW8);
+    //   this.aLinePhotoelectricSignal.bit0 = getBit(word8, 8);
+    //   this.aLinePhotoelectricSignal.bit1 = getBit(word8, 9);
+    //   this.aLinePhotoelectricSignal.bit2 = getBit(word8, 10);
+    //   this.aLinePhotoelectricSignal.bit3 = getBit(word8, 11);
+    //   this.aLinePhotoelectricSignal.bit4 = getBit(word8, 12);
+    //   this.aLinePhotoelectricSignal.bit5 = getBit(word8, 13);
+    //   this.aLinePhotoelectricSignal.bit6 = getBit(word8, 14);
+    //   this.aLinePhotoelectricSignal.bit7 = getBit(word8, 15);
+    //   this.aLinePhotoelectricSignal.bit8 = getBit(word8, 0);
+    //   this.aLinePhotoelectricSignal.bit9 = getBit(word8, 1);
 
-      // B线电机运行信号 (DBW10)
-      let word10 = this.convertToWord(values.DBW10);
-      this.bLineMotorRunning.bit0 = getBit(word10, 8);
-      this.bLineMotorRunning.bit1 = getBit(word10, 9);
-      this.bLineMotorRunning.bit2 = getBit(word10, 10);
-      this.bLineMotorRunning.bit3 = getBit(word10, 11);
-      this.bLineMotorRunning.bit4 = getBit(word10, 12);
-      this.bLineMotorRunning.bit5 = getBit(word10, 13);
+    //   // B线电机运行信号 (DBW10)
+    //   let word10 = this.convertToWord(values.DBW10);
+    //   this.bLineMotorRunning.bit0 = getBit(word10, 8);
+    //   this.bLineMotorRunning.bit1 = getBit(word10, 9);
+    //   this.bLineMotorRunning.bit2 = getBit(word10, 10);
+    //   this.bLineMotorRunning.bit3 = getBit(word10, 11);
+    //   this.bLineMotorRunning.bit4 = getBit(word10, 12);
+    //   this.bLineMotorRunning.bit5 = getBit(word10, 13);
 
-      // B线光电检测信号 (DBW12)
-      let word12 = this.convertToWord(values.DBW12);
-      this.bLinePhotoelectricSignal.bit0 = getBit(word12, 8);
-      this.bLinePhotoelectricSignal.bit1 = getBit(word12, 9);
-      this.bLinePhotoelectricSignal.bit2 = getBit(word12, 10);
-      this.bLinePhotoelectricSignal.bit3 = getBit(word12, 11);
-      this.bLinePhotoelectricSignal.bit4 = getBit(word12, 12);
-      this.bLinePhotoelectricSignal.bit5 = getBit(word12, 13);
-      this.bLinePhotoelectricSignal.bit6 = getBit(word12, 14);
-      this.bLinePhotoelectricSignal.bit7 = getBit(word12, 15);
-      this.bLinePhotoelectricSignal.bit8 = getBit(word12, 0);
-      this.bLinePhotoelectricSignal.bit9 = getBit(word12, 1);
+    //   // B线光电检测信号 (DBW12)
+    //   let word12 = this.convertToWord(values.DBW12);
+    //   this.bLinePhotoelectricSignal.bit0 = getBit(word12, 8);
+    //   this.bLinePhotoelectricSignal.bit1 = getBit(word12, 9);
+    //   this.bLinePhotoelectricSignal.bit2 = getBit(word12, 10);
+    //   this.bLinePhotoelectricSignal.bit3 = getBit(word12, 11);
+    //   this.bLinePhotoelectricSignal.bit4 = getBit(word12, 12);
+    //   this.bLinePhotoelectricSignal.bit5 = getBit(word12, 13);
+    //   this.bLinePhotoelectricSignal.bit6 = getBit(word12, 14);
+    //   this.bLinePhotoelectricSignal.bit7 = getBit(word12, 15);
+    //   this.bLinePhotoelectricSignal.bit8 = getBit(word12, 0);
+    //   this.bLinePhotoelectricSignal.bit9 = getBit(word12, 1);
 
-      // C线电机运行信号 (DBW14)
-      let word14 = this.convertToWord(values.DBW14);
-      this.cLineMotorRunning.bit0 = getBit(word14, 8);
-      this.cLineMotorRunning.bit1 = getBit(word14, 9);
-      this.cLineMotorRunning.bit2 = getBit(word14, 10);
-      this.cLineMotorRunning.bit3 = getBit(word14, 11);
-      this.cLineMotorRunning.bit4 = getBit(word14, 12);
-      this.cLineMotorRunning.bit5 = getBit(word14, 13);
+    //   // C线电机运行信号 (DBW14)
+    //   let word14 = this.convertToWord(values.DBW14);
+    //   this.cLineMotorRunning.bit0 = getBit(word14, 8);
+    //   this.cLineMotorRunning.bit1 = getBit(word14, 9);
+    //   this.cLineMotorRunning.bit2 = getBit(word14, 10);
+    //   this.cLineMotorRunning.bit3 = getBit(word14, 11);
+    //   this.cLineMotorRunning.bit4 = getBit(word14, 12);
+    //   this.cLineMotorRunning.bit5 = getBit(word14, 13);
 
-      // C线光电检测信号 (DBW16)
-      let word16 = this.convertToWord(values.DBW16);
-      this.cLinePhotoelectricSignal.bit0 = getBit(word16, 8);
-      this.cLinePhotoelectricSignal.bit1 = getBit(word16, 9);
-      this.cLinePhotoelectricSignal.bit2 = getBit(word16, 10);
-      this.cLinePhotoelectricSignal.bit3 = getBit(word16, 11);
-      this.cLinePhotoelectricSignal.bit4 = getBit(word16, 12);
-      this.cLinePhotoelectricSignal.bit5 = getBit(word16, 13);
-      this.cLinePhotoelectricSignal.bit6 = getBit(word16, 14);
-      this.cLinePhotoelectricSignal.bit7 = getBit(word16, 15);
-      this.cLinePhotoelectricSignal.bit8 = getBit(word16, 0);
-      this.cLinePhotoelectricSignal.bit9 = getBit(word16, 1);
+    //   // C线光电检测信号 (DBW16)
+    //   let word16 = this.convertToWord(values.DBW16);
+    //   this.cLinePhotoelectricSignal.bit0 = getBit(word16, 8);
+    //   this.cLinePhotoelectricSignal.bit1 = getBit(word16, 9);
+    //   this.cLinePhotoelectricSignal.bit2 = getBit(word16, 10);
+    //   this.cLinePhotoelectricSignal.bit3 = getBit(word16, 11);
+    //   this.cLinePhotoelectricSignal.bit4 = getBit(word16, 12);
+    //   this.cLinePhotoelectricSignal.bit5 = getBit(word16, 13);
+    //   this.cLinePhotoelectricSignal.bit6 = getBit(word16, 14);
+    //   this.cLinePhotoelectricSignal.bit7 = getBit(word16, 15);
+    //   this.cLinePhotoelectricSignal.bit8 = getBit(word16, 0);
+    //   this.cLinePhotoelectricSignal.bit9 = getBit(word16, 1);
 
-      // 缓冲区数量-读取PLC
-      this.bufferQuantity = Number(values.DBW28);
+    //   // 缓冲区数量-读取PLC
+    //   this.bufferQuantity = Number(values.DBW28);
 
-      // 请求上位机下发任务(判断去灭菌还是非灭菌）
-      this.requestUploadTask = Number(values.DBW30);
+    //   // 请求上位机下发任务(判断去灭菌还是非灭菌）
+    //   this.requestUploadTask = Number(values.DBW30);
 
-      // A线数量-读取PLC
-      this.aLineQuantity.a1 = Number(values.DBW34);
-      this.aLineQuantity.a2 = Number(values.DBW36);
-      this.aLineQuantity.a3 = Number(values.DBW38);
+    //   // A线数量-读取PLC
+    //   this.aLineQuantity.a1 = Number(values.DBW34);
+    //   this.aLineQuantity.a2 = Number(values.DBW36);
+    //   this.aLineQuantity.a3 = Number(values.DBW38);
 
-      // B线数量-读取PLC
-      this.bLineQuantity.b1 = Number(values.DBW40);
-      this.bLineQuantity.b2 = Number(values.DBW42);
-      this.bLineQuantity.b3 = Number(values.DBW44);
+    //   // B线数量-读取PLC
+    //   this.bLineQuantity.b1 = Number(values.DBW40);
+    //   this.bLineQuantity.b2 = Number(values.DBW42);
+    //   this.bLineQuantity.b3 = Number(values.DBW44);
 
-      // C线数量-读取PLC
-      this.cLineQuantity.c1 = Number(values.DBW46);
-      this.cLineQuantity.c2 = Number(values.DBW48);
-      this.cLineQuantity.c3 = Number(values.DBW50);
-      // D灭菌柜数量-读取PLC
-      this.dDisinfectionQuantity = Number(values.DBW52);
-      // E灭菌柜数量-读取PLC
-      this.eDisinfectionQuantity = Number(values.DBW58);
-      // 非灭菌区数量-读取PLC
-      this.nonSterileunload = Number(values.DBW32);
-      // 上货区电机运行信号（扫码后入队） (DBW64)
-      let word64 = this.convertToWord(values.DBW64);
-      this.upLoadMotorRunning.bit0 = getBit(word64, 8);
-      this.upLoadMotorRunning.bit1 = getBit(word64, 9);
-      this.upLoadMotorRunning.bit2 = getBit(word64, 10);
-      this.upLoadMotorRunning.bit3 = getBit(word64, 11);
-      this.upLoadMotorRunning.bit4 = getBit(word64, 12);
-      this.upLoadMotorRunning.bit5 = getBit(word64, 13);
-      this.upLoadMotorRunning.bit6 = getBit(word64, 14);
-      this.upLoadMotorRunning.bit7 = getBit(word64, 15);
-      this.upLoadMotorRunning.bit8 = getBit(word64, 0);
-      this.upLoadMotorRunning.bit9 = getBit(word64, 1);
-      this.upLoadMotorRunning.bit10 = getBit(word64, 2);
+    //   // C线数量-读取PLC
+    //   this.cLineQuantity.c1 = Number(values.DBW46);
+    //   this.cLineQuantity.c2 = Number(values.DBW48);
+    //   this.cLineQuantity.c3 = Number(values.DBW50);
+    //   // D灭菌柜进货数量-读取PLC
+    //   this.dDisinfectionInQuantity = Number(values.DBW52);
+    //   // D灭菌柜出货数量-读取PLC
+    //   this.dDisinfectionOutQuantity = Number(values.DBW54);
+    //   // D灭菌柜请求出货信号-读取PLC
+    //   this.dDisinfectionOutSignal = Number(values.DBW56);
+    //   // E灭菌柜进货数量-读取PLC
+    //   this.eDisinfectionInQuantity = Number(values.DBW58);
+    //   // E灭菌柜出货数量-读取PLC
+    //   this.eDisinfectionOutQuantity = Number(values.DBW60);
+    //   // E灭菌柜请求出货信号-读取PLC
+    //   this.eDisinfectionOutSignal = Number(values.DBW62);
+    //   // 非灭菌区数量-读取PLC
+    //   this.nonSterileunload = Number(values.DBW32);
+    //   // 上货区电机运行信号（扫码后入队） (DBW64)
+    //   let word64 = this.convertToWord(values.DBW64);
+    //   this.upLoadMotorRunning.bit0 = getBit(word64, 8);
+    //   this.upLoadMotorRunning.bit1 = getBit(word64, 9);
+    //   this.upLoadMotorRunning.bit2 = getBit(word64, 10);
+    //   this.upLoadMotorRunning.bit3 = getBit(word64, 11);
+    //   this.upLoadMotorRunning.bit4 = getBit(word64, 12);
+    //   this.upLoadMotorRunning.bit5 = getBit(word64, 13);
+    //   this.upLoadMotorRunning.bit6 = getBit(word64, 14);
+    //   this.upLoadMotorRunning.bit7 = getBit(word64, 15);
+    //   this.upLoadMotorRunning.bit8 = getBit(word64, 0);
+    //   this.upLoadMotorRunning.bit9 = getBit(word64, 1);
+    //   this.upLoadMotorRunning.bit10 = getBit(word64, 2);
 
-      //上货区输送线光电信号 (DBW66)
-      let word66 = this.convertToWord(values.DBW66);
-      this.upLoadPhotoelectricSignal.bit0 = getBit(word66, 8);
-      this.upLoadPhotoelectricSignal.bit1 = getBit(word66, 9);
-      this.upLoadPhotoelectricSignal.bit2 = getBit(word66, 10);
-      this.upLoadPhotoelectricSignal.bit3 = getBit(word66, 11);
-      this.upLoadPhotoelectricSignal.bit4 = getBit(word66, 12);
-      this.upLoadPhotoelectricSignal.bit5 = getBit(word66, 13);
-      this.upLoadPhotoelectricSignal.bit6 = getBit(word66, 14);
-      this.upLoadPhotoelectricSignal.bit7 = getBit(word66, 15);
-      this.upLoadPhotoelectricSignal.bit8 = getBit(word66, 0);
-      this.upLoadPhotoelectricSignal.bit9 = getBit(word66, 1);
-      this.upLoadPhotoelectricSignal.bit10 = getBit(word66, 2);
+    //   //上货区输送线光电信号 (DBW66)
+    //   let word66 = this.convertToWord(values.DBW66);
+    //   this.upLoadPhotoelectricSignal.bit0 = getBit(word66, 8);
+    //   this.upLoadPhotoelectricSignal.bit1 = getBit(word66, 9);
+    //   this.upLoadPhotoelectricSignal.bit2 = getBit(word66, 10);
+    //   this.upLoadPhotoelectricSignal.bit3 = getBit(word66, 11);
+    //   this.upLoadPhotoelectricSignal.bit4 = getBit(word66, 12);
+    //   this.upLoadPhotoelectricSignal.bit5 = getBit(word66, 13);
+    //   this.upLoadPhotoelectricSignal.bit6 = getBit(word66, 14);
+    //   this.upLoadPhotoelectricSignal.bit7 = getBit(word66, 15);
+    //   this.upLoadPhotoelectricSignal.bit8 = getBit(word66, 0);
+    //   this.upLoadPhotoelectricSignal.bit9 = getBit(word66, 1);
+    //   this.upLoadPhotoelectricSignal.bit10 = getBit(word66, 2);
 
-      // 扫码枪处光电信号 (DBW84)
-      let word84 = this.convertToWord(values.DBW84);
-      this.scanPhotoelectricSignal.bit0 = getBit(word84, 8);
-      this.scanPhotoelectricSignal.bit1 = getBit(word84, 9);
-      this.scanPhotoelectricSignal.bit2 = getBit(word84, 10);
-      this.scanPhotoelectricSignal.bit3 = getBit(word84, 11);
-      this.scanPhotoelectricSignal.bit4 = getBit(word84, 12);
-      this.scanPhotoelectricSignal.bit5 = getBit(word84, 13);
-      this.scanPhotoelectricSignal.bit6 = getBit(word84, 14);
-      this.scanPhotoelectricSignal.bit7 = getBit(word84, 15);
-      this.scanPhotoelectricSignal.bit8 = getBit(word84, 0);
+    //   // 扫码枪处光电信号 (DBW84)
+    //   let word84 = this.convertToWord(values.DBW84);
+    //   this.scanPhotoelectricSignal.bit0 = getBit(word84, 8);
+    //   this.scanPhotoelectricSignal.bit1 = getBit(word84, 9);
+    //   this.scanPhotoelectricSignal.bit2 = getBit(word84, 10);
+    //   this.scanPhotoelectricSignal.bit3 = getBit(word84, 11);
+    //   this.scanPhotoelectricSignal.bit4 = getBit(word84, 12);
+    //   this.scanPhotoelectricSignal.bit5 = getBit(word84, 13);
+    //   this.scanPhotoelectricSignal.bit6 = getBit(word84, 14);
+    //   this.scanPhotoelectricSignal.bit7 = getBit(word84, 15);
+    //   this.scanPhotoelectricSignal.bit8 = getBit(word84, 0);
 
-      // 请求上位机下发任务(预热小车前）
-      this.requestUploadTaskPreheatingCar = Number(values.DBW86);
+    //   // 请求上位机下发任务(预热小车前）
+    //   this.requestUploadTaskPreheatingCar = Number(values.DBW86);
 
-      // 提升机一楼接货站台扫码数据（托盘号）
-      this.elevatorOneFloorScanCode = values.DBB160 ?? '';
+    //   // 提升机一楼接货站台扫码数据（托盘号）
+    //   this.elevatorOneFloorScanCode = values.DBB160 ?? '';
 
-      // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
-      this.oneFloorElevatorScanCode = values.DBB190;
+    //   // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
+    //   this.oneFloorElevatorScanCode = values.DBB190;
 
-      // 提升机二楼接货站台扫码数据（托盘号）
-      this.elevatorTwoFloorScanCode = values.DBB220 ?? '';
+    //   // 提升机二楼接货站台扫码数据（托盘号）
+    //   this.elevatorTwoFloorScanCode = values.DBB220 ?? '';
 
-      // 提升机三楼接货站台扫码数据（托盘号）
-      this.elevatorThreeFloorScanCode = values.DBB250 ?? '';
+    //   // 提升机三楼接货站台扫码数据（托盘号）
+    //   this.elevatorThreeFloorScanCode = values.DBB250 ?? '';
 
-      // 提升机四楼接货站台扫码数据（托盘号）
-      this.elevatorFourFloorScanCode = values.DBB280 ?? '';
+    //   // 提升机四楼接货站台扫码数据（托盘号）
+    //   this.elevatorFourFloorScanCode = values.DBB280 ?? '';
 
-      // 一楼D灭菌柜接货站台扫码数据（托盘号）
-      this.elevatorDDisinfectionScanCode = values.DBB310 ?? '';
+    //   // 一楼D灭菌柜接货站台扫码数据（托盘号）
+    //   this.elevatorDDisinfectionScanCode = values.DBB310 ?? '';
 
-      // 一楼E灭菌柜接货站台扫码数据（托盘号）
-      this.elevatorEDisinfectionScanCode = values.DBB340 ?? '';
+    //   // 一楼E灭菌柜接货站台扫码数据（托盘号）
+    //   this.elevatorEDisinfectionScanCode = values.DBB340 ?? '';
 
-      // 读取小车位置数值
-      this.cartPositionValues.cart1 = Number(values.DBW88 ?? 0);
-      this.cartPositionValues.cart2 = Number(values.DBW90 ?? 0);
-      this.cartPositionValues.cart3 = Number(values.DBW92 ?? 0);
-      this.cartPositionValues.cart4 = Number(values.DBW94 ?? 0);
+    //   // 读取小车位置数值
+    //   this.cartPositionValues.cart1 = Number(values.DBW88 ?? 0);
+    //   this.cartPositionValues.cart2 = Number(values.DBW90 ?? 0);
+    //   this.cartPositionValues.cart3 = Number(values.DBW92 ?? 0);
+    //   this.cartPositionValues.cart4 = Number(values.DBW94 ?? 0);
 
-      // 只在第一次接收到数据时设置标志位为 true
-      if (!this.isDataReady) {
-        this.isDataReady = true;
-      }
-    });
+    //   // 只在第一次接收到数据时设置标志位为 true
+    //   if (!this.isDataReady) {
+    //     this.isDataReady = true;
+    //   }
+    // });
     // 测试模式下，把上边注释，下面打开
-    // if (!this.isDataReady) {
-    //   this.isDataReady = true;
-    // }
+    if (!this.isDataReady) {
+      this.isDataReady = true;
+    }
   },
   watch: {
     // 切换预热房选择，更新DBW546
@@ -3191,6 +3273,14 @@ export default {
           this.addLog('D口光电触发，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueueDE('D', this.nonSterileD);
           this.sendAllowForPort('D');
+          // 扫码放行时，若未执行或选择了D，则发送D出货命令
+          if (!this.outWarehouseSelected || this.outWarehouseSelected === 'D') {
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 1);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+            }, 2000);
+            this.addLog('D扫码放行，满足条件，发送D出货命令');
+          }
         } else {
           this.addLog(`D扫码数据：${this.elevatorDDisinfectionScanCode}`);
           this.addToUpLoadQueueDE(
@@ -3198,6 +3288,14 @@ export default {
             'D',
             this.nonSterileD
           );
+          // 扫码放行时，若未执行或选择了D，则发送D出货命令
+          if (!this.outWarehouseSelected || this.outWarehouseSelected === 'D') {
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 1);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+            }, 2000);
+            this.addLog('D扫码放行，满足条件，发送D出货命令');
+          }
         }
       }
     },
@@ -3218,6 +3316,14 @@ export default {
           this.addLog('E口光电触发，无码上货模式启用');
           this.addNoCodeTrayToUpLoadQueueDE('E', this.nonSterileE);
           this.sendAllowForPort('E');
+          // 扫码放行时，若未执行或选择了E，则发送E出货命令
+          if (!this.outWarehouseSelected || this.outWarehouseSelected === 'E') {
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 2);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+            }, 2000);
+            this.addLog('E扫码放行，满足条件，发送E出货命令');
+          }
         } else {
           this.addLog(`E扫码数据：${this.elevatorEDisinfectionScanCode}`);
           this.addToUpLoadQueueDE(
@@ -3225,6 +3331,14 @@ export default {
             'E',
             this.nonSterileE
           );
+          // 扫码放行时，若未执行或选择了E，则发送E出货命令
+          if (!this.outWarehouseSelected || this.outWarehouseSelected === 'E') {
+            ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 2);
+            setTimeout(() => {
+              ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+            }, 2000);
+            this.addLog('E扫码放行，满足条件，发送E出货命令');
+          }
         }
       }
     },
@@ -4029,91 +4143,129 @@ export default {
         this.updateOutNeedAndWrite();
       }
     },
-    // 监听D数量变化,
-    dLineQuantity(newVal, oldVal) {
-      // 使用增量计算来处理多个托盘
-      if (newVal < oldVal) {
-        const decreaseCount = oldVal - newVal;
-        // 先判断当前选择出库的是D么
-        if (this.outWarehouseSelected === 'D') {
-          // 批量处理出库托盘
-          for (let i = 0; i < decreaseCount; i++) {
-            if (this.queues[12].trayInfo.length > 0) {
-              // 把D队列的第一个元素数据展示到下货
-              this.addLog(
-                `托盘信息：${this.queues[12].trayInfo[0].trayCode} 出库`
-              );
-              this.currentOutTrayInfo = this.queues[12].trayInfo[0];
-
-              // 调用WMS出货接口（D出货，state: 1）
-              this.callWmsUnloadGoods(
-                this.queues[12].trayInfo[0].trayCode,
-                1,
-                'D'
-              );
-
-              // 删除D队列的第一个元素
-              this.queues[12].trayInfo.shift();
-            } else {
-              this.addLog('D队列空，无法出库');
-              break;
-            }
+    // D上货数量变化：根据增加的数量，标记上货队列最前托盘为已实际入队
+    dDisinfectionInQuantity(newVal, oldVal) {
+      if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
+        for (let i = 0; i < increaseCount; i++) {
+          const upQueue = this.queues[12]; // D 上货队列
+          const idx = upQueue.trayInfo.findIndex((t) => t && t.state === '0');
+          if (idx !== -1) {
+            const tray = upQueue.trayInfo[idx];
+            upQueue.trayInfo[idx] = { ...tray, state: '1' };
+            this.addLog(`D上货数量+1，托盘 ${tray.trayCode} 标记为已实际入队`);
+          } else {
+            this.addLog('D上货数量增加，但上货队列无可标记的托盘');
+            break;
           }
-        } else {
-          // 不是设置出库D的，但是D却减少了，说明有问题，直接报警
-          this.addLog('未设置出库D，程序错误！报警！');
         }
-      }
-      // 动态更新与写入：D/E执行需求
-      if (this.dExecuting) {
-        this.confirmDExecution();
-      }
-      // 如果当前选择出库D，更新出库需进货
-      if (this.outWarehouseSelected === 'D') {
-        this.updateOutNeedAndWrite();
       }
     },
-    // 监听E数量变化,
-    eLineQuantity(newVal, oldVal) {
-      // 使用增量计算来处理多个托盘
-      if (newVal < oldVal) {
-        const decreaseCount = oldVal - newVal;
-        // 先判断当前选择出库的是E么
-        if (this.outWarehouseSelected === 'E') {
-          // 批量处理出库托盘
-          for (let i = 0; i < decreaseCount; i++) {
-            if (this.queues[13].trayInfo.length > 0) {
-              // 把E队列的第一个元素数据展示到下货
-              this.addLog(
-                `托盘信息：${this.queues[13].trayInfo[0].trayCode} 出库`
-              );
-              this.currentOutTrayInfo = this.queues[13].trayInfo[0];
-
-              // 调用WMS出货接口（E出货，state: 1）
-              this.callWmsUnloadGoods(
-                this.queues[13].trayInfo[0].trayCode,
-                1,
-                'E'
-              );
-
-              // 删除E队列的第一个元素
-              this.queues[13].trayInfo.shift();
-            } else {
-              this.addLog('E队列空，无法出库');
-              break;
-            }
+    // E上货数量变化：根据增加的数量，标记上货队列最前托盘为已实际入队
+    eDisinfectionInQuantity(newVal, oldVal) {
+      if (newVal > oldVal) {
+        const increaseCount = newVal - oldVal;
+        for (let i = 0; i < increaseCount; i++) {
+          const upQueue = this.queues[13]; // E 上货队列
+          const idx = upQueue.trayInfo.findIndex((t) => t && t.state === '0');
+          if (idx !== -1) {
+            const tray = upQueue.trayInfo[idx];
+            upQueue.trayInfo[idx] = { ...tray, state: '1' };
+            this.addLog(`E上货数量+1，托盘 ${tray.trayCode} 标记为已实际入队`);
+          } else {
+            this.addLog('E上货数量增加，但上货队列无可标记的托盘');
+            break;
           }
-        } else {
-          // 不是设置出库E的，但是E却减少了，说明有问题，直接报警
-          this.addLog('未设置出库E，程序错误！报警！');
         }
       }
-      if (this.eExecuting) {
-        this.confirmEExecution();
+    },
+    // D下货数量变化：0->N 时移动已实际入队托盘到D出货队列；减少时按数量出货
+    dDisinfectionOutQuantity(newVal, oldVal) {
+      // 从0增加到某个数：把已实际入队的托盘全部移到下货队列
+      if (oldVal === 0 && newVal > 0) {
+        const upQueue = this.queues[12];
+        const downQueue = this.queues[15];
+        const readyTrays = upQueue.trayInfo.filter((t) => t && t.state === '1');
+        if (readyTrays.length > 0) {
+          readyTrays.forEach((t) => downQueue.trayInfo.push(t));
+          upQueue.trayInfo = upQueue.trayInfo.filter(
+            (t) => !(t && t.state === '1')
+          );
+          this.addLog(
+            `D下货数量从0到${newVal}，移动${readyTrays.length}个托盘到D出货队列`
+          );
+        } else {
+          this.addLog('D下货数量从0增加，但上货队列无已实际入队托盘可移动');
+        }
       }
-      // 如果当前选择出库E，更新出库需进货
-      if (this.outWarehouseSelected === 'E') {
-        this.updateOutNeedAndWrite();
+      // 说明是减少了,说明是出库了（对下货队列进行出货）
+      if (newVal < oldVal) {
+        const decreaseCount = oldVal - newVal;
+        for (let i = 0; i < decreaseCount; i++) {
+          if (this.queues[15].trayInfo.length > 0) {
+            const tray = this.queues[15].trayInfo[0];
+            this.addLog(`托盘信息：${tray.trayCode} 出库`);
+            this.currentOutTrayInfo = tray;
+            this.callWmsUnloadGoods(tray.trayCode, 1, 'D');
+            this.queues[15].trayInfo.shift();
+          } else {
+            this.addLog('D出货队列空，无法出库');
+            break;
+          }
+        }
+      }
+    },
+    // E下货数量变化：0->N 时移动已实际入队托盘到E出货队列；减少时按数量出货
+    eDisinfectionOutQuantity(newVal, oldVal) {
+      if (oldVal === 0 && newVal > 0) {
+        const upQueue = this.queues[13];
+        const downQueue = this.queues[16];
+        const readyTrays = upQueue.trayInfo.filter((t) => t && t.state === '1');
+        if (readyTrays.length > 0) {
+          readyTrays.forEach((t) => downQueue.trayInfo.push(t));
+          upQueue.trayInfo = upQueue.trayInfo.filter(
+            (t) => !(t && t.state === '1')
+          );
+          this.addLog(
+            `E下货数量从0到${newVal}，移动${readyTrays.length}个托盘到E出货队列`
+          );
+        } else {
+          this.addLog('E下货数量从0增加，但上货队列无已实际入队托盘可移动');
+        }
+      }
+      if (newVal < oldVal) {
+        const decreaseCount = oldVal - newVal;
+        for (let i = 0; i < decreaseCount; i++) {
+          if (this.queues[16].trayInfo.length > 0) {
+            const tray = this.queues[16].trayInfo[0];
+            this.addLog(`托盘信息：${tray.trayCode} 出库`);
+            this.currentOutTrayInfo = tray;
+            this.callWmsUnloadGoods(tray.trayCode, 1, 'E');
+            this.queues[16].trayInfo.shift();
+          } else {
+            this.addLog('E出货队列空，无法出库');
+            break;
+          }
+        }
+      }
+    },
+    // 监听D/E出货请求信号：1则发送对应出货命令
+    dDisinfectionOutSignal(newVal, oldVal) {
+      if (newVal === 1 && oldVal !== 1) {
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 1);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+        }, 2000);
+        this.addLog('收到D出货请求信号，已发送D出货命令');
+      }
+    },
+    eDisinfectionOutSignal(newVal, oldVal) {
+      if (newVal === 1 && oldVal !== 1) {
+        ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 2);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', 'DBW536');
+        }, 2000);
+        this.addLog('收到E出货请求信号，已发送E出货命令');
       }
     },
     // ---- 新增：监听小车位置数值变化 ----
@@ -4235,6 +4387,20 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(15);
+      }
+    },
+    'queues.15.trayInfo': {
+      // 监听 D出货 (ID: 16)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(16);
+      }
+    },
+    'queues.16.trayInfo': {
+      // 监听 E出货 (ID: 17)
+      deep: true,
+      handler(newVal, oldVal) {
+        this.updateQueueInfo(17);
       }
     }
     // ---- 监听指定队列的 trayInfo 变化结束 ----
@@ -4674,7 +4840,8 @@ export default {
         orderId: 'NO-ORDER',
         productCode: 'NO-PRODUCT',
         productName: '无码产品',
-        isTerile: nonSterile ? 0 : 1
+        isTerile: nonSterile ? 0 : 1,
+        state: '0'
       };
       const queueIndex = trayFrom === 'D' ? 12 : 13;
       this.queues[queueIndex].trayInfo.push(trayInfo);
@@ -5573,16 +5740,16 @@ export default {
         this.writeWordWithCancel('DBW560', 0);
         return;
       }
-      // A/B/C 用解析房 A3/B3/C3；D/E 用队列中实际托盘数量。
+      // A/B/C 用解析房 A3/B3/C3；D/E 用下货队列（D出货/E出货）中的实际托盘数量。
       let need = 0;
       if (['A', 'B', 'C'].includes(this.outWarehouseSelected)) {
         need = this.getAnalysisCountFor(this.outWarehouseSelected);
       } else if (this.outWarehouseSelected === 'D') {
-        // D队列：使用队列12中实际托盘数量
-        need = this.queues[12]?.trayInfo?.length || 0;
+        // D出货队列：使用队列15中实际托盘数量
+        need = this.queues[15]?.trayInfo?.length || 0;
       } else if (this.outWarehouseSelected === 'E') {
-        // E队列：使用队列13中实际托盘数量
-        need = this.queues[13]?.trayInfo?.length || 0;
+        // E出货队列：使用队列16中实际托盘数量
+        need = this.queues[16]?.trayInfo?.length || 0;
       } else {
         need = 0;
       }
@@ -5619,7 +5786,7 @@ export default {
       }
       this.dExecuting = true;
       this.dConfirmLoading = true;
-      const arrived = Number(this.dLineQuantity) || 0;
+      const arrived = Number(this.dDisinfectionInQuantity) || 0;
       const need = Math.max(0, Number(this.dExecQty) - arrived);
       this.dNeedQty = need;
       this.addLog(`写入PLC DBW552（D灭菌柜需进货数量）: ${need}`);
@@ -5646,7 +5813,7 @@ export default {
       }
       this.eExecuting = true;
       this.eConfirmLoading = true;
-      const arrived = Number(this.eLineQuantity) || 0;
+      const arrived = Number(this.eDisinfectionInQuantity) || 0;
       const need = Math.max(0, Number(this.eExecQty) - arrived);
       this.eNeedQty = need;
       this.addLog(`写入PLC DBW554（E灭菌柜需进货数量）: ${need}`);
@@ -5677,12 +5844,32 @@ export default {
         parseInt(this.nonSterileunload) + change
       );
     },
-    updateDLineQuantity(change) {
-      this.dLineQuantity = Math.max(0, parseInt(this.dLineQuantity) + change);
+    // 测试模式：调节 D/E 的进货、出货数量（会触发对应 watch）
+    updateDInQuantity(change) {
+      this.dDisinfectionInQuantity = Math.max(
+        0,
+        parseInt(this.dDisinfectionInQuantity) + change
+      );
     },
-    updateELineQuantity(change) {
-      this.eLineQuantity = Math.max(0, parseInt(this.eLineQuantity) + change);
+    updateEInQuantity(change) {
+      this.eDisinfectionInQuantity = Math.max(
+        0,
+        parseInt(this.eDisinfectionInQuantity) + change
+      );
     },
+    updateDOutQuantity(change) {
+      this.dDisinfectionOutQuantity = Math.max(
+        0,
+        parseInt(this.dDisinfectionOutQuantity) + change
+      );
+    },
+    updateEOutQuantity(change) {
+      this.eDisinfectionOutQuantity = Math.max(
+        0,
+        parseInt(this.eDisinfectionOutQuantity) + change
+      );
+    },
+    // 移除旧的D/E数量调节函数，D/E数量由PLC提供
     // 发送到预热房的方法
     sendToPreheatingRoom() {
       if (!this.preheatingRoomSelected) {
@@ -5944,13 +6131,13 @@ export default {
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', 'DBW536');
         }, 2000);
-        this.outWarehouseTrayCode = this.queues[12].trayInfo[0].trayCode;
+        this.outWarehouseTrayCode = this.queues[15].trayInfo[0]?.trayCode || '';
       } else if (this.outWarehouseSelected === 'E') {
         ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', 'DBW536');
         }, 2000);
-        this.outWarehouseTrayCode = this.queues[13].trayInfo[0].trayCode;
+        this.outWarehouseTrayCode = this.queues[16].trayInfo[0]?.trayCode || '';
       } else if (this.outWarehouseSelected === 'DE') {
         ipcRenderer.send('writeSingleValueToPLC', 'DBW536', 3);
         setTimeout(() => {

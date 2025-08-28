@@ -520,8 +520,18 @@ function conPLC() {
           conn.addItems('DBW48');
           // C3数量
           conn.addItems('DBW50');
-          // D数量
+          // D进货数量
           conn.addItems('DBW52');
+          // D出货数量
+          conn.addItems('DBW54');
+          // D请求出货信号
+          conn.addItems('DBW56');
+          // E进货数量
+          conn.addItems('DBW58');
+          // E出货数量
+          conn.addItems('DBW60');
+          // E请求出货信号
+          conn.addItems('DBW62');
           // E数量
           conn.addItems('DBW58');
           // 上货区电机运行信号（扫码后入队）
@@ -626,8 +636,12 @@ var variables = {
   DBW46: 'DB101,INT46', // C1数量
   DBW48: 'DB101,INT48', // C2数量
   DBW50: 'DB101,INT50', // C3数量
-  DBW52: 'DB101,INT52', // D数量
-  DBW58: 'DB101,INT58', // E数量
+  DBW52: 'DB101,INT52', // D进货数量
+  DBW54: 'DB101,INT54', // D出货数量
+  DBW56: 'DB101,INT56', // D请求出货信号
+  DBW58: 'DB101,INT58', // E进货数量
+  DBW60: 'DB101,INT60', // E出货数量
+  DBW62: 'DB101,INT62', // E请求出货信号
   DBW64: 'DB101,INT64', // 上货区电机运行信号（扫码后入队）
   DBW66: 'DB101,INT66', // 上货区输送线光电信号
   DBW68: 'DB101,INT68', // 预热前小车电机运行信号1#车
