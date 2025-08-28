@@ -1577,17 +1577,29 @@
     >
       <!-- 队列信息区域 -->
       <div class="queue-section" :class="{ expanded: isQueueExpanded }">
-        <div class="section-header" @click="changeQueueExpanded">
+        <div class="section-header">
           <template v-if="isQueueExpanded">
-            <span><i class="el-icon-s-data"></i> 队列信息</span>
+            <div class="header-left">
+              <span><i class="el-icon-s-data"></i> 队列信息</span>
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-search"
+                @click.stop="showTraySearchDialog"
+                style="margin-left: 15px"
+              >
+                检索托盘
+              </el-button>
+            </div>
             <span
               class="arrow-icon"
               :class="{ 'expanded-arrow': isQueueExpanded }"
+              @click="changeQueueExpanded"
               >▼</span
             >
           </template>
           <template v-else>
-            <i class="el-icon-s-data"></i>
+            <i class="el-icon-s-data" @click="changeQueueExpanded"></i>
           </template>
         </div>
         <div v-if="isQueueExpanded" class="expandable-content-queue">
@@ -2247,6 +2259,96 @@
       </div>
     </el-dialog>
 
+    <!-- 托盘检索弹窗 -->
+    <el-dialog
+      title="托盘检索"
+      :visible.sync="traySearchDialogVisible"
+      width="600px"
+      append-to-body
+      :close-on-click-modal="false"
+    >
+      <div class="tray-search-form">
+        <el-form
+          :model="traySearchForm"
+          ref="traySearchForm"
+          label-width="100px"
+        >
+          <el-form-item label="托盘号" prop="trayCode">
+            <el-input
+              v-model="traySearchForm.trayCode"
+              placeholder="请输入托盘号进行查询"
+              clearable
+            >
+              <el-button
+                slot="append"
+                icon="el-icon-search"
+                @click="searchTray"
+                :loading="searchLoading"
+              >
+                查询
+              </el-button>
+            </el-input>
+          </el-form-item>
+        </el-form>
+
+        <!-- 查询结果展示 -->
+        <div v-if="searchResult" class="search-result">
+          <el-divider content-position="left">查询结果</el-divider>
+          <div class="result-content">
+            <div class="result-item">
+              <span class="result-label">托盘号：</span>
+              <span class="result-value">{{ searchResult.trayCode }}</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">当前队列：</span>
+              <span class="result-value">{{ searchResult.queueName }}</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">批次号：</span>
+              <span class="result-value">{{
+                searchResult.batchId || '--'
+              }}</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">是否灭菌：</span>
+              <span class="result-value">{{
+                searchResult.isTerile === 1 ? '灭菌' : '不灭菌'
+              }}</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">进入时间：</span>
+              <span class="result-value">{{ searchResult.time || '--' }}</span>
+            </div>
+            <div v-if="searchResult.sendTo" class="result-item">
+              <span class="result-label">预热房位置：</span>
+              <span class="result-value">{{ searchResult.sendTo }}</span>
+            </div>
+            <div v-if="searchResult.state !== undefined" class="result-item">
+              <span class="result-label">PLC命令状态：</span>
+              <span class="result-value">{{
+                searchResult.state === '0' ? '未执行' : '已执行'
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 无结果提示 -->
+        <div v-else-if="hasSearched && !searchResult" class="no-result">
+          <el-divider content-position="left">查询结果</el-divider>
+          <div class="no-result-content">
+            <i class="el-icon-warning"></i>
+            <p>未找到托盘号为 "{{ traySearchForm.trayCode }}" 的托盘信息</p>
+          </div>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="traySearchDialogVisible = false">关 闭</el-button>
+        <el-button type="primary" @click="searchTray" :loading="searchLoading"
+          >查 询</el-button
+        >
+      </div>
+    </el-dialog>
+
     <!-- 添加托盘对话框 -->
     <el-dialog
       title="添加托盘"
@@ -2372,6 +2474,14 @@ export default {
       isDragging: false,
       isRefreshing: false,
       addTrayDialogVisible: false,
+      // 托盘检索相关
+      traySearchDialogVisible: false,
+      searchLoading: false,
+      traySearchForm: {
+        trayCode: ''
+      },
+      searchResult: null,
+      hasSearched: false,
       isSubmitting: false,
       newTrayForm: {
         trayCode: '',
@@ -5452,6 +5562,62 @@ export default {
         isSterile: true
       };
     },
+    // 显示托盘检索弹窗
+    showTraySearchDialog() {
+      this.traySearchDialogVisible = true;
+      this.traySearchForm.trayCode = '';
+      this.searchResult = null;
+      this.hasSearched = false;
+    },
+    // 托盘检索方法
+    async searchTray() {
+      if (!this.traySearchForm.trayCode.trim()) {
+        this.$message.warning('请输入托盘号');
+        return;
+      }
+
+      this.searchLoading = true;
+      this.hasSearched = true;
+      this.searchResult = null;
+
+      try {
+        const trayCode = this.traySearchForm.trayCode.trim();
+
+        // 在所有队列中查找托盘
+        let foundTray = null;
+        let foundQueueName = '';
+
+        for (const queue of this.queues) {
+          if (queue.trayInfo && Array.isArray(queue.trayInfo)) {
+            const tray = queue.trayInfo.find((t) => t.trayCode === trayCode);
+            if (tray) {
+              foundTray = tray;
+              foundQueueName = queue.queueName;
+              break;
+            }
+          }
+        }
+
+        if (foundTray) {
+          this.searchResult = {
+            ...foundTray,
+            queueName: foundQueueName
+          };
+          this.addLog(
+            `托盘检索成功：${trayCode} 当前在 ${foundQueueName} 队列`
+          );
+        } else {
+          this.searchResult = null;
+          this.addLog(`托盘检索：未找到托盘号 ${trayCode}`);
+        }
+      } catch (error) {
+        console.error('托盘检索失败:', error);
+        this.$message.error('托盘检索失败，请重试');
+        this.addLog(`托盘检索失败：${error.message}`);
+      } finally {
+        this.searchLoading = false;
+      }
+    },
     async submitAddTray() {
       if (!this.selectedQueue) return;
 
@@ -7894,6 +8060,97 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+}
+
+/* 托盘检索弹窗样式 */
+.tray-search-form {
+  .search-result {
+    margin-top: 20px;
+
+    .result-content {
+      background: rgba(30, 42, 56, 0.8);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid rgba(10, 197, 168, 0.2);
+
+      .result-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .result-label {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 14px;
+          min-width: 100px;
+        }
+
+        .result-value {
+          color: #0ac5a8;
+          font-weight: bold;
+          font-size: 14px;
+          text-align: right;
+          flex: 1;
+          margin-left: 15px;
+        }
+      }
+    }
+  }
+
+  .no-result {
+    margin-top: 20px;
+
+    .no-result-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      background: rgba(30, 42, 56, 0.8);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 193, 7, 0.3);
+
+      i {
+        font-size: 48px;
+        color: #ffc107;
+        margin-bottom: 15px;
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+      }
+    }
+  }
+}
+
+/* 队列信息标题操作按钮样式 */
+.header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+
+  .arrow-icon {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #0ac5a8;
+    font-size: 16px;
+
+    &:hover {
+      color: #fff;
+      transform: scale(1.1);
+    }
   }
 }
 </style>
