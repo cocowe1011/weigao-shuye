@@ -1765,14 +1765,14 @@
               </div>
               <div class="cart-position-group">
                 <div class="cart-position-label">
-                  <span>小车4 (0-1880):</span>
+                  <span>小车4 (979-2873):</span>
                   <span class="cart-value">{{ cartPositionValues.cart4 }}</span>
                 </div>
                 <div class="cart-position-slider-container">
                   <el-slider
                     v-model="cartPositionValues.cart4"
-                    :min="0"
-                    :max="1880"
+                    :min="979"
+                    :max="2873"
                     :step="1"
                     class="cart-position-slider"
                   ></el-slider>
@@ -2793,7 +2793,7 @@ export default {
         cart1: 0, // DBW88, 范围0-1450
         cart2: 0, // DBW90, 范围0-1010
         cart3: 0, // DBW92, 范围0-1010
-        cart4: 0 // DBW94, 范围0-1880
+        cart4: 979 // DBW94, 范围979-2873
       },
       // 扫码枪处光电信号-读取PLC
       scanPhotoelectricSignal: {
@@ -4253,59 +4253,23 @@ export default {
         this.updateOutNeedAndWrite();
       }
     },
-    // D上货数量变化：根据增加的数量，标记上货队列最前托盘为已实际入队
-    dDisinfectionInQuantity(newVal, oldVal) {
-      if (newVal > oldVal) {
-        const increaseCount = newVal - oldVal;
-        for (let i = 0; i < increaseCount; i++) {
-          const upQueue = this.queues[12]; // D 上货队列
-          const idx = upQueue.trayInfo.findIndex((t) => t && t.state === '0');
-          if (idx !== -1) {
-            const tray = upQueue.trayInfo[idx];
-            upQueue.trayInfo[idx] = { ...tray, state: '1' };
-            this.addLog(`D上货数量+1，托盘 ${tray.trayCode} 标记为已实际入队`);
-          } else {
-            this.addLog('D上货数量增加，但上货队列无可标记的托盘');
-            break;
-          }
-        }
-      }
-    },
-    // E上货数量变化：根据增加的数量，标记上货队列最前托盘为已实际入队
-    eDisinfectionInQuantity(newVal, oldVal) {
-      if (newVal > oldVal) {
-        const increaseCount = newVal - oldVal;
-        for (let i = 0; i < increaseCount; i++) {
-          const upQueue = this.queues[13]; // E 上货队列
-          const idx = upQueue.trayInfo.findIndex((t) => t && t.state === '0');
-          if (idx !== -1) {
-            const tray = upQueue.trayInfo[idx];
-            upQueue.trayInfo[idx] = { ...tray, state: '1' };
-            this.addLog(`E上货数量+1，托盘 ${tray.trayCode} 标记为已实际入队`);
-          } else {
-            this.addLog('E上货数量增加，但上货队列无可标记的托盘');
-            break;
-          }
-        }
-      }
-    },
-    // D下货数量变化：0->N 时移动已实际入队托盘到D出货队列；减少时按数量出货
+    // D/E 上货数量变更逻辑取消：扫码即入队，无需区分已入队/实际入队
+    // D下货数量变化：0->N 时移动所有在队托盘到D出货队列；减少时按数量出货
     dDisinfectionOutQuantity(newVal, oldVal) {
       // 从0增加到某个数：把已实际入队的托盘全部移到下货队列
       if (oldVal === 0 && newVal > 0) {
         const upQueue = this.queues[12];
         const downQueue = this.queues[15];
-        const readyTrays = upQueue.trayInfo.filter((t) => t && t.state === '1');
-        if (readyTrays.length > 0) {
-          readyTrays.forEach((t) => downQueue.trayInfo.push(t));
-          upQueue.trayInfo = upQueue.trayInfo.filter(
-            (t) => !(t && t.state === '1')
-          );
+        if (upQueue.trayInfo.length > 0) {
+          const moveCount = upQueue.trayInfo.length;
+          // 直接移动所有托盘，不需要过滤
+          upQueue.trayInfo.forEach((t) => downQueue.trayInfo.push(t));
+          upQueue.trayInfo = [];
           this.addLog(
-            `D下货数量从0到${newVal}，移动${readyTrays.length}个托盘到D出货队列`
+            `D下货数量从0到${newVal}，移动${moveCount}个托盘到D出货队列`
           );
         } else {
-          this.addLog('D下货数量从0增加，但上货队列无已实际入队托盘可移动');
+          this.addLog('D下货数量从0增加，但上货队列无托盘可移动');
         }
       }
       // 说明是减少了,说明是出库了（对下货队列进行出货）
@@ -4325,22 +4289,21 @@ export default {
         }
       }
     },
-    // E下货数量变化：0->N 时移动已实际入队托盘到E出货队列；减少时按数量出货
+    // E下货数量变化：0->N 时移动所有在队托盘到E出货队列；减少时按数量出货
     eDisinfectionOutQuantity(newVal, oldVal) {
       if (oldVal === 0 && newVal > 0) {
         const upQueue = this.queues[13];
         const downQueue = this.queues[16];
-        const readyTrays = upQueue.trayInfo.filter((t) => t && t.state === '1');
-        if (readyTrays.length > 0) {
-          readyTrays.forEach((t) => downQueue.trayInfo.push(t));
-          upQueue.trayInfo = upQueue.trayInfo.filter(
-            (t) => !(t && t.state === '1')
-          );
+        if (upQueue.trayInfo.length > 0) {
+          const moveCount = upQueue.trayInfo.length;
+          // 直接移动所有托盘，不需要过滤
+          upQueue.trayInfo.forEach((t) => downQueue.trayInfo.push(t));
+          upQueue.trayInfo = [];
           this.addLog(
-            `E下货数量从0到${newVal}，移动${readyTrays.length}个托盘到E出货队列`
+            `E下货数量从0到${newVal}，移动${moveCount}个托盘到E出货队列`
           );
         } else {
-          this.addLog('E下货数量从0增加，但上货队列无已实际入队托盘可移动');
+          this.addLog('E下货数量从0增加，但上货队列无托盘可移动');
         }
       }
       if (newVal < oldVal) {
@@ -4511,6 +4474,64 @@ export default {
       deep: true,
       handler(newVal, oldVal) {
         this.updateQueueInfo(17);
+      }
+    },
+    // 监听D灭菌柜上货数量变化，重新计算需进货数量
+    dDisinfectionInQuantity(newVal, oldVal) {
+      if (!this.isDataReady) return;
+      // 只有在上货数量增加时才重新计算
+      if (newVal > oldVal && this.dExecuting && this.dExecQty) {
+        const arrived = Number(newVal) || 0;
+        const need = Math.max(0, Number(this.dExecQty) - arrived);
+        this.dNeedQty = need;
+        this.addLog(
+          `D灭菌柜上货数量增加到${newVal}，重新计算需进货数量: ${need}`
+        );
+        this.writeWordWithCancel('DBW552', need);
+
+        // 如果需进货数量为0，取消允许上货并取消执行状态
+        if (need === 0) {
+          this.allowUploadD = false;
+          this.handleAllowUpload('D');
+          // 取消执行状态
+          this.dExecuting = false;
+          // 显示提示消息
+          this.$message({
+            message: 'D灭菌柜已到达执行数量，自动取消执行状态',
+            type: 'info',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }
+    },
+    // 监听E灭菌柜上货数量变化，重新计算需进货数量
+    eDisinfectionInQuantity(newVal, oldVal) {
+      if (!this.isDataReady) return;
+      // 只有在上货数量增加时才重新计算
+      if (newVal > oldVal && this.eExecuting && this.eExecQty) {
+        const arrived = Number(newVal) || 0;
+        const need = Math.max(0, Number(this.eExecQty) - arrived);
+        this.eNeedQty = need;
+        this.addLog(
+          `E灭菌柜上货数量增加到${newVal}，重新计算需进货数量: ${need}`
+        );
+        this.writeWordWithCancel('DBW554', need);
+
+        // 如果需进货数量为0，取消允许上货并取消执行状态
+        if (need === 0) {
+          this.allowUploadE = false;
+          this.handleAllowUpload('E');
+          // 取消执行状态
+          this.eExecuting = false;
+          // 显示提示消息
+          this.$message({
+            message: 'E灭菌柜已到达执行数量，自动取消执行状态',
+            type: 'info',
+            duration: 3000,
+            showClose: true
+          });
+        }
       }
     }
     // ---- 监听指定队列的 trayInfo 变化结束 ----
@@ -4785,7 +4806,6 @@ export default {
                   productName: paramInsert.productName,
                   isTerile: paramInsert.isTerile,
                   receiptOrderCode: paramInsert.receiptOrderCode,
-                  state: '0',
                   sendTo: '' // 发到哪个预热房，发送的时候更新
                 };
                 this.queues[0].trayInfo.push(trayInfo);
@@ -4950,8 +4970,7 @@ export default {
         orderId: 'NO-ORDER',
         productCode: 'NO-PRODUCT',
         productName: '无码产品',
-        isTerile: nonSterile ? 0 : 1,
-        state: '0'
+        isTerile: nonSterile ? 0 : 1
       };
       const queueIndex = trayFrom === 'D' ? 12 : 13;
       this.queues[queueIndex].trayInfo.push(trayInfo);
@@ -5349,14 +5368,21 @@ export default {
         cart1: { min: 0, max: 1450 },
         cart2: { min: 0, max: 1010 },
         cart3: { min: 0, max: 1010 },
-        cart4: { min: 0, max: 1880 }
+        cart4: { min: 979, max: 2873 }
       };
 
       const plcRange = plcRanges[`cart${cartId}`];
       if (!plcRange) return;
 
-      // 计算比例
-      const ratio = value / plcRange.max;
+      // 计算比例（基于新的范围起点）
+      let ratio;
+      if (cartId === 4) {
+        // 小车4特殊处理：979为起点，2873为终点
+        ratio = (value - plcRange.min) / (plcRange.max - plcRange.min);
+        ratio = Math.max(0, Math.min(1, ratio)); // 确保比例在0-1范围内
+      } else {
+        ratio = value / plcRange.max;
+      }
 
       // 根据比例计算y轴位置（PLC原点对应y轴最小值，PLC终点对应y轴最大值）
       const yPosition = yRange.min + (yRange.max - yRange.min) * ratio;
@@ -5955,6 +5981,11 @@ export default {
       const arrived = Number(this.dDisinfectionInQuantity) || 0;
       const need = Math.max(0, Number(this.dExecQty) - arrived);
       this.dNeedQty = need;
+      // 当需进货数量为0时，取消允许上货
+      if (need === 0) {
+        this.allowUploadD = false;
+        this.handleAllowUpload('D');
+      }
       this.addLog(`写入PLC DBW552（D灭菌柜需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW552', need);
       setTimeout(() => {
@@ -5965,6 +5996,9 @@ export default {
       this.dExecuting = false;
       this.dExecQty = undefined;
       this.dNeedQty = 0;
+      // 取消执行时，取消允许上货
+      this.allowUploadD = false;
+      this.handleAllowUpload('D');
       this.addLog(`写入PLC DBW552（D灭菌柜需进货数量）: 0 - 取消执行`);
       this.writeWordWithCancel('DBW552', 0);
     },
@@ -5973,6 +6007,9 @@ export default {
       if (!this.eExecQty || this.eExecQty <= 0) {
         this.eNeedQty = 0;
         this.eExecuting = false;
+        // 当需进货数量为0时，取消允许上货
+        this.allowUploadE = false;
+        this.handleAllowUpload('E');
         this.addLog(`写入PLC DBW554（E灭菌柜需进货数量）: 0 - 未设置数量`);
         this.writeWordWithCancel('DBW554', 0);
         return;
@@ -5982,6 +6019,11 @@ export default {
       const arrived = Number(this.eDisinfectionInQuantity) || 0;
       const need = Math.max(0, Number(this.eExecQty) - arrived);
       this.eNeedQty = need;
+      // 当需进货数量为0时，取消允许上货
+      if (need === 0) {
+        this.allowUploadE = false;
+        this.handleAllowUpload('E');
+      }
       this.addLog(`写入PLC DBW554（E灭菌柜需进货数量）: ${need}`);
       this.writeWordWithCancel('DBW554', need);
       setTimeout(() => {
@@ -5992,6 +6034,9 @@ export default {
       this.eExecuting = false;
       this.eExecQty = undefined;
       this.eNeedQty = 0;
+      // 取消执行时，取消允许上货
+      this.allowUploadE = false;
+      this.handleAllowUpload('E');
       this.addLog(`写入PLC DBW554（E灭菌柜需进货数量）: 0 - 取消执行`);
       this.writeWordWithCancel('DBW554', 0);
     },
