@@ -852,7 +852,7 @@ const setAppTray = () => {
   const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   // 设置此托盘图标的悬停提示内容
-  appTray.setToolTip('WCS系统');
+  appTray.setToolTip('输液器材在线扫码称重复核系统');
 
   // 设置此图标的上下文菜单
   appTray.setContextMenu(contextMenu);

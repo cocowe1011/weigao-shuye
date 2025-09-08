@@ -24,9 +24,9 @@
         </div>
       </div>
       <div class="login-right-down" v-if="pageMark == 'login'">
-        <p class="title">WCS系统</p>
+        <p class="title">输液器复核系统</p>
         <p class="intro">
-          欢迎使用WCS系统。简洁、易用的操作页面，全自动化管理全力帮助您提高效率。
+          欢迎使用输液器材在线扫码称重复核系统。简洁、易用的操作页面，全自动化管理全力帮助您提高效率。
         </p>
         <div class="login-form">
           <el-input
