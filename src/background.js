@@ -472,114 +472,22 @@ function conPLC() {
           conn.addItems('DBW0');
           // 输送线当前运行状态
           conn.addItems('DBW2');
-          // 允许进料反馈
+          // A当前重量
           conn.addItems('DBW4');
-          // A线电机运行信号
-          conn.addItems('DBW6');
-          // A线光电检测信号
+          // A线允许读码
           conn.addItems('DBW8');
-          // B线电机运行信号
+          // A-1读码信息
+          conn.addItems('DBB20');
+          // A-2读码信息
+          conn.addItems('DBB50');
+          // B当前重量
+          conn.addItems('DBW6');
+          // B线允许读码
           conn.addItems('DBW10');
-          // B线光电检测信号
-          conn.addItems('DBW12');
-          // C线电机运行信号
-          conn.addItems('DBW14');
-          // C线光电检测信号
-          conn.addItems('DBW16');
-          // D线电机运行信号
-          conn.addItems('DBW18');
-          // D线光电检测信号
-          conn.addItems('DBW20');
-          // E线电机运行信号
-          conn.addItems('DBW22');
-          // E线光电检测信号
-          conn.addItems('DBW24');
-          // 输送线故障反馈
-          conn.addItems('DBW26');
-          // 缓存区数量
-          conn.addItems('DBW28');
-          // 请求上位机下发任务(判断去灭菌还是非灭菌）
-          conn.addItems('DBW30');
-          // 非灭菌缓存区数量
-          conn.addItems('DBW32');
-          // A1数量
-          conn.addItems('DBW34');
-          // A2数量
-          conn.addItems('DBW36');
-          // A3数量
-          conn.addItems('DBW38');
-          // B1数量
-          conn.addItems('DBW40');
-          // B2数量
-          conn.addItems('DBW42');
-          // B3数量
-          conn.addItems('DBW44');
-          // C1数量
-          conn.addItems('DBW46');
-          // C2数量
-          conn.addItems('DBW48');
-          // C3数量
-          conn.addItems('DBW50');
-          // D进货数量
-          conn.addItems('DBW52');
-          // D出货数量
-          conn.addItems('DBW54');
-          // D请求出货信号
-          conn.addItems('DBW56');
-          // E进货数量
-          conn.addItems('DBW58');
-          // E出货数量
-          conn.addItems('DBW60');
-          // E请求出货信号
-          conn.addItems('DBW62');
-          // E数量
-          conn.addItems('DBW58');
-          // 上货区电机运行信号（扫码后入队）
-          conn.addItems('DBW64');
-          // 上货区输送线光电信号
-          conn.addItems('DBW66');
-          // 预热前小车电机运行信号1#车
-          conn.addItems('DBW68');
-          // 预热前小车检测信号1#车
-          conn.addItems('DBW70');
-          // 灭菌前小车电机运行信号2#车
-          conn.addItems('DBW72');
-          // 灭菌前小车检测信号2#车
-          conn.addItems('DBW74');
-          // 解析前小车电机运行信号3#车
-          conn.addItems('DBW76');
-          // 解析前小车检测信号3#车
-          conn.addItems('DBW78');
-          // 解析后小车电机运行信号4#车
-          conn.addItems('DBW80');
-          // 解析后小车检测信号4#车
-          conn.addItems('DBW82');
-          // 扫码枪处光电信号
-          conn.addItems('DBW84');
-          // 请求上位机下发任务(预热小车前）
-          conn.addItems('DBW86');
-          // 预热前1#小车位置值
-          conn.addItems('DBW88');
-          // 灭菌前2#小车位置值
-          conn.addItems('DBW90');
-          // 解析出4#小车位置值
-          conn.addItems('DBW92');
-          // 灭菌前2#小车位置值
-          conn.addItems('DBW94');
-          // 提升机一楼接货站台扫码数据（托盘号）
-          conn.addItems('DBB160');
-          // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
-          conn.addItems('DBB190');
-          // 提升机二楼接货站台扫码数据（托盘号）
-          conn.addItems('DBB220');
-          // 提升机三楼接货站台扫码数据（托盘号）
-          conn.addItems('DBB250');
-          // 提升机四楼接货站台扫码数据（托盘号）
-          conn.addItems('DBB280');
-          // D扫码
-          conn.addItems('DBB310');
-          //E扫码
-          conn.addItems('DBB340');
+          // B-1读码信息
+          conn.addItems('DBB80');
+          // B-2读码信息
+          conn.addItems('DBB110');
           setInterval(() => {
             conn.readAllItems(valuesReady);
           }, 200);
