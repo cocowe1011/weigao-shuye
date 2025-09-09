@@ -35,7 +35,7 @@ var conn = new nodes7();
 function logToFile(message) {
   const timestamp = new Date().toLocaleString();
   const logPath =
-    'D://wcs_temp_data/log/' +
+    'D://shuye_temp_data/log/' +
     new Date().toLocaleDateString().replaceAll('/', '-') +
     'runlog.txt';
   fs.appendFile(logPath, `[${timestamp}] ${message}\n`, (err) => {
@@ -74,11 +74,11 @@ function flushLogBuffer() {
   if (logBuffer.length === 0) return;
 
   const logPath =
-    'D://wcs_temp_data/log/' +
+    'D://shuye_temp_data/log/' +
     (new Date().toLocaleDateString() + '.txt').replaceAll('/', '-');
 
   // 确保日志目录存在
-  const logDir = 'D://wcs_temp_data/log';
+  const logDir = 'D://shuye_temp_data/log';
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
   }
@@ -352,7 +352,7 @@ app.on('ready', () => {
       const jarPath = path.join(
         __static,
         './jarlib',
-        'ccs-disinfection-changzhou-middle.jar'
+        'weigao-shuye-weight-middle.jar'
       );
 
       // 优化的Java启动参数
@@ -367,7 +367,7 @@ app.on('ready', () => {
         '-XX:+UseG1GC', // 使用G1垃圾收集器
         '-XX:MaxGCPauseMillis=200', // 最大GC停顿时间
         '-XX:+HeapDumpOnOutOfMemoryError', // 内存溢出时导出堆转储
-        '-XX:HeapDumpPath=D://wcs_temp_data/dump', // 堆转储文件路径
+        '-XX:HeapDumpPath=D://shuye_temp_data/dump', // 堆转储文件路径
 
         // 性能优化
         '-XX:+DisableExplicitGC', // 禁止显式GC调用
@@ -377,13 +377,13 @@ app.on('ready', () => {
         // 监控和调试
         '-XX:+PrintGCDetails', // 打印GC详细信息
         '-XX:+PrintGCDateStamps', // 打印GC时间戳
-        '-Xloggc:D://wcs_temp_data/log/gc.log', // GC日志文件
+        '-Xloggc:D://shuye_temp_data/log/gc.log', // GC日志文件
         '-XX:+HeapDumpBeforeFullGC', // Full GC前生成堆转储
         '-XX:+PrintGCApplicationStoppedTime', // 打印应用暂停时间
 
         // 错误处理
         '-XX:+ExitOnOutOfMemoryError', // 发生OOM时退出
-        '-XX:ErrorFile=D://wcs_temp_data/log/hs_err_%p.log', // JVM错误日志
+        '-XX:ErrorFile=D://shuye_temp_data/log/hs_err_%p.log', // JVM错误日志
         // 编码
         '-Dfile.encoding=UTF-8',
         // 应用参数
@@ -391,8 +391,8 @@ app.on('ready', () => {
         jarPath
       ];
       // 确保日志目录存在
-      const logDir = 'D://wcs_temp_data/log';
-      const dumpDir = 'D://wcs_temp_data/dump';
+      const logDir = 'D://shuye_temp_data/log';
+      const dumpDir = 'D://shuye_temp_data/dump';
       if (!fs.existsSync(logDir)) {
         fs.mkdirSync(logDir, { recursive: true });
       }
@@ -608,140 +608,26 @@ function sendHeartToPLC() {
     writeValuesToPLC('DBW500', nowValue);
   }, 200); // 每200毫秒执行一次交替
 }
-
+// 读写都要维护进去
 var variables = {
   DBW0: 'DB101,INT0', // 心跳
   DBW2: 'DB101,INT2', // 输送线当前运行状态
-  DBW4: 'DB101,INT4', // 允许进料反馈
-  DBW6: 'DB101,INT6', // A线电机运行信号
-  DBW8: 'DB101,INT8', // A线光电检测信号
-  DBW10: 'DB101,INT10', // B线电机运行信号
-  DBW12: 'DB101,INT12', // B线光电检测信号
-  DBW14: 'DB101,INT14', // C线电机运行信号
-  DBW16: 'DB101,INT16', // C线光电检测信号
-  DBW18: 'DB101,INT18', // D线电机运行信号
-  DBW20: 'DB101,INT20', // D线光电检测信号
-  DBW22: 'DB101,INT22', // E线电机运行信号
-  DBW24: 'DB101,INT24', // E线光电检测信号
-  DBW26: 'DB101,INT26', // 输送线故障反馈
-  DBW28: 'DB101,INT28', // 缓存区数量
-  DBW30: 'DB101,INT30', // 请求上位机下发任务(判断去灭菌还是非灭菌）
-  DBW32: 'DB101,INT32', // 非灭菌缓存区数量
-  DBW34: 'DB101,INT34', // A1数量
-  DBW36: 'DB101,INT36', // A2数量
-  DBW38: 'DB101,INT38', // A3数量
-  DBW40: 'DB101,INT40', // B1数量
-  DBW42: 'DB101,INT42', // B2数量
-  DBW44: 'DB101,INT44', // B3数量
-  DBW46: 'DB101,INT46', // C1数量
-  DBW48: 'DB101,INT48', // C2数量
-  DBW50: 'DB101,INT50', // C3数量
-  DBW52: 'DB101,INT52', // D进货数量
-  DBW54: 'DB101,INT54', // D出货数量
-  DBW56: 'DB101,INT56', // D请求出货信号
-  DBW58: 'DB101,INT58', // E进货数量
-  DBW60: 'DB101,INT60', // E出货数量
-  DBW62: 'DB101,INT62', // E请求出货信号
-  DBW64: 'DB101,INT64', // 上货区电机运行信号（扫码后入队）
-  DBW66: 'DB101,INT66', // 上货区输送线光电信号
-  DBW68: 'DB101,INT68', // 预热前小车电机运行信号1#车
-  DBW70: 'DB101,INT70', // 预热前小车检测信号1#车
-  DBW72: 'DB101,INT72', // 灭菌前小车电机运行信号2#车
-  DBW74: 'DB101,INT74', // 灭菌前小车检测信号2#车
-  DBW76: 'DB101,INT76', // 解析前小车电机运行信号3#车
-  DBW78: 'DB101,INT78', // 解析前小车检测信号3#车
-  DBW80: 'DB101,INT80', // 解析后小车电机运行信号4#车
-  DBW82: 'DB101,INT82', // 解析后小车检测信号4#车
-  DBW84: 'DB101,INT84', // 扫码枪处光电信号
-  DBW86: 'DB101,INT86', // 请求上位机下发任务(预热小车前）
-  DBW88: 'DB101,INT88', // 预热前1#小车位置值
-  DBW90: 'DB101,INT90', // 灭菌前2#小车位置值
-  DBW92: 'DB101,INT92', // 解析出4#小车位置值
-  DBW94: 'DB101,INT94', // 灭菌前2#小车位置值
-  DBB160: 'DB101,C160.30', // 提升机一楼接货站台扫码数据（托盘号）
-  DBB190: 'DB101,C190.30', // 一楼顶升移栽区扫码数据（扫码后判断方向）（托盘号）
-  DBB220: 'DB101,C220.30', // 提升机二楼接货站台扫码数据（托盘号）
-  DBB250: 'DB101,C250.30', // 提升机三楼接货站台扫码数据（托盘号）
-  DBB280: 'DB101,C280.30', // 提升机四楼接货站台扫码数据（托盘号）
-  DBB310: 'DB101,C310.30', // D扫码
-  DBB340: 'DB101,C340.30', // E扫码
-  DBW500: 'DB101,INT500', // WCS看门狗心跳
-  DBW502: 'DB101,INT502', // WCS-全线启动
-  DBW504: 'DB101,INT504', // WCS-全线停止
-  DBW506: 'DB101,INT506', // WCS看门狗心跳
-  DBW508: 'DB101,INT508', // WCS-故障复位
-  DBW510: 'DB101,INT510', // 接货口全部禁用→写1禁用；写0不禁用
-  DBW512: 'DB101,INT512', // 一楼接货口启用→写1启用；写0不启用
-  DBW514: 'DB101,INT514', // 二楼接货口启用→写1启用；写0不启用
-  DBW516: 'DB101,INT516', // 三楼接货口启用→写1启用；写0不启用
-  DBW518: 'DB101,INT518', // 四楼接货口启用→写1启用；写0不启用
-  DBW520: 'DB101,INT520', // 一楼D灭菌接货口启用→写1启用；写0不启用
-  DBW522: 'DB101,INT522', // 一楼E灭菌接货口启用→写1启用；写0不启用
-  DBW524: 'DB101,INT524', // WCS执行进货预热房编号预热房
-  DBW526: 'DB101,INT526', // WCS执行出货预热房编号
-  DBW528: 'DB101,INT528', // WCS执行进货灭菌柜编号
-  DBW530: 'DB101,INT530', // WCS执行出货灭菌柜编号
-  DBW532: 'DB101,INT532', // WCS执行进货解析柜编号
-  DBW534: 'DB101,INT534', // WCS执行出货解析柜编号
-  DBW536: 'DB101,INT536', // WCS执行出货DE灭菌柜编号
-  DBW540: 'DB101,INT540', // WCS下发任务完成
-  DBW542: 'DB101,INT542', // WCS下发顶升移栽目的地
-  // DBW544: 'DB101,INT544', // WCS-接货口进货错误 - 改为位级别控制
-  DBW544_BIT0: 'DB101,X544.0', // WCS-接货口进货错误 - 位0 (第544字节，位0)
-  DBW544_BIT1: 'DB101,X544.1', // WCS-接货口进货错误 - 位1 (第544字节，位1)
-  DBW544_BIT2: 'DB101,X544.2', // WCS-接货口进货错误 - 位2 (第544字节，位2)
-  DBW544_BIT3: 'DB101,X544.3', // WCS-接货口进货错误 - 位3 (第544字节，位3)
-  DBW544_BIT4: 'DB101,X544.4', // WCS-接货口进货错误 - 位4 (第544字节，位4)
-  DBW544_BIT5: 'DB101,X544.5', // WCS-接货口进货错误 - 位5 (第544字节，位5)
-  DBW544_BIT6: 'DB101,X544.6', // WCS-接货口进货错误 - 位6 (第544字节，位6)
-  DBW544_BIT7: 'DB101,X544.7', // WCS-接货口进货错误 - 位7 (第544字节，位7)
-  DBW544_BIT8: 'DB101,X545.0', // WCS-接货口进货错误 - 位8 (第545字节，位0)
-  DBW544_BIT9: 'DB101,X545.1', // WCS-接货口进货错误 - 位9 (第545字节，位1)
-  DBW544_BIT10: 'DB101,X545.2', // WCS-接货口进货错误 - 位10 (第545字节，位2)
-  DBW544_BIT11: 'DB101,X545.3', // WCS-接货口进货错误 - 位11 (第545字节，位3)
-  DBW544_BIT12: 'DB101,X545.4', // WCS-接货口进货错误 - 位12 (第545字节，位4)
-  DBW544_BIT13: 'DB101,X545.5', // WCS-接货口进货错误 - 位13 (第545字节，位5)
-  DBW544_BIT14: 'DB101,X545.6', // WCS-接货口进货错误 - 位14 (第545字节，位6)
-  DBW546: 'DB101,INT546', // WCS-预热柜当前需要进货数量
-  DBW548: 'DB101,INT548', // WCS-灭菌柜当前需要进货数量
-  DBW550: 'DB101,INT550', // WCS-解析柜当前需要进货数量
-  DBW552: 'DB101,INT552', // WCS-D灭菌柜当前需要进货数量
-  DBW554: 'DB101,INT554', // WCS-E灭菌柜当前需要进货数量
-  DBW556: 'DB101,INT556', // 备用地址
-  DBW558: 'DB101,INT558', // WCS-预热前小车信号请求尾托盘标识
-  DBW560: 'DB101,INT560' // 出库当前需进货数量
+  DBW4: 'DB101,INT4', // A称当前重量（g)
+  DBW6: 'DB101,INT6', // B称当前重量（g)
+  DBW8: 'DB101,INT8', // A线允许读码
+  DBW10: 'DB101,INT10', // B线允许读码
+  DBW200: 'DB101,INT200', // WCS看门狗心跳
+  DBW202: 'DB101,INT202', // WCS-重量判断
+  DBW210: 'DB101,INT210', // WCS看门狗心跳
+  DBW222: 'DB101,INT222', // WCS-重量判断
+  DBB20: 'DB101,C20.30', // A-1读码信息
+  DBB50: 'DB101,C50.30', // A-2读码信息
+  DBB80: 'DB101,C80.30', // B-1读码信息
+  DBB110: 'DB101,C110.30' // B-2读码信息
 };
 
-var writeStrArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-var writeAddArr = [
-  'DBW500',
-  'DBW502',
-  'DBW504',
-  'DBW506',
-  'DBW508',
-  'DBW510',
-  'DBW512',
-  'DBW514',
-  'DBW516',
-  'DBW518',
-  'DBW520',
-  'DBW522',
-  // 'DBW524',
-  // 'DBW526',
-  // 'DBW528',
-  // 'DBW530',
-  // 'DBW532',
-  // 'DBW534',
-  // 'DBW536',
-  'DBW540',
-  // 'DBW542',
-  // 'DBW544', // 已改为位级别控制，不再批量写入
-  'DBW546',
-  'DBW548',
-  'DBW550',
-  'DBW552',
-  'DBW554'
-];
+var writeStrArr = [0];
+var writeAddArr = ['DBW100'];
 
 // 给PLC写值
 function writeValuesToPLC(add, values) {
