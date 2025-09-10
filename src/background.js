@@ -31,6 +31,44 @@ var appTray = null;
 let closeStatus = false;
 var conn = new nodes7();
 
+// 配置相关变量
+let configType = null; // 配置类型，初始为null
+const CONFIG_DIR = 'D://shuye_temp_data/config'; // 配置目录
+const CONFIG_PATH = CONFIG_DIR + '/config.json'; // 配置文件路径
+
+// 读取配置文件
+function loadConfig() {
+  const configPath = CONFIG_PATH;
+
+  try {
+    // 确保配置目录存在
+    if (!fs.existsSync(CONFIG_DIR)) {
+      fs.mkdirSync(CONFIG_DIR, { recursive: true });
+    }
+
+    // 检查配置文件是否存在
+    if (fs.existsSync(configPath)) {
+      const configData = fs.readFileSync(configPath, 'utf8');
+      const config = JSON.parse(configData);
+      configType = config.configType;
+      logger.info(`配置文件加载成功，配置类型: ${configType}`);
+    } else {
+      // 配置文件不存在，创建默认配置（仅在第一次创建时）
+      const defaultConfig = { configType: 'A' };
+      fs.writeFileSync(
+        configPath,
+        JSON.stringify(defaultConfig, null, 2),
+        'utf8'
+      );
+      configType = 'A';
+      logger.info(`配置文件不存在，已创建默认配置，配置类型: ${configType}`);
+    }
+  } catch (error) {
+    logger.error(`配置文件读取失败: ${error.message}`);
+    // 读取失败时不强制使用默认配置，保持configType为null
+  }
+}
+
 // 记录日志的辅助函数
 function logToFile(message) {
   const timestamp = new Date().toLocaleString();
@@ -139,6 +177,12 @@ global.sharedObject = {
 };
 let mainWindow = null;
 app.on('ready', () => {
+  // 首先加载配置
+  loadConfig();
+
+  // 初始化写入数组
+  initWriteArrays();
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1100,
@@ -163,6 +207,24 @@ app.on('ready', () => {
     mainWindow.loadURL('app://./index.html');
     // mainWindow.webContents.openDevTools();
   }
+
+  // 添加配置读取接口
+  ipcMain.handle('read-config-file', async (event, arg) => {
+    const configPath = CONFIG_PATH;
+    try {
+      if (!fs.existsSync(configPath)) {
+        // 配置文件不存在，返回null表示读取失败
+        logger.warn('配置文件不存在');
+        return null;
+      }
+      const configData = fs.readFileSync(configPath, 'utf8');
+      return JSON.parse(configData);
+    } catch (error) {
+      logger.error(`配置文件读取失败: ${error.message}`);
+      return null; // 读取失败时返回null
+    }
+  });
+
   ipcMain.on('logStatus', (event, arg) => {
     console.log(arg);
     if (arg === 'login') {
@@ -262,37 +324,12 @@ app.on('ready', () => {
           mainWindow.webContents.send(
             'receivedMsg',
             {
-              DBW0: 0,
-              DBW6: 0,
-              DBW8: 35580,
-              DBW10: 512,
-              DBW12: -1793,
-              DBW14: 0,
-              DBW16: 0,
-              DBW28: 0,
-              DBW30: 0,
-              DBW34: 0,
-              DBW36: 0,
-              DBW38: 0,
-              DBW40: 0,
-              DBW42: 0,
-              DBW44: 0,
-              DBW46: 0,
-              DBW48: 0,
-              DBW50: 0,
-              DBW64: 0,
-              DBW66: 0,
-              DBW70: 0,
-              DBW74: 0,
-              DBW78: 0,
-              DBW82: 0,
-              DBW84: 0,
-              DBW86: 0,
-              DBB160: 'HF800SR-1-H                   ',
-              DBB190: '83048880004868800784          ',
-              DBB220: 'HF800SR-1-H                   ',
-              DBB250: '83048880004868800784          ',
-              DBB280: 'HF800SR-1-H                   '
+              DBW0: 0, // 输送线看门狗心跳
+              DBW2: 1, // 输送线当前运行状态
+              DBW4: 1250, // A称当前重量（g）
+              DBW8: 1, // A线允许读码
+              DBB20: 'HF800SR-1-A                   ', // A-1读码信息
+              DBB50: '83048880004868800784          ' // A-2读码信息
             },
             writeStrArr.toString()
           );
@@ -300,37 +337,12 @@ app.on('ready', () => {
           mainWindow.webContents.send(
             'receivedMsg',
             {
-              DBW0: 1,
-              DBW6: 0,
-              DBW8: 35580,
-              DBW10: 512,
-              DBW12: -1793,
-              DBW14: 0,
-              DBW16: 0,
-              DBW28: 0,
-              DBW30: 0,
-              DBW34: 0,
-              DBW36: 0,
-              DBW38: 0,
-              DBW40: 0,
-              DBW42: 0,
-              DBW44: 0,
-              DBW46: 0,
-              DBW48: 0,
-              DBW50: 0,
-              DBW64: 0,
-              DBW66: 0,
-              DBW70: 0,
-              DBW74: 0,
-              DBW78: 0,
-              DBW82: 0,
-              DBW84: 0,
-              DBW86: 0,
-              DBB160: 'HF800SR-1-H                   ',
-              DBB190: '83048880004868800784          ',
-              DBB220: 'HF800SR-1-H                   ',
-              DBB250: '83048880004868800784          ',
-              DBB280: 'HF800SR-1-H                   '
+              DBW0: 1, // 输送线看门狗心跳
+              DBW2: 0, // 输送线当前运行状态
+              DBW4: 980, // A称当前重量（g）
+              DBW8: 0, // A线允许读码
+              DBB20: 'HF800SR-1-B                   ', // A-1读码信息
+              DBB50: '83048880004868800785          ' // A-2读码信息
             },
             writeStrArr.toString()
           );
@@ -467,27 +479,31 @@ function conPLC() {
           conn.setTranslationCB(function (tag) {
             return variables[tag];
           }); // This sets the "translation" to allow us to work with object names
-          logger.info('连接PLC成功');
-          // 输送线看门狗心跳
-          conn.addItems('DBW0');
-          // 输送线当前运行状态
-          conn.addItems('DBW2');
-          // A当前重量
-          conn.addItems('DBW4');
-          // A线允许读码
-          conn.addItems('DBW8');
-          // A-1读码信息
-          conn.addItems('DBB20');
-          // A-2读码信息
-          conn.addItems('DBB50');
-          // B当前重量
-          conn.addItems('DBW6');
-          // B线允许读码
-          conn.addItems('DBW10');
-          // B-1读码信息
-          conn.addItems('DBB80');
-          // B-2读码信息
-          conn.addItems('DBB110');
+          logger.info(`连接PLC成功，当前配置类型: ${configType}`);
+
+          // 根据配置类型添加不同的读取项
+          if (configType === 'A') {
+            // A配置的读取项
+            conn.addItems('DBW0'); // 输送线看门狗心跳
+            conn.addItems('DBW2'); // 输送线当前运行状态
+            conn.addItems('DBW4'); // A当前重量
+            conn.addItems('DBW8'); // A线允许读码
+            conn.addItems('DBB20'); // A-1读码信息
+            conn.addItems('DBB50'); // A-2读码信息
+            logger.info('已添加A配置的读取项');
+          } else if (configType === 'B') {
+            // B配置的读取项
+            conn.addItems('DBW0'); // 输送线看门狗心跳
+            conn.addItems('DBW2'); // 输送线当前运行状态
+            conn.addItems('DBW6'); // B当前重量
+            conn.addItems('DBW10'); // B线允许读码
+            conn.addItems('DBB80'); // B-1读码信息
+            conn.addItems('DBB110'); // B-2读码信息
+            logger.info('已添加B配置的读取项');
+          } else {
+            // 配置类型未知，不添加任何读取项
+            logger.warn(`未知的配置类型: ${configType}，跳过PLC读取项配置`);
+          }
           setInterval(() => {
             conn.readAllItems(valuesReady);
           }, 200);
@@ -513,7 +529,18 @@ function sendHeartToPLC() {
       nowValue = 1 - nowValue;
     }
     times++;
-    writeValuesToPLC('DBW500', nowValue);
+
+    // 根据配置类型使用不同的心跳地址
+    let heartAddress;
+    if (configType === 'A') {
+      heartAddress = 'DBW200';
+    } else if (configType === 'B') {
+      heartAddress = 'DBW210';
+    } else {
+      // 配置类型未知，跳过心跳发送
+      return;
+    }
+    writeValuesToPLC(heartAddress, nowValue);
   }, 200); // 每200毫秒执行一次交替
 }
 // 读写都要维护进去
@@ -534,8 +561,29 @@ var variables = {
   DBB110: 'DB101,C110.30' // B-2读码信息
 };
 
-var writeStrArr = [0];
-var writeAddArr = ['DBW100'];
+// 根据配置类型初始化写入数组
+let writeStrArr = [];
+let writeAddArr = [];
+
+// 初始化写入数组
+function initWriteArrays() {
+  if (configType === 'A') {
+    // A配置的写入项
+    writeAddArr = ['DBW200']; // A: DBW200(写，心跳，一直写),DBW202(写，单次写)
+    writeStrArr = [0];
+    logger.info('已初始化A配置的写入数组');
+  } else if (configType === 'B') {
+    // B配置的写入项
+    writeAddArr = ['DBW210']; // B: DBW210(写，心跳，一直写),DBW222(写，单次写)
+    writeStrArr = [0];
+    logger.info('已初始化B配置的写入数组');
+  } else {
+    // 配置类型未知，初始化为空数组
+    writeAddArr = [];
+    writeStrArr = [];
+    logger.warn(`未知的配置类型: ${configType}，写入数组初始化为空`);
+  }
+}
 
 // 给PLC写值
 function writeValuesToPLC(add, values) {

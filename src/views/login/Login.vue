@@ -2,6 +2,12 @@
   <div class="login">
     <div class="login-left">
       <img src="./img/imgs_register.png" alt="免费注册" />
+      <div class="config-info-left" v-if="configType">
+        当前配置：{{ configType }} 上位机
+        <span v-if="!configLoaded" class="config-error-tip">
+          （未获取到机器配置）
+        </span>
+      </div>
     </div>
     <div class="login-right">
       <div class="login-right-top">
@@ -161,12 +167,34 @@ export default {
       javaAppStarted: false,
       javaAppUrl: process.env.VUE_APP_BASE_URL + '/status/check',
       maxRetries: 30,
-      retryInterval: 1000
+      retryInterval: 1000,
+      configType: null,
+      configLoaded: false
     };
   },
   watch: {},
   computed: {},
   methods: {
+    // 加载配置数据
+    async loadConfig() {
+      try {
+        const configData = await ipcRenderer.invoke('read-config-file');
+        if (configData) {
+          this.configType = configData.configType;
+          this.configLoaded = true;
+          console.log('登录页面配置加载成功:', configData);
+        } else {
+          console.warn('登录页面配置文件不存在或读取失败');
+          this.configLoaded = false;
+          // 不设置默认配置，保持原有值
+        }
+      } catch (error) {
+        console.error('登录页面配置加载失败:', error);
+        this.configLoaded = false;
+        // 不设置默认配置，保持原有值
+      }
+    },
+
     registerUser() {
       this.registerStatus = true;
       // 判断非空项
@@ -332,8 +360,9 @@ export default {
         });
     }
   },
-  created() {
-    // ipcRenderer.send('logStatus','logout');
+  async created() {
+    // 加载配置
+    await this.loadConfig();
   },
   mounted() {
     if (!this.javaAppStarted) {
@@ -350,6 +379,7 @@ export default {
   &-left {
     pointer-events: none;
     -webkit-app-region: drag;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -357,6 +387,26 @@ export default {
     img {
       width: 690px;
       height: 546px;
+    }
+    .config-info-left {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 20px;
+      color: #1890ff;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 8px 12px;
+      border: 1px solid #1890ff;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .config-error-tip {
+        color: #f56c6c;
+        font-weight: 500;
+        margin-left: 8px;
+      }
     }
   }
   &-right {
