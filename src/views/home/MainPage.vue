@@ -883,6 +883,7 @@ export default {
             border-radius: 25px;
             font-weight: bold;
             font-size: 16px;
+            text-align: center;
             width: 290px;
 
             &.status-normal {
