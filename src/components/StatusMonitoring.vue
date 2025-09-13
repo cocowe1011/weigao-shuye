@@ -9,12 +9,12 @@
       <div class="inner">
         <i
           class="el-icon-check"
-          style="font-size: 28px; color: #fff"
+          style="font-size: 16px; color: #fff"
           v-if="plcStatus"
         ></i>
         <i
           class="el-icon-close"
-          style="font-size: 28px; color: #fff"
+          style="font-size: 16px; color: #fff"
           v-else
         ></i>
         {{ plcStatus ? 'PLC已连接' : 'PLC未连接' }}
@@ -138,20 +138,20 @@ export default {
 <style lang="less" scoped>
 .sm-main {
   background-color: #51a351;
-  box-shadow: 0 0 12px #999;
-  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
   // background: #1bb09d;
   // box-shadow: 0 0 5px #61c0b3;
-  width: 85px;
-  height: 85px;
-  border-radius: 50%;
+  width: 120px;
+  height: 40px;
+  border-radius: 6px;
   position: absolute;
-  right: 170px;
-  top: 60px;
+  right: 20px;
+  top: 160px;
   z-index: 4000;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   color: #fff;
@@ -161,15 +161,16 @@ export default {
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 8px;
   }
 }
 .sm-main:hover {
-  -moz-box-shadow: 0 0 12px black;
-  -webkit-box-shadow: 0 0 12px black;
-  box-shadow: 0 0 12px black;
+  -moz-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  -webkit-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
   opacity: 1;
   -ms-filter: alpha(opacity=100);
   filter: alpha(opacity=100);

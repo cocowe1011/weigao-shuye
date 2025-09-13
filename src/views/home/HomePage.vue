@@ -8,8 +8,10 @@
             style="width: 38px; height: 38px"
           />
           <div style="margin-left: 10px; height: 100%">
-            <div class="maskDiv-top-left-top-title">WCS系统</div>
-            <div class="maskDiv-top-left-top-title2">wcs</div>
+            <div class="maskDiv-top-left-top-title">
+              输液器材在线扫码称重复核系统
+            </div>
+            <div class="maskDiv-top-left-top-title2">SYSTEM</div>
           </div>
         </div>
         <div class="maskDiv-top-mid">
@@ -21,6 +23,7 @@
           >
             <el-menu-item index="1">首页</el-menu-item>
             <el-menu-item index="2">业务处理</el-menu-item>
+            <el-menu-item index="4">配置管理</el-menu-item>
             <el-menu-item index="5">关于</el-menu-item>
           </el-menu>
         </div>
@@ -177,6 +180,15 @@ export default {
             if (this.$route.path !== '/homePage/MainPage') {
               this.$router.replace({
                 path: '/homePage/MainPage'
+              });
+            }
+          });
+          break;
+        case '4':
+          this.$nextTick(() => {
+            if (this.$route.path !== '/homePage/config') {
+              this.$router.replace({
+                path: '/homePage/config'
               });
             }
           });
