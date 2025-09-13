@@ -86,7 +86,7 @@
                 v-if="errorUpper !== null && errorLower !== null"
                 style="color: red; font-size: 12px; margin-left: 10px"
               >
-                误差: {{ errorLower }}g - {{ errorUpper }}g
+                误差: -{{ errorLower }}g ~ +{{ errorUpper }}g
               </span>
             </div>
           </div>
