@@ -883,7 +883,7 @@ export default {
             border-radius: 25px;
             font-weight: bold;
             font-size: 16px;
-            width: 281px;
+            width: 290px;
 
             &.status-normal {
               background: linear-gradient(135deg, #27ae60, #2ecc71);
