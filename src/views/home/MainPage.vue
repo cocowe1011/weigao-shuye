@@ -879,7 +879,7 @@ export default {
 
           .weight-status {
             margin-top: 20px;
-            padding: 12px 30px;
+            padding: 12px 18px;
             border-radius: 25px;
             font-weight: bold;
             font-size: 16px;
