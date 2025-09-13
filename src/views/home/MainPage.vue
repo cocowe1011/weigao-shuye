@@ -573,7 +573,7 @@ export default {
       position: absolute;
       top: 80px;
       right: 20px;
-      width: 300px;
+      width: 320px;
       background: white;
       border-radius: 8px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
