@@ -35,11 +35,11 @@
             <input type="number" v-model.number="currentWeight" />
           </div>
           <div class="test-row">
-            <label>A-1读码信息:</label>
+            <label>{{ configType }}-1读码信息:</label>
             <input type="text" v-model="scanInfo1" />
           </div>
           <div class="test-row">
-            <label>A-2读码信息:</label>
+            <label>{{ configType }}-2读码信息:</label>
             <input type="text" v-model="scanInfo2" />
           </div>
           <div class="test-row">
