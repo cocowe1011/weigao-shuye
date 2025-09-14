@@ -330,7 +330,7 @@ app.on('ready', () => {
               DBW8: 1, // A线允许读码
               DBB20:
                 '(01)26932992148768(10)20250801(11)250804(17)280731(91)10A(21)', // A-1读码信息
-              DBB50:
+              DBB92:
                 '(01)26932992148768(10)20250801(11)250804(17)280731(91)10A(21)' // A-2读码信息
             },
             writeStrArr.toString()
@@ -345,7 +345,7 @@ app.on('ready', () => {
               DBW8: 0, // A线允许读码
               DBB20:
                 '(01)26932992148768(10)20250801(11)250804(17)280731(91)10A(21)', // A-1读码信息
-              DBB50:
+              DBB92:
                 '(01)26932992148768(10)20250801(11)250804(17)280731(91)10A(21)' // A-2读码信息
             },
             writeStrArr.toString()
@@ -493,7 +493,7 @@ function conPLC() {
             conn.addItems('DBW4'); // A当前重量
             conn.addItems('DBW8'); // A线允许读码
             conn.addItems('DBB20'); // A-1读码信息
-            conn.addItems('DBB50'); // A-2读码信息
+            conn.addItems('DBB92'); // A-2读码信息
             logger.info('已添加A配置的读取项');
           } else if (configType === 'B') {
             // B配置的读取项
@@ -501,8 +501,8 @@ function conPLC() {
             conn.addItems('DBW2'); // 输送线当前运行状态
             conn.addItems('DBW6'); // B当前重量
             conn.addItems('DBW10'); // B线允许读码
-            conn.addItems('DBB80'); // B-1读码信息
-            conn.addItems('DBB110'); // B-2读码信息
+            conn.addItems('DBB164'); // B-1读码信息
+            conn.addItems('DBB236'); // B-2读码信息
             logger.info('已添加B配置的读取项');
           } else {
             // 配置类型未知，不添加任何读取项
@@ -537,9 +537,9 @@ function sendHeartToPLC() {
     // 根据配置类型使用不同的心跳地址
     let heartAddress;
     if (configType === 'A') {
-      heartAddress = 'DBW200';
+      heartAddress = 'DBW400';
     } else if (configType === 'B') {
-      heartAddress = 'DBW210';
+      heartAddress = 'DBW420';
     } else {
       // 配置类型未知，跳过心跳发送
       return;
@@ -555,14 +555,14 @@ var variables = {
   DBW6: 'DB101,INT6', // B称当前重量（g)
   DBW8: 'DB101,INT8', // A线允许读码
   DBW10: 'DB101,INT10', // B线允许读码
-  DBW200: 'DB101,INT200', // WCS看门狗心跳
-  DBW202: 'DB101,INT202', // WCS-重量判断
-  DBW210: 'DB101,INT210', // WCS看门狗心跳
-  DBW222: 'DB101,INT222', // WCS-重量判断
-  DBB20: 'DB101,C20.30', // A-1读码信息
-  DBB50: 'DB101,C50.30', // A-2读码信息
-  DBB80: 'DB101,C80.30', // B-1读码信息
-  DBB110: 'DB101,C110.30' // B-2读码信息
+  DBW400: 'DB101,INT400', // WCS看门狗心跳
+  DBW402: 'DB101,INT402', // WCS-重量判断
+  DBW420: 'DB101,INT420', // WCS看门狗心跳
+  DBW422: 'DB101,INT422', // WCS-重量判断
+  DBB20: 'DB101,C20.70', // A-1读码信息
+  DBB92: 'DB101,C92.70', // A-2读码信息
+  DBB164: 'DB101,C164.70', // B-1读码信息
+  DBB236: 'DB101,C236.70' // B-2读码信息
 };
 
 // 根据配置类型初始化写入数组
@@ -573,12 +573,12 @@ let writeAddArr = [];
 function initWriteArrays() {
   if (configType === 'A') {
     // A配置的写入项
-    writeAddArr = ['DBW200']; // A: DBW200(写，心跳，一直写),DBW202(写，单次写)
+    writeAddArr = ['DBW400']; // A: DBW400(写，心跳，一直写),DBW402(写，单次写)
     writeStrArr = [0];
     logger.info('已初始化A配置的写入数组');
   } else if (configType === 'B') {
     // B配置的写入项
-    writeAddArr = ['DBW210']; // B: DBW210(写，心跳，一直写),DBW222(写，单次写)
+    writeAddArr = ['DBW420']; // B: DBW420(写，心跳，一直写),DBW422(写，单次写)
     writeStrArr = [0];
     logger.info('已初始化B配置的写入数组');
   } else {

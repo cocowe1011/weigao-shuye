@@ -133,6 +133,7 @@ import HttpUtilMes from '@/utils/HttpUtilMes';
 import HttpUtil from '@/utils/HttpUtil';
 import moment from 'moment';
 import { ipcRenderer } from 'electron';
+import { EventBus } from '@/utils/EventBus';
 export default {
   name: '',
   components: {},
@@ -284,20 +285,57 @@ export default {
     async handleScanTrigger() {
       this.addLog('检测到读码信号，开始处理...');
 
-      // 检查两个读码信息是否一致
-      if (this.scanInfo1 !== this.scanInfo2) {
+      let plcAAddress;
+      if (this.configType === 'A') {
+        plcAAddress = 'DBW402';
+      } else if (this.configType === 'B') {
+        plcAAddress = 'DBW422';
+      } else {
         this.addLog(
-          `读码不一致 - 码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}`
+          `错误：未知的配置类型 '${this.configType}'，无法确定PLC地址`
         );
         return;
       }
 
       if (!this.scanInfo1 || !this.scanInfo2) {
-        this.addLog('读码信息为空，跳过处理');
+        this.addLog(
+          `读码信息为空，跳过处理，码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}，给${this.configType}线PLC的${plcAAddress}发送2`
+        );
+        ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', plcAAddress);
+        }, 2000);
         return;
       }
 
-      this.addLog(`读码一致: ${this.scanInfo1}`);
+      // 判断读码是否包含noread(转换为小写)
+      if (
+        this.scanInfo1.toLowerCase().includes('noread') ||
+        this.scanInfo2.toLowerCase().includes('noread')
+      ) {
+        this.addLog(
+          `读码包含noread，跳过处理，码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}，给${this.configType}线PLC的${plcAAddress}发送2`
+        );
+        ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', plcAAddress);
+        }, 2000);
+        return;
+      }
+
+      // 检查两个读码信息是否一致
+      if (this.scanInfo1 !== this.scanInfo2) {
+        this.addLog(
+          `读码不一致 - 码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}，给${this.configType}线PLC的${plcAAddress}发送2`
+        );
+        ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', plcAAddress);
+        }, 2000);
+        return;
+      }
+
+      this.addLog(`读码一致: 码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}`);
 
       try {
         // 调用MES接口获取产品信息
@@ -316,7 +354,20 @@ export default {
           productData.productCode
         } 实际重量：${Math.round(this.currentWeight)}g 目标重量：${
           productData.productWeight
-        }g ${isQualified ? '合格' : '不合格'}`;
+        }g ${isQualified ? '合格' : '不合格'},给${
+          this.configType
+        }线PLC的${plcAAddress}发送${isQualified ? 1 : 2}`;
+        if (isQualified) {
+          ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 1);
+          setTimeout(() => {
+            ipcRenderer.send('cancelWriteToPLC', plcAAddress);
+          }, 2000);
+        } else {
+          ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
+          setTimeout(() => {
+            ipcRenderer.send('cancelWriteToPLC', plcAAddress);
+          }, 2000);
+        }
         this.addLog(logMessage);
       } catch (error) {
         this.addLog(`获取产品信息失败: ${error.message}`);
@@ -401,6 +452,12 @@ export default {
         this.allowScan = 0;
         this.addLog('读码信号恢复');
       }, 1000);
+    },
+
+    // 处理配置刷新事件
+    handleConfigRefresh() {
+      this.addLog('收到配置更新通知，重新查询配置...');
+      this.getConfig();
     }
   },
   created() {},
@@ -414,28 +471,33 @@ export default {
     this.updateDateTime();
     this.timeTimer = setInterval(this.updateDateTime, 1000);
 
+    // 监听配置更新事件
+    EventBus.$on('reFlushConfig', this.handleConfigRefresh);
+
     // 监听PLC数据
-    // ipcRenderer.on('receivedMsg', (event, values, values2) => {
-    //   if (this.configType === 'A') {
-    //     // A配置的变量映射
-    //     this.currentWeight = Number(values.DBW4); // A称当前重量
-    //     this.allowScan = Number(values.DBW8); // A线允许读码
-    //     this.scanInfo1 = values.DBB20 ?? ''; // A-1读码信息
-    //     this.scanInfo2 = values.DBB50 ?? ''; // A-2读码信息
-    //   } else {
-    //     // B配置的变量映射
-    //     this.currentWeight = Number(values.DBW6); // B称当前重量
-    //     this.allowScan = Number(values.DBW10); // B线允许读码
-    //     this.scanInfo1 = values.DBB80 ?? ''; // B-1读码信息
-    //     this.scanInfo2 = values.DBB110 ?? ''; // B-2读码信息
-    //   }
-    // });
+    ipcRenderer.on('receivedMsg', (event, values, values2) => {
+      if (this.configType === 'A') {
+        // A配置的变量映射
+        this.currentWeight = Number(values.DBW4); // A称当前重量
+        this.allowScan = Number(values.DBW8); // A线允许读码
+        this.scanInfo1 = values.DBB20 ?? ''; // A-1读码信息
+        this.scanInfo2 = values.DBB92 ?? ''; // A-2读码信息
+      } else {
+        // B配置的变量映射
+        this.currentWeight = Number(values.DBW6); // B称当前重量
+        this.allowScan = Number(values.DBW10); // B线允许读码
+        this.scanInfo1 = values.DBB164 ?? ''; // B-1读码信息
+        this.scanInfo2 = values.DBB236 ?? ''; // B-2读码信息
+      }
+    });
   },
   beforeDestroy() {
     // 清理定时器
     if (this.timeTimer) {
       clearInterval(this.timeTimer);
     }
+    // 移除事件监听
+    EventBus.$off('reFlushConfig', this.handleConfigRefresh);
   }
 };
 </script>
@@ -560,13 +622,6 @@ export default {
         font-weight: 500;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
       }
-
-      @media (max-width: 768px) {
-        flex-direction: column;
-        gap: 10px;
-        height: auto;
-        padding: 15px;
-      }
     }
 
     .test-panel {
@@ -664,10 +719,6 @@ export default {
           flex-direction: column;
           gap: 20px;
           flex: 1;
-
-          @media (max-width: 768px) {
-            gap: 15px;
-          }
         }
 
         .right-cards {
@@ -675,10 +726,6 @@ export default {
           flex-direction: column;
           gap: 20px;
           flex: 1;
-
-          @media (max-width: 768px) {
-            gap: 15px;
-          }
         }
 
         .info-card {
@@ -866,15 +913,8 @@ export default {
               margin-top: 5px;
             }
 
-            @media (max-width: 1200px) {
-              width: 250px;
-              height: 250px;
-            }
-
-            @media (max-width: 768px) {
-              width: 200px;
-              height: 200px;
-            }
+            width: 250px;
+            height: 250px;
           }
 
           .weight-status {
@@ -904,16 +944,6 @@ export default {
               box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
             }
           }
-
-          @media (max-width: 768px) {
-            width: 100%;
-            margin: 15px 0;
-          }
-        }
-
-        @media (max-width: 768px) {
-          flex-direction: column;
-          gap: 15px;
         }
       }
 
@@ -1012,35 +1042,17 @@ export default {
             }
           }
         }
+      }
 
-        @media (max-width: 768px) {
-          margin-top: 0;
+      padding: 15px;
+
+      .top-section {
+        gap: 15px;
+
+        .weight-display {
+          width: 300px;
         }
       }
-
-      @media (max-width: 1200px) {
-        padding: 15px;
-
-        .top-section {
-          gap: 15px;
-
-          .weight-display {
-            width: 300px;
-          }
-        }
-      }
-
-      @media (max-width: 768px) {
-        padding: 15px 15px 0 15px;
-      }
-    }
-  }
-
-  .connection-status {
-    @media (max-width: 768px) {
-      position: static;
-      margin: 10px auto;
-      width: fit-content;
     }
   }
 }
