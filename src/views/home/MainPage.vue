@@ -31,16 +31,30 @@
         </div>
         <div class="test-panel-content">
           <div class="test-row">
-            <label>当前重量:</label>
+            <label>当前重量(g):</label>
             <input type="number" v-model.number="currentWeight" />
           </div>
           <div class="test-row">
             <label>{{ configType }}-1读码信息:</label>
-            <input type="text" v-model="scanInfo1" />
+            <div class="input-group">
+              <input type="text" v-model="scanInfo1" />
+              <button @click="decodeInfo(1)" class="decode-btn">解码</button>
+            </div>
+          </div>
+          <div class="decode-result" v-if="decodedInfo1">
+            <label>解码结果1:</label>
+            <div class="decoded-text">{{ decodedInfo1 }}</div>
           </div>
           <div class="test-row">
             <label>{{ configType }}-2读码信息:</label>
-            <input type="text" v-model="scanInfo2" />
+            <div class="input-group">
+              <input type="text" v-model="scanInfo2" />
+              <button @click="decodeInfo(2)" class="decode-btn">解码</button>
+            </div>
+          </div>
+          <div class="decode-result" v-if="decodedInfo2">
+            <label>解码结果2:</label>
+            <div class="decoded-text">{{ decodedInfo2 }}</div>
           </div>
           <div class="test-row">
             <label>允许读码:</label>
@@ -61,7 +75,7 @@
               <i class="el-icon-camera card-background-icon"></i>
               <div class="card-label">UDI码</div>
               <div class="card-value" style="font-size: 18px">
-                {{ scanInfo1 || '待扫描' }}
+                {{ parsedUDICode || '待扫描' }}
               </div>
             </div>
             <div class="info-card product-card">
@@ -77,8 +91,10 @@
           <div class="weight-display">
             <div class="weight-circle">
               <div class="weight-label">当前重量</div>
-              <div class="weight-value">{{ Math.round(currentWeight) }}</div>
-              <div class="weight-unit">g</div>
+              <div class="weight-value">
+                {{ (currentWeight / 1000).toFixed(1) }}
+              </div>
+              <div class="weight-unit">kg</div>
             </div>
             <div class="weight-status" :class="weightStatusClass">
               {{ weightStatusText }}
@@ -86,7 +102,7 @@
                 v-if="errorUpper !== null && errorLower !== null"
                 style="color: red; font-size: 12px; margin-left: 10px"
               >
-                误差: -{{ errorLower }}g ~ +{{ errorUpper }}g
+                误差: -{{ errorLower }}kg ~ +{{ errorUpper }}kg
               </span>
             </div>
           </div>
@@ -104,7 +120,7 @@
               <i class="el-icon-odometer card-background-icon"></i>
               <div class="card-label">目标重量</div>
               <div class="card-value">
-                {{ productInfo ? productInfo.productWeight + ' g' : '待获取' }}
+                {{ productInfo ? productInfo.productWeight + ' kg' : '待获取' }}
               </div>
             </div>
           </div>
@@ -148,6 +164,12 @@ export default {
       scanInfo1: '',
       // 读码信息
       scanInfo2: '',
+      // 解码结果
+      decodedInfo1: '',
+      // 解码结果
+      decodedInfo2: '',
+      // 解析后的UDI码（用于显示）
+      parsedUDICode: '',
       // 配置类型
       configType: null,
       // 配置数据
@@ -168,7 +190,9 @@ export default {
       // 时间更新定时器
       timeTimer: null,
       // 测试面板相关
-      showTestPanel: false
+      showTestPanel: false,
+      // 重量故障状态（基于读码比较结果，不随实时重量变化）
+      weightFaultStatus: null // null: 未检测, 'normal': 正常, 'error': 异常
     };
   },
   watch: {
@@ -185,18 +209,19 @@ export default {
       if (
         !this.productInfo ||
         this.errorUpper === null ||
-        this.errorLower === null
+        this.errorLower === null ||
+        this.weightFaultStatus === null
       )
         return 'status-normal';
-      const diff = Math.abs(
-        this.currentWeight - this.productInfo.productWeight
-      );
-      if (diff <= this.errorLower) {
-        return 'status-normal';
-      } else if (diff <= this.errorUpper) {
-        return 'status-warning';
-      } else {
-        return 'status-error';
+
+      // 基于读码比较结果的状态，不随实时重量变化
+      switch (this.weightFaultStatus) {
+        case 'normal':
+          return 'status-normal';
+        case 'error':
+          return 'status-error';
+        default:
+          return 'status-normal';
       }
     },
     // 重量状态文本
@@ -204,18 +229,19 @@ export default {
       if (
         !this.productInfo ||
         this.errorUpper === null ||
-        this.errorLower === null
+        this.errorLower === null ||
+        this.weightFaultStatus === null
       )
         return '等待产品信息';
-      const diff = Math.abs(
-        this.currentWeight - this.productInfo.productWeight
-      );
-      if (diff <= this.errorLower) {
-        return '重量正常';
-      } else if (diff <= this.errorUpper) {
-        return '重量偏差';
-      } else {
-        return '重量异常';
+
+      // 基于读码比较结果的状态，不随实时重量变化
+      switch (this.weightFaultStatus) {
+        case 'normal':
+          return '重量正常';
+        case 'error':
+          return '重量异常';
+        default:
+          return '等待产品信息';
       }
     }
   },
@@ -323,10 +349,13 @@ export default {
         return;
       }
 
+      const scanInfo1Str = this.parseUDICode(this.scanInfo1);
+      const scanInfo2Str = this.parseUDICode(this.scanInfo2);
+
       // 检查两个读码信息是否一致
-      if (this.scanInfo1 !== this.scanInfo2) {
+      if (scanInfo1Str !== scanInfo2Str) {
         this.addLog(
-          `读码不一致 - 码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}，给${this.configType}线PLC的${plcAAddress}发送2`
+          `读码不一致 - 码1: ${scanInfo1Str}, 码2: ${scanInfo2Str}，给${this.configType}线PLC的${plcAAddress}发送2`
         );
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
@@ -337,26 +366,51 @@ export default {
 
       this.addLog(`读码一致: 码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}`);
 
+      // 更新解析后的UDI码用于显示
+      this.parsedUDICode = scanInfo1Str;
+
+      // 重置重量故障状态，准备进行新的重量比较
+      this.weightFaultStatus = null;
+      // 初始化扫码信息
+      this.productInfo = null;
+
       try {
         // 调用MES接口获取产品信息
         const productData = await this.getProductInfo(this.scanInfo1);
         this.productInfo = productData;
 
         // 比较重量
-        const weightDiff = Math.abs(
-          this.currentWeight - productData.productWeight
-        );
+        // 将PLC重量从g转换为kg进行比较
+        const currentWeightKg = (this.currentWeight / 1000).toFixed(1);
+        const targetWeight = Number(productData.productWeight);
+        // 确保误差值为数字类型
+        const errorUpper = parseFloat(this.errorUpper) || 0;
+        const errorLower = parseFloat(this.errorLower) || 0;
+        // 判断当前重量是否在 [目标重量-下限，目标重量+上限] 区间内
+        const max = (targetWeight + errorUpper).toFixed(1);
+        const min = (targetWeight - errorLower).toFixed(1);
         const isQualified =
-          this.errorUpper !== null ? weightDiff <= this.errorUpper : false;
+          this.errorUpper !== null && this.errorLower !== null
+            ? currentWeightKg >= min && currentWeightKg <= max
+            : false;
+
+        // 设置重量故障状态（基于读码比较结果，保持到下次扫码）
+        if (this.errorUpper !== null && this.errorLower !== null) {
+          if (isQualified) {
+            this.weightFaultStatus = 'normal';
+          } else {
+            this.weightFaultStatus = 'error';
+          }
+        } else {
+          this.weightFaultStatus = null;
+        }
 
         // 输出日志
         const logMessage = `${productData.productName} ${
           productData.productCode
-        } 实际重量：${Math.round(this.currentWeight)}g 目标重量：${
-          productData.productWeight
-        }g ${isQualified ? '合格' : '不合格'},给${
-          this.configType
-        }线PLC的${plcAAddress}发送${isQualified ? 1 : 2}`;
+        } 实际重量：${currentWeightKg}kg，目标重量：${targetWeight}kg，重量范围 ${min}kg ~ ${max}kg，${
+          isQualified ? '合格' : '不合格'
+        }，给${this.configType}线PLC的${plcAAddress}发送${isQualified ? 1 : 2}`;
         if (isQualified) {
           ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 1);
           setTimeout(() => {
@@ -378,34 +432,11 @@ export default {
     async getProductInfo(udi) {
       // 模拟API调用延迟
       await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Mock数据 - 根据UDI返回不同的产品信息
-      const mockProducts = {
-        default: {
-          productName: '一次性使用输液器',
-          productCode: '01.01.31.0562',
-          productWeight: 1300
-        },
-        test1: {
-          productName: '精密过滤输液器',
-          productCode: '01.01.31.0563',
-          productWeight: 1500
-        },
-        test2: {
-          productName: '避光输液器',
-          productCode: '01.01.31.0564',
-          productWeight: 1200
-        }
+      return {
+        productName: '一次性使用输液器',
+        productCode: '01.01.31.0562',
+        productWeight: 13.1
       };
-
-      // 根据UDI选择不同的产品（这里简化处理）
-      const productKey = udi.includes('test1')
-        ? 'test1'
-        : udi.includes('test2')
-        ? 'test2'
-        : 'default';
-
-      return mockProducts[productKey];
     },
 
     // 更新时间
@@ -436,6 +467,112 @@ export default {
       return levelTexts[type] || '信息';
     },
 
+    // 解析原始UDI码为GS1标准格式
+    parseUDICode(rawUdi) {
+      if (!rawUdi) return '';
+
+      // 清理前缀和特殊字符：去掉F<、引号、星号等
+      let cleanUdi = rawUdi
+        .replace(/^F<'?/, '') // 去掉开头的 F< 或 F<'
+        .replace(/[^0-9A-Za-z]/g, '') // 只保留字母和数字
+        .trim();
+
+      if (!cleanUdi) return '';
+
+      try {
+        // 基于示例分析的解析规则
+        // 输入示例：0126932992127367102025091111250915172809109140A210051
+        // 输出示例：(01)26932992127367(10)20250911(11)250912(17)280910(91)44A(21)0001
+
+        let result = '';
+        let position = 0;
+
+        // 1. 跳过开头的AI标识符 "01"（如果存在）
+        if (cleanUdi.substr(0, 2) === '01') {
+          position = 2;
+        }
+
+        // 2. 解析GTIN (01) - 14位数字
+        if (position + 14 <= cleanUdi.length) {
+          const gtin = cleanUdi.substr(position, 14);
+          result += `(01)${gtin}`;
+          position += 14;
+        }
+
+        // 3. 解析批号 (10) - 根据示例，接下来跳过"10"标识符，取8位
+        if (
+          position + 2 < cleanUdi.length &&
+          cleanUdi.substr(position, 2) === '10'
+        ) {
+          position += 2; // 跳过"10"标识符
+        }
+        if (position + 8 <= cleanUdi.length) {
+          const batchNumber = cleanUdi.substr(position, 8);
+          result += `(10)${batchNumber}`;
+          position += 8;
+        }
+
+        // 4. 解析生产日期 (11) - 跳过"11"标识符，取6位
+        if (
+          position + 2 < cleanUdi.length &&
+          cleanUdi.substr(position, 2) === '11'
+        ) {
+          position += 2; // 跳过"11"标识符
+        }
+        if (position + 6 <= cleanUdi.length) {
+          const productionDate = cleanUdi.substr(position, 6);
+          result += `(11)${productionDate}`;
+          position += 6;
+        }
+
+        // 5. 解析有效期 (17) - 跳过"17"标识符，取6位
+        if (
+          position + 2 < cleanUdi.length &&
+          cleanUdi.substr(position, 2) === '17'
+        ) {
+          position += 2; // 跳过"17"标识符
+        }
+        if (position + 6 <= cleanUdi.length) {
+          const expiryDate = cleanUdi.substr(position, 6);
+          result += `(17)${expiryDate}`;
+          position += 6;
+        }
+
+        // 6. 解析公司内部信息 (91) - 跳过"91"标识符，取到下一个AI之前
+        if (
+          position + 2 < cleanUdi.length &&
+          cleanUdi.substr(position, 2) === '91'
+        ) {
+          position += 2; // 跳过"91"标识符
+        }
+        // 查找下一个AI标识符"21"的位置
+        const remainingPart = cleanUdi.substr(position);
+        const ai21Index = remainingPart.indexOf('21');
+        if (ai21Index > 0) {
+          const companyInfo = remainingPart.substr(0, ai21Index);
+          result += `(91)${companyInfo}`;
+          position += ai21Index;
+        }
+
+        // 7. 解析序列号 (21) - 跳过"21"标识符，取剩余部分
+        if (
+          position + 2 < cleanUdi.length &&
+          cleanUdi.substr(position, 2) === '21'
+        ) {
+          position += 2; // 跳过"21"标识符
+        }
+        if (position < cleanUdi.length) {
+          const serialNumber = cleanUdi.substr(position);
+          result += `(21)${serialNumber}`;
+        }
+
+        return result;
+      } catch (error) {
+        console.error('UDI解析失败:', error);
+        return rawUdi; // 解析失败时返回原始数据
+      }
+    },
+
     // 测试面板相关方法
     toggleTestPanel() {
       this.showTestPanel = !this.showTestPanel;
@@ -452,6 +589,17 @@ export default {
         this.allowScan = 0;
         this.addLog('读码信号恢复');
       }, 1000);
+    },
+
+    // 解码方法
+    decodeInfo(type) {
+      if (type === 1) {
+        this.decodedInfo1 = this.parseUDICode(this.scanInfo1);
+        this.addLog(`解码1: ${this.scanInfo1} -> ${this.decodedInfo1}`);
+      } else if (type === 2) {
+        this.decodedInfo2 = this.parseUDICode(this.scanInfo2);
+        this.addLog(`解码2: ${this.scanInfo2} -> ${this.decodedInfo2}`);
+      }
     },
 
     // 处理配置刷新事件
@@ -628,7 +776,7 @@ export default {
       position: absolute;
       top: 80px;
       right: 20px;
-      width: 320px;
+      width: 380px;
       background: white;
       border-radius: 8px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -676,6 +824,34 @@ export default {
             font-size: 14px;
           }
 
+          .input-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+
+            input {
+              flex: 1;
+              margin: 0;
+            }
+
+            .decode-btn {
+              padding: 6px 10px;
+              background: #67c23a;
+              color: white;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 12px;
+              white-space: nowrap;
+              flex-shrink: 0;
+
+              &:hover {
+                background: #5daf34;
+              }
+            }
+          }
+
           button {
             padding: 6px 12px;
             background: #4a90e2;
@@ -693,6 +869,32 @@ export default {
               background: #ccc;
               cursor: not-allowed;
             }
+          }
+        }
+
+        .decode-result {
+          margin-bottom: 12px;
+          padding: 8px;
+          background: #f5f7fa;
+          border-radius: 4px;
+          border-left: 3px solid #67c23a;
+
+          label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+          }
+
+          .decoded-text {
+            font-size: 13px;
+            color: #2c3e50;
+            word-break: break-all;
+            line-height: 1.4;
+            background: white;
+            padding: 6px 8px;
+            border-radius: 3px;
+            border: 1px solid #e4e7ed;
           }
         }
       }
