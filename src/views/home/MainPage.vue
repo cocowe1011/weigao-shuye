@@ -18,8 +18,16 @@
           <div class="header-title">威高专用输液器重量复核系统</div>
           <div class="header-time">{{ currentDateTime }}</div>
         </div>
-        <div class="header-test-icon" @click="toggleTestPanel">
-          <i class="el-icon-setting"></i>
+        <div class="header-right-info">
+          <div class="header-config-info" v-if="configType">
+            当前配置: {{ configType }}线
+            <span v-if="debugMode" style="margin-left: 15px; color: #ffeb3b"
+              >[调试模式]</span
+            >
+          </div>
+          <div class="header-test-icon" @click="toggleTestPanel">
+            <i class="el-icon-setting"></i>
+          </div>
         </div>
       </div>
 
@@ -62,6 +70,21 @@
               触发读码
             </button>
           </div>
+          <div class="test-row">
+            <label>调试模式:</label>
+            <button
+              @click="toggleDebugMode"
+              :class="debugMode ? 'debug-btn-active' : 'debug-btn-inactive'"
+            >
+              {{ debugMode ? '关闭调试' : '开启调试' }}
+            </button>
+          </div>
+          <div class="test-row">
+            <label>配置管理:</label>
+            <button @click="refreshConfig" :disabled="refreshLoading">
+              {{ refreshLoading ? '刷新中...' : '刷新配置' }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -100,7 +123,13 @@
               {{ weightStatusText }}
               <span
                 v-if="errorUpper !== null && errorLower !== null"
-                style="color: red; font-size: 12px; margin-left: 10px"
+                style="
+                  color: #ffffff;
+                  font-size: 12px;
+                  margin-left: 10px;
+                  font-weight: 700;
+                  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                "
               >
                 误差: -{{ errorLower }}kg ~ +{{ errorUpper }}kg
               </span>
@@ -128,7 +157,17 @@
 
         <!-- 日志显示区域 -->
         <div class="log-container">
-          <div class="log-header">系统日志</div>
+          <div class="log-header">
+            <span>系统日志</span>
+            <el-button
+              type="primary"
+              icon="el-icon-search"
+              size="small"
+              @click="showHistoryDialog = true"
+            >
+              查询历史称重记录
+            </el-button>
+          </div>
           <div class="log-content">
             <div v-for="log in runningLogs" :key="log.id" class="log-entry">
               <span class="log-time">{{ formatTime(log.timestamp) }}</span>
@@ -141,6 +180,140 @@
         </div>
       </div>
     </div>
+
+    <!-- 历史称重记录查询弹窗 -->
+    <el-dialog
+      title="历史称重记录查询"
+      :visible.sync="showHistoryDialog"
+      width="80%"
+      :close-on-click-modal="false"
+      :append-to-body="true"
+      class="history-dialog"
+      @open="handleHistoryDialogOpen"
+    >
+      <div class="history-search-form">
+        <div class="search-item">
+          <label>UDI码:</label>
+          <el-input
+            v-model="searchForm.udi"
+            placeholder="请输入UDI码"
+            clearable
+            style="width: 200px"
+          />
+        </div>
+        <div class="search-item">
+          <label>产品名称:</label>
+          <el-input
+            v-model="searchForm.productName"
+            placeholder="请输入产品名称"
+            clearable
+            style="width: 200px"
+          />
+        </div>
+        <div class="search-item">
+          <label>产品货号:</label>
+          <el-input
+            v-model="searchForm.productCode"
+            placeholder="请输入产品货号"
+            clearable
+            style="width: 200px"
+          />
+        </div>
+        <div class="search-item">
+          <label>扫码位置:</label>
+          <el-select
+            v-model="searchForm.location"
+            placeholder="扫码位置"
+            clearable
+            style="width: 110px"
+          >
+            <el-option label="A线" value="A" />
+            <el-option label="B线" value="B" />
+          </el-select>
+        </div>
+        <div class="search-buttons">
+          <el-button
+            type="primary"
+            @click="searchHistoryRecords"
+            :loading="searchLoading"
+          >
+            <i class="el-icon-search"></i> 查询
+          </el-button>
+          <el-button @click="resetSearchForm">
+            <i class="el-icon-refresh"></i> 重置
+          </el-button>
+        </div>
+      </div>
+
+      <div class="history-table-container">
+        <el-table
+          :data="historyRecords"
+          v-loading="searchLoading"
+          stripe
+          border
+          style="width: 100%"
+          height="400"
+          class="history-table"
+        >
+          <el-table-column
+            prop="productName"
+            label="产品名称"
+            min-width="180"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="productCode"
+            label="产品货号"
+            min-width="140"
+          />
+          <el-table-column
+            prop="productWeight"
+            label="目标重量(kg)"
+            min-width="120"
+          />
+          <el-table-column prop="errorUpper" label="误差上限" min-width="100" />
+          <el-table-column prop="errorLower" label="误差下限" min-width="100" />
+          <el-table-column
+            prop="actualWeight"
+            label="实际重量(kg)"
+            min-width="120"
+          />
+          <el-table-column prop="isQualified" label="是否合格" min-width="100">
+            <template slot-scope="scope">
+              <el-tag
+                :type="scope.row.isQualified === '1' ? 'success' : 'danger'"
+              >
+                {{ scope.row.isQualified === '1' ? '合格' : '不合格' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="udi"
+            label="UDI码"
+            min-width="250"
+            show-overflow-tooltip
+          />
+          <el-table-column prop="location" label="扫码位置" min-width="100" />
+          <el-table-column prop="createTime" label="创建时间" min-width="180">
+            <template slot-scope="scope">
+              {{ scope.row.createTime }}
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div class="pagination-container" v-if="totalRecords > 0">
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[10, 20, 50, 100]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="totalRecords"
+          />
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -191,8 +364,24 @@ export default {
       timeTimer: null,
       // 测试面板相关
       showTestPanel: false,
+      // 调试模式状态
+      debugMode: false,
       // 重量故障状态（基于读码比较结果，不随实时重量变化）
-      weightFaultStatus: null // null: 未检测, 'normal': 正常, 'error': 异常
+      weightFaultStatus: null, // null: 未检测, 'normal': 正常, 'error': 异常
+      // 历史记录查询相关
+      showHistoryDialog: false,
+      searchForm: {
+        udi: '',
+        productName: '',
+        productCode: '',
+        location: ''
+      },
+      historyRecords: [],
+      searchLoading: false,
+      currentPage: 1,
+      pageSize: 20,
+      totalRecords: 0,
+      refreshLoading: false
     };
   },
   watch: {
@@ -381,14 +570,16 @@ export default {
 
         // 比较重量
         // 将PLC重量从g转换为kg进行比较
-        const currentWeightKg = (this.currentWeight / 1000).toFixed(1);
+        const currentWeightKg = parseFloat(
+          (this.currentWeight / 1000).toFixed(1)
+        );
         const targetWeight = Number(productData.productWeight);
         // 确保误差值为数字类型
         const errorUpper = parseFloat(this.errorUpper) || 0;
         const errorLower = parseFloat(this.errorLower) || 0;
         // 判断当前重量是否在 [目标重量-下限，目标重量+上限] 区间内
-        const max = (targetWeight + errorUpper).toFixed(1);
-        const min = (targetWeight - errorLower).toFixed(1);
+        const max = parseFloat((targetWeight + errorUpper).toFixed(1));
+        const min = parseFloat((targetWeight - errorLower).toFixed(1));
         const isQualified =
           this.errorUpper !== null && this.errorLower !== null
             ? currentWeightKg >= min && currentWeightKg <= max
@@ -423,20 +614,74 @@ export default {
           }, 2000);
         }
         this.addLog(logMessage);
+
+        // 保存称重记录
+        await this.saveWeightRecord({
+          productName: productData.productName,
+          productCode: productData.productCode,
+          productWeight: productData.productWeight.toString(),
+          actualWeight: currentWeightKg,
+          isQualified: isQualified ? '1' : '0',
+          errorUpper: this.errorUpper.toString(),
+          errorLower: this.errorLower.toString(),
+          invalidFlag: '0',
+          udi: this.parsedUDICode,
+          location: this.configType || '未知'
+        });
       } catch (error) {
         this.addLog(`获取产品信息失败: ${error.message}`);
       }
     },
 
-    // 获取产品信息（Mock数据）
+    // 获取产品信息
     async getProductInfo(udi) {
-      // 模拟API调用延迟
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return {
-        productName: '一次性使用输液器',
-        productCode: '01.01.31.0562',
-        productWeight: 13.1
-      };
+      if (this.debugMode) {
+        // 调试模式：使用Mock数据
+        this.addLog('调试模式：使用Mock数据获取产品信息');
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return {
+          productName: '一次性使用输液器',
+          productCode: '01.01.31.0562',
+          productWeight: 9.2
+        };
+      } else {
+        // 正常模式：调用MES接口
+        this.addLog('正常模式：调用MES接口获取产品信息');
+        return await this.getProductInfoFromMES(udi);
+      }
+    },
+
+    // 从MES接口获取产品信息
+    async getProductInfoFromMES(udi) {
+      try {
+        const url = `/captcha/PackageWeightAutoScan.ashx?method=GetProductInfo&udi=${encodeURIComponent(
+          udi
+        )}`;
+        this.addLog(`调用MES接口: ${url}`);
+
+        const response = await HttpUtilMes.get(url);
+
+        if (response.code === 200 && response.data) {
+          // 解析返回的JSON字符串
+          const productData = JSON.parse(response.data);
+          if (productData && productData.length > 0) {
+            const product = productData[0];
+            this.addLog(`MES接口返回成功: ${product.FGDNAME}`);
+            return {
+              productName: product.FGDNAME || '未知产品',
+              productCode: product.FGDSEQ || '未知货号',
+              productWeight: parseFloat(product.FWEIGHT) || 0
+            };
+          } else {
+            throw new Error('MES接口返回数据为空');
+          }
+        } else {
+          throw new Error(`MES接口调用失败: ${response.msg || '未知错误'}`);
+        }
+      } catch (error) {
+        this.addLog(`MES接口调用异常: ${error.message}`);
+        throw error;
+      }
     },
 
     // 更新时间
@@ -582,6 +827,12 @@ export default {
       this.showTestPanel = false;
     },
 
+    // 切换调试模式
+    toggleDebugMode() {
+      this.debugMode = !this.debugMode;
+      this.addLog(`调试模式已${this.debugMode ? '开启' : '关闭'}`);
+    },
+
     triggerScan() {
       this.allowScan = 1;
       this.addLog('测试触发读码');
@@ -606,6 +857,108 @@ export default {
     handleConfigRefresh() {
       this.addLog('收到配置更新通知，重新查询配置...');
       this.getConfig();
+    },
+
+    // 保存称重记录
+    async saveWeightRecord(recordData) {
+      try {
+        this.addLog('正在保存称重记录...');
+        const response = await HttpUtil.post(
+          '/scan_weight_record/save',
+          recordData
+        );
+        if (response.data > 0) {
+          this.addLog('称重记录保存成功');
+        } else {
+          this.addLog(`称重记录保存失败: ${response.msg || '未知错误'}`);
+        }
+      } catch (error) {
+        this.addLog(`称重记录保存异常: ${error.message}`);
+      }
+    },
+
+    // 查询历史称重记录
+    async searchHistoryRecords() {
+      this.searchLoading = true;
+      try {
+        const searchParams = {
+          ...this.searchForm,
+          pageNum: this.currentPage,
+          pageSize: this.pageSize
+        };
+        const response = await HttpUtil.post(
+          '/scan_weight_record/selectListByPage',
+          searchParams
+        );
+
+        if (response.data && response.data.list) {
+          this.historyRecords = response.data.list || [];
+          this.totalRecords = response.data.total || 0;
+        } else {
+          this.$message.error(`查询失败: ${response.msg || '未知错误'}`);
+          this.historyRecords = [];
+          this.totalRecords = 0;
+        }
+      } catch (error) {
+        this.$message.error(`查询异常: ${error.message}`);
+        this.historyRecords = [];
+        this.totalRecords = 0;
+      } finally {
+        this.searchLoading = false;
+      }
+    },
+
+    // 重置搜索表单
+    resetSearchForm() {
+      this.searchForm = {
+        udi: '',
+        productName: '',
+        productCode: '',
+        location: ''
+      };
+      this.currentPage = 1;
+      this.historyRecords = [];
+      this.totalRecords = 0;
+      // 重置后自动查询全部历史记录
+      this.searchHistoryRecords();
+    },
+
+    // 分页大小改变
+    handleSizeChange(val) {
+      this.pageSize = val;
+      this.currentPage = 1;
+      this.searchHistoryRecords();
+    },
+
+    // 当前页改变
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.searchHistoryRecords();
+    },
+
+    // 刷新配置
+    async refreshConfig() {
+      this.refreshLoading = true;
+      try {
+        this.addLog('开始刷新配置...');
+        await this.loadConfig();
+        await this.getConfig();
+        this.addLog('配置刷新成功');
+        this.$message.success('配置已刷新！');
+      } catch (error) {
+        this.addLog(`配置刷新失败: ${error.message}`);
+        this.$message.error('配置刷新失败！');
+      } finally {
+        this.refreshLoading = false;
+      }
+    },
+
+    // 处理历史弹窗打开事件
+    handleHistoryDialogOpen() {
+      // 重置搜索表单和分页
+      this.resetSearchForm();
+      // 自动查询历史记录
+      this.searchHistoryRecords();
     }
   },
   created() {},
@@ -651,12 +1004,6 @@ export default {
 </script>
 <style lang="less" scoped>
 .main-page-container {
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
   font-family: 'Microsoft YaHei', Arial, sans-serif;
   background: linear-gradient(135deg, #1a3b5c 0%, #2d5a87 100%);
   height: 100%;
@@ -710,7 +1057,7 @@ export default {
       background: linear-gradient(90deg, #4a90e2 0%, #1e3c72 50%, #4a90e2 100%);
       border-radius: 0 0 15px 15px;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
       padding: 0 40px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -734,19 +1081,33 @@ export default {
       .header-content {
         text-align: center;
         z-index: 2;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+      }
+
+      .header-right-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        z-index: 3;
         position: relative;
-        flex: 1;
+        margin-left: auto;
+      }
+
+      .header-config-info {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        white-space: nowrap;
       }
 
       .header-test-icon {
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
         cursor: pointer;
         color: white;
         font-size: 24px;
-        z-index: 3;
         padding: 8px;
         border-radius: 4px;
         transition: background-color 0.3s;
@@ -868,6 +1229,24 @@ export default {
             &:disabled {
               background: #ccc;
               cursor: not-allowed;
+            }
+
+            &.debug-btn-active {
+              background: #67c23a;
+              color: white;
+
+              &:hover {
+                background: #5daf34;
+              }
+            }
+
+            &.debug-btn-inactive {
+              background: #f56c6c;
+              color: white;
+
+              &:hover {
+                background: #f78989;
+              }
             }
           }
         }
@@ -1125,8 +1504,10 @@ export default {
             border-radius: 25px;
             font-weight: bold;
             font-size: 16px;
-            text-align: center;
             width: 290px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
             &.status-normal {
               background: linear-gradient(135deg, #27ae60, #2ecc71);
@@ -1162,11 +1543,15 @@ export default {
         min-height: 0;
 
         .log-header {
-          padding: 15px 25px;
+          padding: 0px 25px;
           background: linear-gradient(90deg, #4a90e2, #357abd);
           color: white;
           font-weight: bold;
           font-size: 16px;
+          height: 50px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
         .log-content {
@@ -1255,6 +1640,65 @@ export default {
           width: 300px;
         }
       }
+    }
+  }
+}
+
+// 历史记录弹窗样式
+.history-dialog {
+  .el-dialog__body {
+    padding: 20px;
+  }
+
+  .history-search-form {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f5f7fa;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    .search-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      label {
+        font-size: 14px;
+        color: #606266;
+        white-space: nowrap;
+      }
+    }
+
+    .search-buttons {
+      display: flex;
+      gap: 10px;
+    }
+  }
+
+  .history-table-container {
+    .history-table {
+      .el-table__body-wrapper {
+        overflow-y: auto;
+      }
+
+      .el-table__body {
+        .el-table__row {
+          .el-table__cell {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 8px 12px;
+          }
+        }
+      }
+    }
+
+    .pagination-container {
+      margin-top: 15px;
+      text-align: right;
     }
   }
 }

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const HttpUtilMes = axios.create({
   baseURL: process.env.VUE_APP_BASE_URL_WMS,
-  timeout: 10000 // 请求超时时间
+  timeout: 2000 // 请求超时时间
 });
 
 // 添加响应拦截器
