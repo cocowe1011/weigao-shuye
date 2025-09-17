@@ -553,7 +553,9 @@ export default {
         return;
       }
 
-      this.addLog(`读码一致: 码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}`);
+      this.addLog(
+        `读码一致: 码1: ${this.scanInfo1}, 码2: ${this.scanInfo2}，解码: ${scanInfo1Str}`
+      );
 
       // 更新解析后的UDI码用于显示
       this.parsedUDICode = scanInfo1Str;
@@ -565,7 +567,7 @@ export default {
 
       try {
         // 调用MES接口获取产品信息
-        const productData = await this.getProductInfo(this.scanInfo1);
+        const productData = await this.getProductInfo(scanInfo1Str);
         this.productInfo = productData;
 
         // 比较重量
