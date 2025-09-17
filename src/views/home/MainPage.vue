@@ -519,7 +519,7 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-        }, 2000);
+        }, 1000);
         return;
       }
 
@@ -534,7 +534,7 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-        }, 2000);
+        }, 1000);
         return;
       }
 
@@ -549,7 +549,7 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-        }, 2000);
+        }, 1000);
         return;
       }
 
@@ -608,12 +608,12 @@ export default {
           ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 1);
           setTimeout(() => {
             ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-          }, 2000);
+          }, 1000);
         } else {
           ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
           setTimeout(() => {
             ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-          }, 2000);
+          }, 1000);
         }
         this.addLog(logMessage);
 
@@ -631,7 +631,13 @@ export default {
           location: this.configType || '未知'
         });
       } catch (error) {
-        this.addLog(`获取产品信息失败: ${error.message}`);
+        this.addLog(
+          `获取产品信息失败: ${error.message}，给${this.configType}线PLC的${plcAAddress}发送2`
+        );
+        ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
+        setTimeout(() => {
+          ipcRenderer.send('cancelWriteToPLC', plcAAddress);
+        }, 1000);
       }
     },
 
