@@ -519,7 +519,7 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-        }, 1000);
+        }, 2000);
         return;
       }
 
@@ -534,7 +534,7 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-        }, 1000);
+        }, 2000);
         return;
       }
 
@@ -549,7 +549,7 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-        }, 1000);
+        }, 2000);
         return;
       }
 
@@ -608,12 +608,12 @@ export default {
           ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 1);
           setTimeout(() => {
             ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-          }, 1000);
+          }, 2000);
         } else {
           ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
           setTimeout(() => {
             ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-          }, 1000);
+          }, 2000);
         }
         this.addLog(logMessage);
 
@@ -637,7 +637,7 @@ export default {
         ipcRenderer.send('writeSingleValueToPLC', plcAAddress, 2);
         setTimeout(() => {
           ipcRenderer.send('cancelWriteToPLC', plcAAddress);
-        }, 1000);
+        }, 2000);
       }
     },
 
