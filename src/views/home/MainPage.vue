@@ -630,6 +630,14 @@ export default {
           udi: this.parsedUDICode,
           location: this.configType || '未知'
         });
+
+        // 非调试模式下，称重合格后调用MES接口进行回写
+        if (!this.debugMode && isQualified) {
+          this.addLog('非调试模式：称重合格，开始调用MES回写接口...');
+          await this.callMESCallback(this.parsedUDICode, currentWeightKg);
+        } else if (this.debugMode && isQualified) {
+          this.addLog('调试模式：称重合格，跳过MES回写接口调用');
+        }
       } catch (error) {
         this.addLog(
           `获取产品信息失败: ${error.message}，给${this.configType}线PLC的${plcAAddress}发送2`
@@ -689,6 +697,29 @@ export default {
       } catch (error) {
         this.addLog(`MES接口调用异常: ${error.message}`);
         throw error;
+      }
+    },
+
+    // 调用MES接口进行称重结果回写
+    async callMESCallback(udi, weight) {
+      try {
+        const url = `/captcha/PackageWeightAutoScan.ashx?method=RecProductResultInfo&udi=${encodeURIComponent(
+          udi
+        )}&weight=${weight}`;
+        this.addLog(`调用MES回写接口: ${url}`);
+
+        const response = await HttpUtilMes.get(url);
+
+        if (response.code === 200) {
+          this.addLog(`MES回写接口调用成功: ${response.msg || '成功'}`);
+          return true;
+        } else {
+          this.addLog(`MES回写接口调用失败: ${response.msg || '未知错误'}`);
+          return false;
+        }
+      } catch (error) {
+        this.addLog(`MES回写接口调用异常: ${error.message}`);
+        return false;
       }
     },
 
