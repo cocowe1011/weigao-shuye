@@ -323,6 +323,7 @@ import HttpUtil from '@/utils/HttpUtil';
 import moment from 'moment';
 import { ipcRenderer } from 'electron';
 import { EventBus } from '@/utils/EventBus';
+import { parseUDICode as parseGs1Udi } from '@/utils/gs1Udi';
 export default {
   name: '',
   components: {},
@@ -753,137 +754,7 @@ export default {
 
     // 解析原始UDI码为GS1标准格式
     parseUDICode(rawUdi) {
-      if (!rawUdi) return '';
-
-      // 清理前缀和特殊字符：去掉F<、引号、星号等
-      let cleanUdi = rawUdi
-        .replace(/^F<'?/, '') // 去掉开头的 F< 或 F<'
-        .replace(/[^0-9A-Za-z]/g, '') // 只保留字母和数字
-        .trim();
-
-      if (!cleanUdi) return '';
-
-      try {
-        // 基于示例分析的解析规则
-        // 输入示例：0126932992127367102025091111250915172809109140A210051
-        // 输出示例：(01)26932992127367(10)20250911(11)250912(17)280910(91)44A(21)0001
-        // 输入示例：01269269822610321020251201S111251208172711309116A210064
-        // 输出示例：(01)26926982261032(10)20251201S1(11)251208(17)271130(91)16A(21)0064
-        let result = '';
-        let position = 0;
-
-        // 1. 跳过开头的AI标识符 "01"（如果存在）
-        if (cleanUdi.substr(0, 2) === '01') {
-          position = 2;
-        }
-
-        // 2. 解析GTIN (01) - 14位数字
-        if (position + 14 <= cleanUdi.length) {
-          const gtin = cleanUdi.substr(position, 14);
-          result += `(01)${gtin}`;
-          position += 14;
-        }
-
-        // 3. 解析批号 (10) - 变长
-        // 逻辑：查找下一个 AI "11" 并且其后跟随6位有效的日期数字 (YYMMDD)
-        if (
-          position + 2 < cleanUdi.length &&
-          cleanUdi.substr(position, 2) === '10'
-        ) {
-          position += 2; // 跳过"10"标识符
-
-          let foundNext = false;
-          const remaining = cleanUdi.substr(position);
-
-          // 简单的日期校验函数 (YYMMDD)
-          const isValidDate = (dateStr) => {
-            if (!/^\d{6}$/.test(dateStr)) return false;
-            const mm = parseInt(dateStr.substr(2, 2));
-            const dd = parseInt(dateStr.substr(4, 2));
-            return mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31;
-          };
-
-          // 在剩余部分查找 "11" + 6位数字
-          for (let i = 1; i < remaining.length - 7; i++) {
-            const potentialDate = remaining.substr(i + 2, 6);
-            if (remaining.substr(i, 2) === '11' && isValidDate(potentialDate)) {
-              const batchNumber = remaining.substr(0, i);
-              result += `(10)${batchNumber}`;
-              position += i;
-              foundNext = true;
-              break;
-            }
-          }
-
-          // 如果没找到，兜底逻辑：取8位（兼容旧逻辑）
-          if (!foundNext && position + 8 <= cleanUdi.length) {
-            const batchNumber = cleanUdi.substr(position, 8);
-            result += `(10)${batchNumber}`;
-            position += 8;
-          }
-        }
-
-        // 4. 解析生产日期 (11) - 跳过"11"标识符，取6位
-        if (
-          position + 2 < cleanUdi.length &&
-          cleanUdi.substr(position, 2) === '11'
-        ) {
-          position += 2; // 跳过"11"标识符
-          if (position + 6 <= cleanUdi.length) {
-            const productionDate = cleanUdi.substr(position, 6);
-            result += `(11)${productionDate}`;
-            position += 6;
-          }
-        }
-
-        // 5. 解析有效期 (17) - 跳过"17"标识符，取6位
-        if (
-          position + 2 < cleanUdi.length &&
-          cleanUdi.substr(position, 2) === '17'
-        ) {
-          position += 2; // 跳过"17"标识符
-          if (position + 6 <= cleanUdi.length) {
-            const expiryDate = cleanUdi.substr(position, 6);
-            result += `(17)${expiryDate}`;
-            position += 6;
-          }
-        }
-
-        // 6. 解析公司内部信息 (91) - 变长
-        if (
-          position + 2 < cleanUdi.length &&
-          cleanUdi.substr(position, 2) === '91'
-        ) {
-          position += 2; // 跳过"91"标识符
-
-          // 查找下一个AI标识符"21"的位置
-          const remainingPart = cleanUdi.substr(position);
-          const ai21Index = remainingPart.indexOf('21');
-
-          if (ai21Index !== -1) {
-            const companyInfo = remainingPart.substr(0, ai21Index);
-            result += `(91)${companyInfo}`;
-            position += ai21Index;
-          }
-        }
-
-        // 7. 解析序列号 (21) - 跳过"21"标识符，取剩余部分
-        if (
-          position + 2 < cleanUdi.length &&
-          cleanUdi.substr(position, 2) === '21'
-        ) {
-          position += 2; // 跳过"21"标识符
-          if (position < cleanUdi.length) {
-            const serialNumber = cleanUdi.substr(position);
-            result += `(21)${serialNumber}`;
-          }
-        }
-
-        return result;
-      } catch (error) {
-        console.error('UDI解析失败:', error);
-        return rawUdi; // 解析失败时返回原始数据
-      }
+      return parseGs1Udi(rawUdi);
     },
 
     // 测试面板相关方法
